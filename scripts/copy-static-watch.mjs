@@ -100,7 +100,9 @@ async function safeRun(action, payloadPath) {
   }
 }
 
-const initialTargets = watchedEntries.map((entry) => path.join(rootDir, entry));
+const initialTargets = watchedEntries
+  .map((entry) => path.join(rootDir, entry))
+  .filter((entryPath) => existsSync(entryPath));
 const watcher = chokidar.watch(initialTargets, {
   ignoreInitial: false,
   awaitWriteFinish: {

@@ -31,6 +31,7 @@ export interface CategoryView extends Category {
 
 export interface CardView extends Card {
   categoryName?: string;
+  tagText?: string;
   statusName?: string;
 }
 

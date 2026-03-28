@@ -1,23 +1,38 @@
 import type { QueryParams, PageOptions, CardStatus, CardView } from '../../types/card';
 import { loadAllViewData } from '../../view-model/card-view';
 
+// 定义状态标签类型
+type StatusTab = {
+  label: string;
+  value: CardStatus | '';
+  active: boolean;
+};
+
+// 基本状态标签列表
+const baseStatusTabs: Array<Omit<StatusTab, 'active'>> = [
+  { label: '全部', value: '' },
+  { label: '掌握', value: 'mastered' },
+  { label: '模糊', value: 'fuzzy' },
+  { label: '未知', value: 'unknown' },
+];
+
+// 根据当前选中的状态构建状态标签列表，设置 active 字段
+function buildStatusTabs(status?: CardStatus): StatusTab[] {
+  const normalized = status || '';
+  return baseStatusTabs.map((item) => ({
+    ...item,
+    active: item.value === normalized,
+  }));
+}
+
 Page({
   data: {
     inputKeyword: '',
-    queryParams: {
-      categoryId: '',
-      status: '',
-      keyword: '',
-    } as PageOptions,
+    queryParams: {} as QueryParams,
     cardViewList: [] as CardView[],
     showQuizAction: false as boolean,
     isSearchResultMode: false as boolean,
-    statusTabs: [
-      { label: '全部', value: undefined },
-      { label: '掌握', value: 'mastered' },
-      { label: '模糊', value: 'fuzzy' },
-      { label: '未知', value: 'unknown' },
-    ] as const,
+    statusTabs: buildStatusTabs(),
   },
 
   // 解析状态参数，确保它是合法的 CardStatus 值
@@ -65,13 +80,15 @@ Page({
 
   // 切换状态筛选条件
   toggleStatusFilter(event: WechatMiniprogram.BaseEvent) {
-    const status = event.currentTarget.dataset.value as CardStatus | undefined;
+    const rawStatus = event.currentTarget.dataset.value as CardStatus | '' | undefined;
+    const status = rawStatus ? rawStatus : undefined;
 
     this.setData({
       queryParams: {
         ...this.data.queryParams,
         status,
       },
+      statusTabs: buildStatusTabs(status),
     });
     this.loadData();
   },
@@ -88,14 +105,19 @@ Page({
     const q = this.parseParams(options as PageOptions);
     const { categoryId, status, keyword } = q;
 
-    this.data.queryParams = {
-      categoryId: categoryId || '',
-      status: status || '',
-      keyword: keyword ? decodeURIComponent(keyword) : '',
+    const normalizedQuery: QueryParams = {
+      categoryId,
+      status,
+      keyword: keyword ? decodeURIComponent(keyword) : undefined,
     };
+
     this.setData({
-      isSearchResultMode: Boolean(this.data.queryParams.keyword?.trim()),
-      showQuizAction: Boolean(this.data.queryParams.categoryId) && !this.data.isSearchResultMode,
+      queryParams: normalizedQuery,
+      inputKeyword: normalizedQuery.keyword || '',
+      isSearchResultMode: Boolean(normalizedQuery.keyword?.trim()),
+      showQuizAction:
+        Boolean(normalizedQuery.categoryId) && !Boolean(normalizedQuery.keyword?.trim()),
+      statusTabs: buildStatusTabs(normalizedQuery.status),
     });
   },
 

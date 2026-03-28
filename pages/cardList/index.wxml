@@ -19,12 +19,12 @@
 
     <view wx-if="{{!isSearchResultMode}}" class="filter-row">
       <view class="filter-status">
-        <view
-          wx-for="{{statusTabs}}"
-          wx:key="{{item.value}}"
-          class="filter-chip {{ queryParams.status === item.value ? 'active' : '' }}"
-          bindtap="toggleStatusFilter"
-          data-value="{{ item.value }}"
+          <view
+            wx:for="{{statusTabs}}"
+            wx:key="label"
+            class="filter-chip {{ item.active ? 'active' : '' }}"
+            bindtap="toggleStatusFilter"
+            data-value="{{ item.value }}"
           >{{ item.label }}</view
         >
       </view>
@@ -40,16 +40,21 @@
     </view>
 
     <view class="card-list">
-      <view wx-for="{{cardViewList}}" wx:key="id" class="card-item" bindtap="goToDetail" data-id="{{ item.id }}">
+      <view
+        wx:for="{{cardViewList}}"
+        wx:for-item="item"
+        wx:for-index="index"
+        wx:key="id"
+        class="card-item"
+        bindtap="goToDetail"
+        data-id="{{ item.id }}"
+      >
         <view class="card-top">
           <view class="card-title">
             <view class="card-category">{{ item.categoryName }}</view>
-            <view class="card-tag">
-              {{ Array.isArray(item.tags) && item.tags.length > 0 ? '/ ' : '' }}
-              {{ Array.isArray(item.tags) ? item.tags.join('•') : '' }}
-            </view>
+            <view class="card-tag">{{ item.tagText }}</view>
           </view>
-          <view class="card-status status-{{item.status}}">
+          <view class="card-status status-{{ item.status ? item.status : 'undefined' }}">
             {{ item.statusName ? item.statusName : '新' }}
           </view>
         </view>

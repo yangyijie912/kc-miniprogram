@@ -8,9 +8,17 @@ export function createCategoryNameMap(categoryList: Category[]): Map<string, str
 
 // 将单个卡片转换为卡片视图，添加分类名称和状态名称
 export function toCardView(card: Card, categoryNameById: Map<string, string>): CardView {
+  const tagText = Array.isArray(card.tags)
+    ? card.tags
+        .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
+        .filter(Boolean)
+        .join('•')
+    : '';
+
   return {
     ...card,
     categoryName: categoryNameById.get(card.categoryId),
+    tagText,
     statusName: card.status ? cardStatusTextMap[card.status] : undefined,
   };
 }

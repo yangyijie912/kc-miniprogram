@@ -73,7 +73,12 @@ await mkdir(distDir, { recursive: true });
 syncDataJsonToJsModules();
 
 for (const entry of entriesToCopy) {
-  await cp(path.join(rootDir, entry), path.join(distDir, entry), {
+  const sourcePath = path.join(rootDir, entry);
+  if (!existsSync(sourcePath)) {
+    continue;
+  }
+
+  await cp(sourcePath, path.join(distDir, entry), {
     recursive: true,
     force: true,
     filter,
