@@ -1,14 +1,20 @@
-import type { Card, Category, CategoryView } from '../types/card';
+import type { Card, Category, CategoryView, CardView } from '../types/card';
 import type { ServiceResult } from '../types/service';
 import { getCards } from '../services/cardService';
 import { getCategories } from '../services/categoryService';
 import { UNCATEGORIZED_ID } from '../constants/category';
 import { getCategoryTheme } from './categoryTheme';
+import { toCardViews } from './cardView';
 
 export type CategoryViewPageData = {
   cardList: Card[];
   categoryList: Category[];
+  cardViewList: CardView[];
   categoryViewList: CategoryView[];
+};
+
+export type CardQueryParams = Partial<Card> & {
+  keyword?: string;
 };
 
 // 创建一个映射，统计每个分类的卡片数量，格式为 { [categoryId]: count }
@@ -44,9 +50,14 @@ function createCategoryViewList(categoryList: Category[], cardList: Card[]): Cat
     .filter((category) => category.visible);
 }
 
+// 创建卡片视图列表，包含每个卡片的分类名称和状态名称等属性
+export function createCardViewList(cardList: Card[], categoryList: Category[]): CardView[] {
+  return toCardViews(cardList, categoryList);
+}
+
 // 加载卡片列表
-export function loadCards(): Card[] {
-  const res = getCards() as ServiceResult<Card[]>;
+export function loadCards(query: CardQueryParams): Card[] {
+  const res = getCards(query) as ServiceResult<Card[]>;
   if (res.success && res.data) {
     return res.data;
   }
@@ -71,14 +82,16 @@ export function loadCategories(): Category[] {
 }
 
 // 返回所有数据
-export function loadAllCategoryViewData(): CategoryViewPageData {
-  const cardList = loadCards();
+export function loadAllViewData(): CategoryViewPageData {
+  const cardList = loadCards({});
   const categoryList = loadCategories();
+  const cardViewList = createCardViewList(cardList, categoryList);
   const categoryViewList = createCategoryViewList(categoryList, cardList);
 
   return {
     cardList,
     categoryList,
+    cardViewList,
     categoryViewList,
   };
 }

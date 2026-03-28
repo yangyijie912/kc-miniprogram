@@ -1,4 +1,4 @@
-import { loadAllCategoryViewData, type CategoryViewPageData } from '../../utils/useCategoryView';
+import { loadAllViewData, type CategoryViewPageData } from '../../utils/useCategoryView';
 
 Page({
   data: {
@@ -49,7 +49,7 @@ Page({
 
   // 加载所有数据，包括分类列表、卡片列表和分类视图列表
   loadAllData() {
-    const { categoryList, cardList, categoryViewList } = loadAllCategoryViewData();
+    const { categoryList, cardList, categoryViewList } = loadAllViewData();
     this.setData({
       categoryList,
       cardList,
@@ -58,21 +58,7 @@ Page({
     });
   },
 
-  onLoad() {},
-
-  onReady() {},
-
   onShow() {
     this.loadAllData();
   },
-
-  onHide() {},
-
-  onUnload() {},
-
-  onPullDownRefresh() {},
-
-  onReachBottom() {},
-
-  onShareAppMessage() {},
 });

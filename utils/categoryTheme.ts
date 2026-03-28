@@ -1,4 +1,4 @@
-import { categoryThemes } from '../config/categoryThemes';
+import { CATEGORY_THEMES } from '../constants/themes';
 
 // 通过字符串生成一个稳定的哈希值，确保同一个字符串总是得到同一个哈希值
 function hashString(value: string) {
@@ -16,6 +16,6 @@ function hashString(value: string) {
 // 根据类别名称获取对应的主题颜色，使用哈希函数确保同一类别总是得到同一主题
 export function getCategoryTheme(name: string) {
   // 取余以后将其映射到主题数组的索引范围内
-  const index = hashString(name) % categoryThemes.length;
-  return categoryThemes[index];
+  const index = hashString(name) % CATEGORY_THEMES.length;
+  return CATEGORY_THEMES[index];
 }

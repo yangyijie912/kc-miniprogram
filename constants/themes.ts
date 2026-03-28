@@ -1,4 +1,4 @@
-export const categoryThemes = [
+export const CATEGORY_THEMES = [
   {
     background: 'linear-gradient(135deg, #1f2937, #334155)',
     color: '#f8fafc',
