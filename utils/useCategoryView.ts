@@ -67,8 +67,8 @@ export function loadCategories():Category[] {
   return []
 }
 
-// 加载所有数据
-export function loadAllData ():CategoryViewPageData {
+// 返回所有数据
+export function loadAllCategoryViewData ():CategoryViewPageData {
   const cardList = loadCards();
   const categoryList = loadCategories();
   const categoryViewList = createCategoryViewList(categoryList,cardList)

@@ -8,27 +8,6 @@ Page({
 
   },
 
-  // 开始抽题
-  openQuizSetup(){
-
-  },
-  // 查看题库
-  goToCardListByAll(){
-    wx.navigateTo({
-      url: "/pages/cardList/index"
-    })
-  },
-  // 搜索题目
-  searchCard(){
-
-  },
-  // 跳往卡片列表
-  goToCardList(categoryId){
-    wx.navigateTo({
-      url: `/pages/cardList/index?categoryId=${categoryId}`,
-    });
-  },
-
   /**
    * 生命周期函数--监听页面加载
    */
