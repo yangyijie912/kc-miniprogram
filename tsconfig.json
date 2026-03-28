@@ -5,6 +5,7 @@
     "moduleResolution": "Node",
     "rootDir": ".",
     "outDir": "dist",
+    "types": ["miniprogram-api-typings"],
     "strict": false,
     "allowJs": true,
     "checkJs": false,

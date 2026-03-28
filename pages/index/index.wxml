@@ -16,15 +16,15 @@
 
       <view class="hero-metrics">
         <view class="metric-item">
-          <view class="metric-value">{{ 0 }}</view>
+          <view class="metric-value">{{ cardList.length }}</view>
           <view class="metric-label">知识卡</view>
         </view>
         <view class="metric-item">
-          <view class="metric-value">{{ 0 }}</view>
+          <view class="metric-value">{{ categoryViewList.length }}</view>
           <view class="metric-label">分类</view>
         </view>
         <view class="metric-item">
-          <view class="metric-value">{{0}}</view>
+          <view class="metric-value">{{ unmasteredCount }}</view>
           <view class="metric-label">未掌握</view>
         </view>
       </view>
@@ -41,7 +41,8 @@
           class="search-input"
           placeholder="例如：useEffect、闭包、响应式"
           placeholder-class="search-placeholder"
-          v-model="searchQuery"
+          value="{{ searchQuery }}"
+          bindinput="onSearchInput"
         />
         <view class="search-btn" bindtap="searchCard">搜索</view>
       </view>
