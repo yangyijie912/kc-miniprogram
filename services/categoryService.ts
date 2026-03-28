@@ -1,4 +1,4 @@
-import categories from '../data/category.json';
+import categories from '../data/category';
 import { UNCATEGORIZED_CATEGORY, UNCATEGORIZED_ID } from '../constants/category';
 import { CATEGORY_STORAGE_KEY } from '../constants/storageKeys';
 import type { Category } from '../types/card';
@@ -12,7 +12,9 @@ export const uncategorizedId = UNCATEGORIZED_ID;
 const uncategorizedCategory: Category = UNCATEGORIZED_CATEGORY;
 
 // 默认分类列表，从静态数据文件加载
-const defaultCategories: Category[] = (categories as Category[]).map((category) => ({ ...category }));
+const defaultCategories: Category[] = (categories as Category[]).map((category) => ({
+  ...category,
+}));
 
 // 当前的分类列表，后续会从本地存储加载或使用默认分类
 let categoryList: Category[] = [];
@@ -24,7 +26,9 @@ function cloneCategory(category: Category): Category {
 
 // 对分类列表进行排序，首先按照 sort 字段升序排序，如果 sort 相同则按照 name 字段的字母顺序排序
 function normalizeCategories(list: Category[]): Category[] {
-  return list.map(cloneCategory).sort((left, right) => left.sort - right.sort || left.name.localeCompare(right.name));
+  return list
+    .map(cloneCategory)
+    .sort((left, right) => left.sort - right.sort || left.name.localeCompare(right.name));
 }
 
 // 从本地存储加载分类列表，如果没有则使用默认分类，并保存到本地存储
@@ -68,7 +72,9 @@ export function getCategories(params?: Partial<Category>): ServiceResult<Categor
   return success(
     currentList
       .filter((category) => {
-        return (Object.keys(params) as Array<keyof Category>).every((key) => category[key] === params[key]);
+        return (Object.keys(params) as Array<keyof Category>).every(
+          (key) => category[key] === params[key],
+        );
       })
       .map(cloneCategory),
   );

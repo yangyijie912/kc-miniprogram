@@ -1,6 +1,6 @@
-import cards from '../data/cards.json';
-import categories from '../data/category.json';
-import { UNCATEGORIZED_CATEGORY, UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from '../constants/category';
+import cards from '../data/cards';
+import categories from '../data/category';
+import { UNCATEGORIZED_CATEGORY, UNCATEGORIZED_ID } from '../constants/category';
 import { CARD_STORAGE_KEY, CATEGORY_STORAGE_KEY } from '../constants/storageKeys';
 import type { Card, Category } from '../types/card';
 import type { ServiceResult } from '../types/service';

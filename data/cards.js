@@ -1,0 +1,306 @@
+module.exports = [
+  {
+    "id": "1",
+    "category": "Vue",
+    "question": "Vue是什么？",
+    "answer": "待补充",
+    "content": "Vue是一个渐进式框架，基于标准 HTML、CSS 和 JavaScript 构建，并提供了一套声明式的、组件化的编程模型。Vue 有两个核心功能：\n(1)声明式渲染：Vue 基于标准 HTML 拓展了一套模板语法\n(2)响应式：Vue 会自动跟踪 JavaScript 状态并在其发生变化时响应式地更新 DOM",
+    "tags": [
+      "响应式原理"
+    ]
+  },
+  {
+    "id": "2",
+    "category": "Vue",
+    "question": "Vue和React的区别？",
+    "answer": "待补充",
+    "content": "相同点：\n(1)都是组件化思想\n(2)都有Virtual DOM（虚拟dom）这个概念\n(3)数据驱动视图，开发时只需要关注数据的变化\n(4)都提倡单向数据流\n不同点：\n(1)核心思想不同。React推崇函数式编程（纯组件），数据不可变以及单向数据流。Vue是以数据可变的、细粒度的响应性系统为基础，属性可直接修改，它对侦测数据的变化更敏感、更精确。\n(2)对于视图描述这块，它们的方案不一样。React用的是jsx，可以直接用 js 来写逻辑。Vue基于标准 HTML 拓展了一套模板语法vue template。\n(3) diff算法不同。react主要使用diff队列保存需要更新哪些DOM，得到patch树，再统一操作批量更新DOM。Vue 使用双向指针，边对比，边更新DOM。\n(4)响应式原理不同。React是在state和props的值改变后通过diff算法算出更改的部分，再渲染页面，Vue2是通过Object.defineProperty()来劫持各个属性的setter，getter，在数据变动时发布消息给订阅者，触发相应的监听回调。Vue3用的是Proxy。\n拓展：\n(1)vue template 是受限制的，只能访问 data，prop、method，可以静态的分析和优化，而 react 的 jsx 因为直接是 js 的语法，动态逻辑比较多，没法静态的做分析和优化。\n(2)react的jsx本来就是和 js 同一个上下文，结合 typescript 就很自然。但是vue template和 js 上下文割裂开来，引入 typescript 做类型推导的时候就比较困难，需要单独把所有 prop、method、data 的类型声明一遍才行。",
+    "tags": [
+      "响应式原理"
+    ]
+  },
+  {
+    "id": "3",
+    "category": "Vue",
+    "question": "都运用了虚拟DOM，React和Vue有什么区别？",
+    "answer": "待补充",
+    "content": "React：重新渲染 + diff\nVue：依赖追踪 + 精确更新\n两者都有 虚拟 DOM 和 diff，但触发更新的方式完全不同。\nReact 的思路是：\nstate 改变 -> 组件函数重新执行 -> 生成新的 virtual DOM -> diff -> 更新真实 DOM\n所以 React 的特点是：组件级重新执行。它不知道哪个变量影响哪个节点，所以选择重新算一遍再diff。\n再看 Vue 的更新模型：\nVue 有一个核心东西叫：响应式系统。它会做一件事：依赖收集。\n流程是：数据变化 -> 找到依赖 -> 更新对应组件\nReact 的 diff：组件重新 render -> VDOM diff\nVue 的 diff：只在依赖触发时 diff ，所以 Vue 的更新范围通常更小。",
+    "tags": [
+      "响应式原理"
+    ]
+  },
+  {
+    "id": "4",
+    "category": "Vue",
+    "question": "Vue2和Vue3的响应式数据原理分别是什么？",
+    "answer": "待补充",
+    "content": "Vue2用的是Object.defineProperty，通过set和get重新定义和修改属性，属性变化会通知相关依赖进行更新操作。\n缺点：\n(1)检测不到对象属性的添加和删除\n(2)数组API方法无法监听到\n(3)需要对每个属性进行遍历监听，如果嵌套对象，需要深层监听，造成性能问题。\nVue3用的Proxy，Proxy 是 ES6 中提供的功能，其作用为：实现基本操作的拦截和自定义（如属性查找、赋值、枚举、函数调用等）。可以监听整个对象。",
+    "tags": [
+      "还有一个很经典的区别是列表diff。"
+    ]
+  },
+  {
+    "id": "5",
+    "category": "Vue",
+    "question": "为什么vue2中对象添加新属性不会刷新页面？",
+    "answer": "待补充",
+    "content": "vue2是用过Object.defineProperty实现数据响应式，最开始的对象属性被设置成响应式数据，后面新加的属性无法触发事件属性的拦截变成响应式数据。\n解决方式：Vue.set()、Object.assign()、$forcecUpdated()",
+    "tags": [
+      "还有一个很经典的区别是列表diff。"
+    ]
+  },
+  {
+    "id": "6",
+    "category": "Vue",
+    "question": "Vue3 的 reactive / ref 区别",
+    "answer": "待补充",
+    "content": "都可以用来声明响应式状态，reactive 用于创建对象的响应式数据，而 ref 用于创建基本类型的响应式数据。因为 Proxy 只能代理对象，无法直接代理基本类型，所以 Vue3 使用 ref 通过 value 属性包装基本类型实现响应式。为什么模板又不用 .value，因为Vue 在 template 里会自动帮你解包，这就是ref auto unwrapping（ref自动解包）。\nreactive() API 有一些局限性：\n(1)、声明的值类型有限，它只能用于对象类型 (对象、数组和如 Map、Set 这样的集合类型)，不能持有如 string、number 或 boolean 这样的原始类型。\n(2)、不能替换整个对象。state = reactive({ count: 1 })会导致丢失响应性连接，应该写成state.count = 1;\n(3)、对解构操作不友好。对属性进行解构操作也会丢失响应性连接。\nconst user = reactive({\nage: 18",
+    "tags": [
+      "还有一个很经典的区别是列表diff。"
+    ]
+  },
+  {
+    "id": "7",
+    "category": "Vue",
+    "question": "Vue 的双向绑定是怎么实现的？",
+    "answer": "待补充",
+    "content": "Vue 的双向绑定是通过 v-model 实现的，本质上是数据绑定和事件监听的结合。数据变化会更新视图，而用户输入时通过事件修改数据，从而实现数据和视图的同步。\n注意：Vue 的数据流是单向的，v-model 本质是 value 绑定和 input 事件的语法糖（或者说本质是 props 和 emit 的语法糖），通过事件修改数据，从而形成类似双向绑定的效果。Vue2 默认使用 value 和 input 事件，Vue3 改为 modelValue 和 update:modelValue，从而支持多个 v-model。",
+    "tags": [
+      "这里 响应式会丢失。"
+    ]
+  },
+  {
+    "id": "8",
+    "category": "Vue",
+    "question": "created / mounted 区别",
+    "answer": "待补充",
+    "content": "created：数据已经初始化完成，可以访问 data、methods、computed 等，但DOM还没渲染，常见用途是初始化数据、发请求。\nmounted：组件已经完成渲染，DOM 已经挂载到页面。常见用途：操作 DOM、获取元素尺寸、初始化第三方库。\n如果数据不依赖DOM，Vue2请求接口可以在created也可以在mounted，但是服务端渲染不支持mounted，这时候要放在created。放在mounted请求有可能导致页面闪动（页面dom结构已经生成），但如果在页面加载前完成则不会，出现此情况建议：放在created生命周期当中。Vue3推荐onMounted，不要放在setup。",
+    "tags": [
+      "的生命周期"
+    ]
+  },
+  {
+    "id": "9",
+    "category": "Vue",
+    "question": "updated / beforeUpdate 的区别",
+    "answer": "待补充",
+    "content": "beforeUpdate：数据更新了，但 DOM 还没更新。\nupdated：DOM 已经更新完成。一般不建议在 updated 里再修改数据，可能造成无限更新循环。",
+    "tags": [
+      "的生命周期"
+    ]
+  },
+  {
+    "id": "10",
+    "category": "Vue",
+    "question": "setup是什么？",
+    "answer": "待补充",
+    "content": "setup 是 Vue3 Composition API 的入口函数，在组件创建时执行。开发者可以在里面声明响应式状态、计算属性、监听以及生命周期，并将需要暴露给模板的数据 return 出去。\nsetup 执行时机：setup → beforeCreate → created\n也就是说：setup 比 Vue2 生命周期还早。\n所以在 setup 里 没有 this，因为组件实例还没创建。这也是 Vue3 不再推荐 this.xxx 的原因。",
+    "tags": [
+      "的生命周期"
+    ]
+  },
+  {
+    "id": "11",
+    "category": "Vue",
+    "question": "说说keep-alive？",
+    "answer": "待补充",
+    "content": "keep-alive 用于缓存组件实例，避免组件被销毁。当组件被缓存时不会触发 destroy 生命周期，而是触发 activated 和 deactivated（Vue3对应onActivated、onDeactivated）。常用于路由页面缓存，比如列表页返回时保留状态和滚动位置。",
+    "tags": [
+      "的生命周期"
+    ]
+  },
+  {
+    "id": "12",
+    "category": "Vue",
+    "question": "keep-alive 缓存的组件，第一次进入页面会触发 mounted 还是 activated？",
+    "answer": "待补充",
+    "content": "答：mounted\nkeep-alive 会缓存组件实例，当组件切换时不会销毁，而是进入 activated 和 deactivated 状态。默认会缓存访问过的组件，但可以通过 include、exclude、max 控制缓存策略。\nerrorCaptured？（onErrorCaptured）\nVue 提供 errorCaptured 生命周期用于捕获子组件运行时错误，常用于错误监控或降级处理。如果返回 false，可以阻止错误继续向父组件传播。\n触发时机：当子组件发生错误时，父组件的 errorCaptured 会被触发。",
+    "tags": [
+      "的生命周期"
+    ]
+  },
+  {
+    "id": "13",
+    "category": "Vue",
+    "question": "return false 的作用：",
+    "answer": "待补充",
+    "content": "如果返回false，错误就不会继续向上冒泡。",
+    "tags": [
+      "的生命周期"
+    ]
+  },
+  {
+    "id": "14",
+    "category": "Vue",
+    "question": "父组件生命周期和子组件生命周期的执行顺序是什么？",
+    "answer": "待补充",
+    "content": "父子组件生命周期执行顺序是：created 阶段父组件先执行，子组件后执行；mounted 阶段子组件先执行，父组件最后执行。",
+    "tags": [
+      "如果不返回，错误会继续往父组件传播。"
+    ]
+  },
+  {
+    "id": "15",
+    "category": "Vue",
+    "question": "Vue组件之间的通信方式都有哪些？",
+    "answer": "待补充",
+    "content": "(1)父向子通信：props\n(2)子向父通信：$emit\n触发自定义事件，this.$emit('事件名', 参数)。父组件接收到后，由父组件\n修改，子组件本身是不能修改父组件的数据的。\n(3)兄弟组件之间的通信：EventBus\n创建一个中央事件总线EventBus，兄弟组件通过$emit触发自定义事件，$emit第二个参数为传递的数值，另一个兄弟组件通过$on监听自定义事件。\n(4)祖孙与后代组件之间的通信：provide 与 inject\n在祖先组件定义provide属性，返回传递的值。在后代组件通过inject接收组件传递过来的值。\n(5)非关系组件间之间的通信：Vuex / Pinia",
+    "tags": [
+      "组件通信"
+    ]
+  },
+  {
+    "id": "16",
+    "category": "Vue",
+    "question": "EventBus 为什么很少推荐了？",
+    "answer": "待补充",
+    "content": "第一，数据流不清晰。你只看到某个组件在 $on，但到底是谁 $emit 的，要到处找。项目一大就很痛苦。\n第二，难维护。事件名全靠字符串，改名、重构都不安全。\n第三，容易内存泄漏。如果组件销毁时忘记 `$off``，监听还在，就会有问题。\n第四，调试困难。不像 Vuex / Pinia 那样有明确的状态流和 devtools 支持，EventBus 经常是“消息飞来飞去”。",
+    "tags": [
+      "组件通信"
+    ]
+  },
+  {
+    "id": "17",
+    "category": "Vue",
+    "question": "Vue3的composable是什么？",
+    "answer": "待补充",
+    "content": "composable 是 Vue3 Composition API 中用于抽离和复用逻辑的函数，通常以 useXxx 命名。它可以把状态、方法、计算属性、监听等逻辑封装起来，在多个组件中复用，作用类似 React 自定义 Hook，但更贴近 Vue 的响应式体系。",
+    "tags": [
+      "组件通信"
+    ]
+  },
+  {
+    "id": "18",
+    "category": "Vue",
+    "question": "说说Vuex和Pinia？",
+    "answer": "待补充",
+    "content": "Vuex 或 Pinia 用于集中管理全局共享状态，避免组件层层传递 props 或复杂的事件通信，使状态变化更加可追踪和可维护。\nVuex 的状态管理是这种模式：state、mutations、actions特点是：必须通过 mutation 修改 state，这是为了让状态变化可追踪。\nPinia 的设计更简单：state、actions，没有mutations，可以直接改 state。\nPinia 是 Vue 官方推荐的新状态管理库，相比 Vuex 语法更简洁，没有 mutation 概念，TypeScript 支持更好，并且更适合 Vue3 Composition API。\nVuex 通过 mutation 管理状态变化，而 Pinia 允许直接修改 state，因为 Vue3 的响应式系统和 DevTools 已经能够追踪状态变化，从而减少模板代码并提升开发体验。",
+    "tags": [
+      "组件通信"
+    ]
+  },
+  {
+    "id": "19",
+    "category": "Vue",
+    "question": "v-if和v-show的区别？",
+    "answer": "待补充",
+    "content": "(1)v-show隐藏则是为该元素添加css--display:none，dom元素依旧还在。v-if显示隐藏是将dom元素整个添加或删除。\n(2) v-show 由false变为true的时候不会触发组件的生命周期。\nv-if由false变为true的时候，触发组件的beforeCreate、created、beforeMount、mounted钩子，由true变为false的时候触发组件的beforeDestory、destoryed方法\n(3) v-if 是惰性的。意思是：如果初始条件是 false，DOM 不会渲染。而 v-show：DOM 一定会先渲染出来。\nv-if 与 v-show 都能控制dom元素在页面的显示\n如果需要非常频繁地切换，则使用 v-show 较好。\n如果在运行时条件很少改变，则使用 v-if 较好。",
+    "tags": [
+      "Vue"
+    ]
+  },
+  {
+    "id": "20",
+    "category": "Vue",
+    "question": "Vue中的$nextTick有什么作用？",
+    "answer": "待补充",
+    "tags": [
+      "Vue"
+    ]
+  },
+  {
+    "id": "21",
+    "category": "Vue",
+    "question": "computer和watch的区别？",
+    "answer": "待补充",
+    "tags": [
+      "})"
+    ]
+  },
+  {
+    "id": "22",
+    "category": "Vue",
+    "question": "为什么v-if和v-for不建议放在一起使用？",
+    "answer": "待补充",
+    "tags": [
+      "支持异步"
+    ]
+  },
+  {
+    "id": "23",
+    "category": "Vue",
+    "question": "slot是什么？",
+    "answer": "待补充",
+    "content": "插槽。用来拓展组件，去更好地复用组件和对其做定制化处理。\nslot 用于父组件向子组件传递模板内容，分为默认插槽、具名插槽和作用域插槽，作用域插槽允许子组件向父组件暴露数据。\n可以使用<slot>标签，也可以使用v-slot（v-slot属性只能在<template>上使用）",
+    "tags": [
+      "优先级不明显，且有性能方面的浪费。"
+    ]
+  },
+  {
+    "id": "24",
+    "category": "Vue",
+    "question": "vue中有哪些修饰符？",
+    "answer": "待补充",
+    "tags": [
+      "优先级不明显，且有性能方面的浪费。"
+    ]
+  },
+  {
+    "id": "25",
+    "category": "Vue",
+    "question": "自定义指令怎么用，有什么应用场景？",
+    "answer": "待补充",
+    "tags": [
+      "Vue"
+    ]
+  },
+  {
+    "id": "26",
+    "category": "Vue",
+    "question": "Vue2组件中的data为什么是一个函数？",
+    "answer": "待补充",
+    "content": "为了防止多个组件实例对象之间共用一个data，产生数据污染。采用函数的形式，initData时会将其作为工厂函数都会返回全新data对象（函数返回的对象内存地址并不相同）",
+    "tags": [
+      "vs Vue3"
+    ]
+  },
+  {
+    "id": "27",
+    "category": "Vue",
+    "question": "谈谈mixin？",
+    "answer": "待补充",
+    "content": "mixin来分发 Vue 组件中的可复用功能。（解决逻辑复用问题）\n缺点：\n(1)、命名冲突；\n(2)、数据来源不清晰\n拓展：vue 的组件是 option 对象的方式，那么逻辑复用方式很自然可以想到通过对象属性的 mixin，vue2 的组件内逻辑复用方案就是 mixin，但是 mixin 很难区分混入的属性、方法的来源，比较乱，代码维护性差，但也没有更好的方案。后面Vue3.0以后把option api换成composition api才解决了这个问题。\nreact 刚开始也是支持 mixin 的，但后来废弃了。然后采用了HOC（高阶组件），再后面有了Fiber架构后，就是用hooks来解决这个问题。",
+    "tags": [
+      "vs Vue3"
+    ]
+  },
+  {
+    "id": "28",
+    "category": "Vue",
+    "question": "Vue3有哪些新特点？",
+    "answer": "待补充",
+    "content": "(1)体积更小（移除一些不常用的 API，打包时只打包用到的模块）\n(2)速度更快\n(a) diff算法优化（增加了静态标记，生变化的地方添加一个flag标记，下次发生变化的时候直接找该地方进行比较）\n(b)静态提升（不参与更新的元素，会做静态提升，只会被创建一次，在渲染时直接复用）",
+    "tags": [
+      "vs Vue3"
+    ]
+  },
+  {
+    "id": "29",
+    "category": "Vue",
+    "question": "Options API和Composition API有什么不同？",
+    "answer": "待补充",
+    "content": "Options API以“组件实例”的概念为中心，通过定义methods，computed，watch，data等属性与方法，共同处理页面逻辑。\nComposition API是直接在函数作用域内定义响应式状态变量，并将从多个函数中得到的状态组合起来处理复杂问题。(Composition API 的风格是基于函数的组合，但组合式 API 并不是函数式编程。组合式 API 是以 Vue 中数据可变的、细粒度的响应性系统为基础的，而函数式编程通常强调数据不可变。)\n组合式API比起选项式API有以下优点：\n(1)更好的逻辑复用；它可以解决mixin命名冲突和数据来源不清晰的问题（在选项式 API 中主要的逻辑复用机制是 mixins）。\n(2)更好的类型推导；Composition API主要利用基本的变量和函数，它们本身就是类型友好的。\n(3)更灵活的代码组织；Composition API相同的逻辑功能基本都是放在一起的，利于阅读和维护。\n(4)不像选项式 API 需要依赖 this 上下文对象访问属性，被编译的模板可以直接访问 <script setup> 中定义的变量。 Composition API中见不到this的使用，减少了this指向不明的情况。\n两种 API 风格都能够覆盖大部分的应用场景。它们只是同一个底层系统所提供的两套不同的接口。实际上，选项式 API 是在组合式 API 的基础上实现的。（官方认为不必只固守一种风格，这两种API风格在学习中可以选择自己喜欢的。未来也不会废弃选项式API）",
+    "tags": [
+      "(c) 响应式系统Proxy"
+    ]
+  },
+  {
+    "id": "30",
+    "category": "Vue",
+    "question": "如何处理Vue项目中的错误？",
+    "answer": "待补充",
+    "content": "(1)设置全局错误处理函数Vue.config.errorHandler。三个参数分别是错误对象、错误组件、错误信息\n(2)利用生命周期钩子errorCaptured。三个参数分别是错误对象、错误组件、错误信息",
+    "tags": [
+      "(c) 响应式系统Proxy"
+    ]
+  },
+  {
+    "id": "31",
+    "category": "Vue",
+    "question": "vue可以做哪些性能优化？",
+    "answer": "待补充",
+    "tags": [
+      "(c) 响应式系统Proxy"
+    ]
+  }
+];

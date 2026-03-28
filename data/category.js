@@ -1,0 +1,42 @@
+module.exports = [
+  {
+    "id": "1",
+    "name": "React",
+    "sort": 1
+  },
+  {
+    "id": "2",
+    "name": "Vue",
+    "sort": 2
+  },
+  {
+    "id": "3",
+    "name": "JavaScript",
+    "sort": 3
+  },
+  {
+    "id": "4",
+    "name": "TypeScript",
+    "sort": 4
+  },
+  {
+    "id": "5",
+    "name": "CSS",
+    "sort": 5
+  },
+  {
+    "id": "6",
+    "name": "浏览器",
+    "sort": 6
+  },
+  {
+    "id": "7",
+    "name": "Next.js",
+    "sort": 7
+  },
+  {
+    "id": "8",
+    "name": "工程化",
+    "sort": 8
+  }
+];
