@@ -3,8 +3,8 @@ import type { ServiceResult } from '../types/service';
 import { getCards } from '../services/cardService';
 import { getCategories } from '../services/categoryService';
 import { UNCATEGORIZED_ID } from '../constants/category';
-import { getCategoryTheme } from './categoryTheme';
-import { toCardViews } from './cardView';
+import { getCategoryTheme } from '../utils/categoryTheme';
+import { toCardViews } from '../utils/cardView';
 
 export type CategoryViewPageData = {
   cardList: Card[];
@@ -82,8 +82,8 @@ export function loadCategories(): Category[] {
 }
 
 // 返回所有数据
-export function loadAllViewData(): CategoryViewPageData {
-  const cardList = loadCards({});
+export function loadAllViewData(query: CardQueryParams = {}): CategoryViewPageData {
+  const cardList = loadCards(query);
   const categoryList = loadCategories();
   const cardViewList = createCardViewList(cardList, categoryList);
   const categoryViewList = createCategoryViewList(categoryList, cardList);

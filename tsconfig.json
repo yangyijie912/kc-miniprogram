@@ -29,11 +29,10 @@
     "services/**/*.js",
     "constants/**/*.ts",
     "constants/**/*.js",
-    "config/**/*.ts",
-    "config/**/*.js",
     "types/**/*.ts",
     "types/**/*.js",
-    "typings/**/*.d.ts"
+    "typings/**/*.d.ts",
+    "view-model/**/*.ts"
   ],
   "exclude": ["dist", "node_modules"]
 }

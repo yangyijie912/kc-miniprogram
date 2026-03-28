@@ -33,3 +33,17 @@ export interface CardView extends Card {
   categoryName?: string;
   statusName?: string;
 }
+
+// 定义查询参数类型
+export type QueryParams = {
+  categoryId?: string;
+  keyword?: string;
+  status?: CardStatus;
+};
+
+// 定义页面接收的查询参数类型
+export type PageOptions = {
+  categoryId?: string;
+  keyword?: string;
+  status?: string;
+};

@@ -1,4 +1,4 @@
-import { loadAllViewData, type CategoryViewPageData } from '../../utils/useCategoryView';
+import { loadAllViewData, type CategoryViewPageData } from '../../view-model/card-view';
 
 Page({
   data: {
