@@ -3,9 +3,16 @@
   "private": true,
   "scripts": {
     "clean": "node -e \"try { require('fs').rmSync('dist', { recursive: true, force: true }); } catch (e) { if (e && e.code !== 'EBUSY') throw e; }\"",
-    "build": "npm run clean && tsc -p tsconfig.json && node scripts/copy-static.mjs"
+    "build:ts": "tsc -p tsconfig.json",
+    "build:assets": "node scripts/copy-static.mjs",
+    "build": "npm run clean && npm run build:ts && npm run build:assets",
+    "watch:ts": "tsc -p tsconfig.json -w --preserveWatchOutput",
+    "watch:assets": "node scripts/copy-static-watch.mjs",
+    "dev": "concurrently \"npm:watch:ts\" \"npm:watch:assets\""
   },
   "devDependencies": {
+    "chokidar": "^4.0.3",
+    "concurrently": "^9.1.2",
     "typescript": "^5.8.3"
   }
 }

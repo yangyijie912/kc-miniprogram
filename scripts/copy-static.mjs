@@ -1,4 +1,5 @@
 import { cp, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -42,7 +43,7 @@ const filter = (source) => {
 
   if (fileName.endsWith('.js')) {
     const tsSibling = source.replace(/\.js$/, '.ts');
-    return !relativePath.startsWith('pages/index/');
+    return !existsSync(tsSibling);
   }
 
   return true;
