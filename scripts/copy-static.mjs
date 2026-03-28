@@ -59,6 +59,9 @@ const filter = (source) => {
   }
 
   if (fileName.endsWith('.js')) {
+    if (relativePath.startsWith('data/')) {
+      return false;
+    }
     const tsSibling = source.replace(/\.js$/, '.ts');
     return !existsSync(tsSibling);
   }

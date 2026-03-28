@@ -58,6 +58,9 @@ function shouldCopy(sourcePath) {
   }
 
   if (fileName.endsWith('.js')) {
+    if (relativePath.startsWith('data/')) {
+      return false;
+    }
     const tsSibling = sourcePath.replace(/\.js$/, '.ts');
     return !existsSync(tsSibling);
   }
@@ -84,6 +87,19 @@ async function removeOne(sourcePath) {
 
 await mkdir(distDir, { recursive: true });
 
+async function safeRun(action, payloadPath) {
+  try {
+    await action();
+  } catch (error) {
+    const e = /** @type {{ code?: string }} */ (error);
+    // Ignore transient races when files are created/removed very quickly.
+    if (e && (e.code === 'ENOENT' || e.code === 'EBUSY')) {
+      return;
+    }
+    console.error(`[copy-static-watch] failed for ${payloadPath}:`, error);
+  }
+}
+
 const initialTargets = watchedEntries.map((entry) => path.join(rootDir, entry));
 const watcher = chokidar.watch(initialTargets, {
   ignoreInitial: false,
@@ -95,31 +111,41 @@ const watcher = chokidar.watch(initialTargets, {
 
 watcher
   .on('add', async (filePath) => {
-    const generatedJsPath = trySyncDataJsonToJs(filePath);
-    await copyOne(filePath);
-    if (generatedJsPath) {
-      await copyOne(generatedJsPath);
-    }
+    await safeRun(async () => {
+      const generatedJsPath = trySyncDataJsonToJs(filePath);
+      await copyOne(filePath);
+      if (generatedJsPath) {
+        await copyOne(generatedJsPath);
+      }
+    }, filePath);
   })
   .on('change', async (filePath) => {
-    const generatedJsPath = trySyncDataJsonToJs(filePath);
-    await copyOne(filePath);
-    if (generatedJsPath) {
-      await copyOne(generatedJsPath);
-    }
+    await safeRun(async () => {
+      const generatedJsPath = trySyncDataJsonToJs(filePath);
+      await copyOne(filePath);
+      if (generatedJsPath) {
+        await copyOne(generatedJsPath);
+      }
+    }, filePath);
   })
   .on('unlink', async (filePath) => {
-    await removeOne(filePath);
+    await safeRun(async () => {
+      await removeOne(filePath);
+    }, filePath);
   })
   .on('addDir', async (dirPath) => {
-    if (!shouldCopy(dirPath)) {
-      return;
-    }
-    const relativePath = path.relative(rootDir, dirPath);
-    await mkdir(path.join(distDir, relativePath), { recursive: true });
+    await safeRun(async () => {
+      if (!shouldCopy(dirPath)) {
+        return;
+      }
+      const relativePath = path.relative(rootDir, dirPath);
+      await mkdir(path.join(distDir, relativePath), { recursive: true });
+    }, dirPath);
   })
   .on('unlinkDir', async (dirPath) => {
-    await removeOne(dirPath);
+    await safeRun(async () => {
+      await removeOne(dirPath);
+    }, dirPath);
   })
   .on('error', (error) => {
     console.error('[copy-static-watch] error:', error);
