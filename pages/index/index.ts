@@ -40,7 +40,8 @@ Page({
   },
 
   // 打开指定分类的卡片列表页
-  goToCardList(categoryId: string) {
+  goToCardListByCategory(event: WechatMiniprogram.BaseEvent) {
+    const categoryId = event.currentTarget.dataset.categoryId;
     wx.navigateTo({
       url: `/pages/cardList/index?categoryId=${categoryId}`,
     });

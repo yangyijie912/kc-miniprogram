@@ -23,6 +23,10 @@ export interface CategoryView extends Category {
   canEdit: boolean;
   canDelete: boolean;
   visible: boolean;
+  theme: {
+    background: string;
+    color: string;
+  };
 }
 
 export interface CardView extends Card {

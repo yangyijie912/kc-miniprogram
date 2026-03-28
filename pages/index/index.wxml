@@ -56,12 +56,12 @@
 
       <view class="category-list">
         <view
-          wx:for="categoryViewList"
+          wx:for="{{categoryViewList}}"
           wx:key="id"
           class="category-item"
-          style="background-color: {{getCategoryTheme(item.name).background}};
-          color: {{getCategoryTheme(item.name).color}};"
-          bindtap="goToCardList(item.id)"
+          style="background: {{item.theme.background}}; color: {{item.theme.color}};"
+          bindtap="goToCardListByCategory"
+          data-category-id="{{item.id}}"
         >
           <text class="category-name">{{ item.name }}</text>
           <text class="category-count">{{ item.cardCount }} 张卡片</text>
