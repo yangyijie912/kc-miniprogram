@@ -3,9 +3,12 @@
     "target": "ES2019",
     "module": "CommonJS",
     "moduleResolution": "Node",
+    "rootDir": ".",
+    "outDir": "dist",
     "strict": false,
     "allowJs": true,
     "checkJs": false,
+    "noEmit": false,
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -14,13 +17,22 @@
     "baseUrl": "."
   },
   "include": [
+    "app.js",
     "pages/**/*.ts",
+    "pages/**/*.js",
     "components/**/*.ts",
+    "components/**/*.js",
     "utils/**/*.ts",
+    "utils/**/*.js",
     "services/**/*.ts",
+    "services/**/*.js",
     "constants/**/*.ts",
+    "constants/**/*.js",
     "config/**/*.ts",
+    "config/**/*.js",
     "types/**/*.ts",
+    "types/**/*.js",
     "typings/**/*.d.ts"
-  ]
+  ],
+  "exclude": ["dist", "node_modules"]
 }

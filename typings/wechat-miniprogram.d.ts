@@ -1,8 +1,25 @@
+declare type WxCallback = () => void;
+
+declare type WxFileSystemManager = {
+  writeFile(options: {
+    filePath: string;
+    data: string;
+    encoding?: string;
+    success?: WxCallback;
+    fail?: WxCallback;
+  }): void;
+};
+
 declare const wx: {
-  getStorageSync(key: string): string;
+  env: {
+    USER_DATA_PATH: string;
+  };
+  getStorageSync(key: string): any;
   setStorageSync(key: string, value: string): void;
   showToast(options: { title: string; icon?: string }): void;
   navigateTo(options: { url: string }): void;
+  openDocument(options: { filePath: string; success?: WxCallback; fail?: WxCallback }): void;
+  getFileSystemManager(): WxFileSystemManager;
 };
 
 declare function Page(options: Record<string, any>): void;
