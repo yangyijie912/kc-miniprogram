@@ -1,5 +1,5 @@
 import { cp, mkdir, rm } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import chokidar from 'chokidar';
@@ -23,6 +23,18 @@ const watchedEntries = [
 
 function toPosixPath(value) {
   return value.replace(/\\/g, '/');
+}
+
+function trySyncDataJsonToJs(sourcePath) {
+  const relativePath = toPosixPath(path.relative(rootDir, sourcePath));
+  if (!relativePath.startsWith('data/') || !relativePath.endsWith('.json')) {
+    return null;
+  }
+
+  const data = JSON.parse(readFileSync(sourcePath, 'utf8'));
+  const jsPath = sourcePath.replace(/\.json$/, '.js');
+  writeFileSync(jsPath, `module.exports = ${JSON.stringify(data, null, 2)};\n`, 'utf8');
+  return jsPath;
 }
 
 function shouldCopy(sourcePath) {
@@ -83,10 +95,18 @@ const watcher = chokidar.watch(initialTargets, {
 
 watcher
   .on('add', async (filePath) => {
+    const generatedJsPath = trySyncDataJsonToJs(filePath);
     await copyOne(filePath);
+    if (generatedJsPath) {
+      await copyOne(generatedJsPath);
+    }
   })
   .on('change', async (filePath) => {
+    const generatedJsPath = trySyncDataJsonToJs(filePath);
     await copyOne(filePath);
+    if (generatedJsPath) {
+      await copyOne(generatedJsPath);
+    }
   })
   .on('unlink', async (filePath) => {
     await removeOne(filePath);

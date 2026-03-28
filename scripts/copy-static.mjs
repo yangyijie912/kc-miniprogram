@@ -1,5 +1,6 @@
 import { cp, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,6 +20,22 @@ const entriesToCopy = [
   'data',
   'pages',
 ];
+
+function syncDataJsonToJsModules() {
+  const dataDir = path.join(rootDir, 'data');
+  const jsonFiles = ['cards.json', 'category.json'];
+
+  for (const fileName of jsonFiles) {
+    const jsonPath = path.join(dataDir, fileName);
+    if (!existsSync(jsonPath)) {
+      continue;
+    }
+
+    const data = JSON.parse(readFileSync(jsonPath, 'utf8'));
+    const jsModulePath = path.join(dataDir, fileName.replace(/\.json$/, '.js'));
+    writeFileSync(jsModulePath, `module.exports = ${JSON.stringify(data, null, 2)};\n`, 'utf8');
+  }
+}
 
 const filter = (source) => {
   const relativePath = path.relative(rootDir, source).replace(/\\/g, '/');
@@ -50,6 +67,7 @@ const filter = (source) => {
 };
 
 await mkdir(distDir, { recursive: true });
+syncDataJsonToJsModules();
 
 for (const entry of entriesToCopy) {
   await cp(path.join(rootDir, entry), path.join(distDir, entry), {
