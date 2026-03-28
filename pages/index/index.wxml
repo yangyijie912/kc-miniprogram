@@ -1,0 +1,73 @@
+<!--index.wxml-->
+<navigation-bar title="知识卡" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="page">
+    <view class="hero-card">
+      <view class="hero-badge">Knowledge Card</view>
+      <view class="hero-title">把零散知识，练成稳定记忆</view>
+      <view class="hero-desc">
+        用抽题、分类和检索把前端知识点串起来，适合日常复习和面试前冲刺。
+      </view>
+
+      <view class="hero-actions">
+        <view class="quiz-btn" bindtap="openQuizSetup">开始抽题</view>
+        <view class="secondary-btn" bindtap="goToCardListByAll">查看卡库</view>
+      </view>
+
+      <view class="hero-metrics">
+        <view class="metric-item">
+          <view class="metric-value">{{ 0 }}</view>
+          <view class="metric-label">知识卡</view>
+        </view>
+        <view class="metric-item">
+          <view class="metric-value">{{ 0 }}</view>
+          <view class="metric-label">分类</view>
+        </view>
+        <view class="metric-item">
+          <view class="metric-value">{{0}}</view>
+          <view class="metric-label">未掌握</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="search-panel">
+      <view class="section-head">
+        <view class="section-title">快速搜索</view>
+        <view class="section-tip">按问题、答案或关键词查找</view>
+      </view>
+
+      <view class="search-area">
+        <input
+          class="search-input"
+          placeholder="例如：useEffect、闭包、响应式"
+          placeholder-class="search-placeholder"
+          v-model="searchQuery"
+        />
+        <view class="search-btn" bindtap="searchCard">搜索</view>
+      </view>
+    </view>
+
+    <view class="category-panel">
+      <view class="section-head">
+        <view class="section-title">热门分类</view>
+        <view class="section-tip">从熟悉的主题开始刷题</view>
+      </view>
+
+      <view class="category-list">
+        <view
+          wx:for="categoryViewList"
+          wx:key="id"
+          class="category-item"
+          style="background-color: {{getCategoryTheme(item.name).background}};
+          color: {{getCategoryTheme(item.name).color}};"
+          bindtap="goToCardList(item.id)"
+        >
+          <text class="category-name">{{ item.name }}</text>
+          <text class="category-count">{{ item.cardCount }} 张卡片</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- <QuizSetupSheet :open="showQuizSetup" @close="closeQuizSetup" @start="startQuizWithCurrentUI" /> -->
+  </view>
+</scroll-view>
