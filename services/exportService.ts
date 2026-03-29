@@ -36,19 +36,23 @@ export const buildExportJson = async () => {
 // 导出为 JSON 文件
 export const exportToJson = async () => {
   const jsonStr = await buildExportJson();
-  const fs = wx.getFileSystemManager()
-  const filePath = `${wx.env.USER_DATA_PATH}/export_${new Date()}.json`
+  const fs = wx.getFileSystemManager();
+  const filePath = `${wx.env.USER_DATA_PATH}/export_${Date.now()}.json`;
 
   fs.writeFile({
     filePath,
     data: jsonStr,
     encoding: 'utf8',
     success: () => {
-      wx.showToast({ title: '导出成功' })
+      wx.showToast({ title: '导出成功' });
 
       wx.openDocument({
         filePath,
-      })
-    }
-  })
+      });
+    },
+    fail: (err) => {
+      console.error('导出失败', err);
+      wx.showToast({ title: '导出失败', icon: 'none' });
+    },
+  });
 };

@@ -1,6 +1,20 @@
-<!--index.wxml-->
 <scroll-view class="scrollarea" scroll-y type="list">
-  <view class="container">
-    Weixinaa
+  <view class="page">
+    <view class="panel">
+      <view class="panel-title">我的</view>
+      <view class="panel-subtitle">数据维护入口统一放在这里</view>
+
+      <view class="action-grid">
+        <view class="action-card action-card-import" bindtap="importData">
+          <view class="action-title">数据导入</view>
+          <view class="action-desc">支持从 JSON 文件恢复卡片与分类（开发中）</view>
+        </view>
+
+        <view class="action-card action-card-export" bindtap="exportData">
+          <view class="action-title">数据导出</view>
+          <view class="action-desc">导出当前卡片与分类到 JSON 文件</view>
+        </view>
+      </view>
+    </view>
   </view>
 </scroll-view>
