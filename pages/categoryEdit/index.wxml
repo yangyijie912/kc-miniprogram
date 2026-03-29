@@ -1,6 +1,38 @@
-<!--index.wxml-->
 <scroll-view class="scrollarea" scroll-y type="list">
-  <view class="container">
-    Weixinaa
+  <view class="page">
+    <view class="hero-card">
+      <view class="eyebrow">Category Editor</view>
+      <view class="title">{{ categoryId ? '编辑分类' : '新增分类' }}</view>
+      <view class="desc">会影响卡片的归类和展示顺序。</view>
+    </view>
+
+    <view class="form-card">
+      <view class="form-header">
+        <view class="form-title">基础信息</view>
+        <view class="form-tip">名称用于展示，排序值越小越靠前</view>
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">名称</view>
+        <input class="form-input" value="{{formData.name}}" bindinput="onNameInput" placeholder="例如：Vue" placeholder-class="input-placeholder" />
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">排序</view>
+        <input
+          class="form-input"
+          type="digit"
+          value="{{formData.sort}}"
+          bindinput="onSortInput"
+          placeholder="例如：1"
+          placeholder-class="input-placeholder"
+        />
+      </view>
+
+      <view class="form-actions">
+        <view class="btn btn-secondary" bindtap="cancel">取消</view>
+        <view class="btn btn-primary" bindtap="save">保存</view>
+      </view>
+    </view>
   </view>
 </scroll-view>
