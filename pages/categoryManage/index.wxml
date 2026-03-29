@@ -1,6 +1,33 @@
-<!--index.wxml-->
 <scroll-view class="scrollarea" scroll-y type="list">
-  <view class="container">
-    Weixinaa
+  <view class="page">
+    <view class="hero-card">
+      <view class="eyebrow">Category Admin</view>
+      <view class="title">分类管理</view>
+      <view class="desc">管理分类结构，方便卡片的新增、筛选和跳转。</view>
+    </view>
+
+    <view class="toolbar-card">
+      <view class="toolbar-title">全部分类</view>
+      <view class="toolbar-action" bindtap="addCategory">新增分类</view>
+    </view>
+
+    <view class="list-card">
+      <view wx:for="{{categoryViewList}}" wx:key="id" class="category-row">
+        <view>
+          <view class="category-name">{{ item.name }}</view>
+          <view class="category-count">{{ item.cardCount }} 张卡片</view>
+        </view>
+        <view class="row-actions">
+          <view class="row-btn" bindtap="goToEdit" data-id="{{item.id}}" wx:if="{{item.canEdit}}">编辑</view>
+          <view
+            class="row-btn row-btn-danger"
+            bindtap="removeCategory"
+            data-id="{{item.id}}"
+            wx:if="{{item.canDelete}}"
+            >删除</view
+          >
+        </view>
+      </view>
+    </view>
   </view>
 </scroll-view>

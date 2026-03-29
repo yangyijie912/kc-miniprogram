@@ -1,13 +1,3 @@
-/**index.wxss**/
-page {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-.scrollarea {
-  flex: 1;
-  overflow-y: hidden;
-}
 .page {
   --bg-cream: #f7f1e8;
   --bg-surface: rgba(255, 252, 247, 0.84);

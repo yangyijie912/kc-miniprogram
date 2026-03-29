@@ -1,10 +1,130 @@
-/**index.wxss**/
-page {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
+.page {
+  padding: 24rpx 28rpx max(12rpx, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #f8f2e8 0%, #efe5d5 100%);
 }
-.scrollarea {
-  flex: 1;
-  overflow-y: hidden;
+
+.hero-card,
+.toolbar-card,
+.list-card {
+  border-radius: 28rpx;
+  border: 1rpx solid rgba(61, 43, 24, 0.12);
+  background: rgba(255, 252, 247, 0.84);
+  box-shadow: 0 16rpx 40rpx rgba(80, 55, 25, 0.06);
+}
+
+.hero-card,
+.toolbar-card {
+  padding: 28rpx;
+}
+
+.eyebrow {
+  color: #127a72;
+  font-size: 22rpx;
+}
+
+.title {
+  margin-top: 12rpx;
+  color: #1e1c18;
+  font-size: 44rpx;
+  font-weight: 700;
+}
+
+.desc {
+  margin-top: 14rpx;
+  color: #6c645a;
+  font-size: 26rpx;
+  line-height: 1.7;
+}
+
+.toolbar-card {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.toolbar-title {
+  color: #1e1c18;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.toolbar-action {
+  min-width: 160rpx;
+  height: 76rpx;
+  padding: 0 24rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  background: rgba(31, 94, 255, 0.1);
+  color: #1f5eff;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.list-card {
+  margin-top: 20rpx;
+  padding: 12rpx 20rpx;
+}
+
+.category-row {
+  padding: 24rpx 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* gap: 16rpx; */
+  border-bottom: 1rpx solid rgba(61, 43, 24, 0.08);
+}
+
+.category-row:last-child {
+  border-bottom: none;
+}
+
+.category-name {
+  color: #1e1c18;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.category-count {
+  margin-top: 6rpx;
+  color: #6c645a;
+}
+
+.row-actions {
+  display: flex;
+  gap: 12rpx;
+}
+
+.row-btn {
+  min-width: 104rpx;
+  height: 64rpx;
+  padding: 0 18rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.8);
+  color: #6c645a;
+  font-size: 24rpx;
+}
+
+.row-btn-danger {
+  background: rgba(239, 125, 66, 0.12);
+  color: #c76530;
+}
+
+@media (max-width: 320px) {
+  .toolbar-card,
+  .category-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .row-actions {
+    width: 100%;
+  }
 }
