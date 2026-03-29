@@ -72,19 +72,19 @@
           <view
             class="quiz-chip quiz-limit-chip {{ selectedLimit === 10 ? 'active' : '' }}"
             bindtap="onSelectLimit"
-            data-limit="10"
+            data-limit="{{10}}"
             >10</view
           >
           <view
             class="quiz-chip quiz-limit-chip {{ selectedLimit === 20 ? 'active' : '' }}"
             bindtap="onSelectLimit"
-            data-limit="20"
+            data-limit="{{20}}"
             >20</view
           >
           <view
             class="quiz-chip quiz-limit-chip {{ selectedLimit === 30 ? 'active' : '' }}"
             bindtap="onSelectLimit"
-            data-limit="30"
+            data-limit="{{30}}"
             >30</view
           >
           <view class="quiz-limit-custom">

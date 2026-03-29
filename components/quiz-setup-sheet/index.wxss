@@ -30,7 +30,7 @@
   overflow-y: auto;
   z-index: 21;
   bottom: 0;
-  padding: 18rpx 28rpx;
+  padding: 18rpx 28rpx 24rpx;
 }
 
 .quiz-setup-handle {

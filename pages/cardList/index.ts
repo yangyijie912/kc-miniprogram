@@ -1,4 +1,5 @@
 import type { QueryParams, PageOptions, CardStatus, CardView } from '../../types/card';
+import type { quizQuery } from '../../types/quiz';
 import { loadAllViewData } from '../../view-model/card-view';
 
 // 定义状态标签类型
@@ -33,6 +34,7 @@ Page({
     showQuizAction: false as boolean,
     isSearchResultMode: false as boolean,
     statusTabs: buildStatusTabs(),
+    showQuizSetup: false as boolean,
   },
 
   // 解析状态参数，确保它是合法的 CardStatus 值
@@ -101,6 +103,32 @@ Page({
     });
   },
 
+  // 打开测验设置界面
+  openQuizSetup() {
+    this.setData({
+      showQuizSetup: true,
+    });
+  },
+
+  // 关闭测验设置界面
+  closeQuizSetup() {
+    this.setData({
+      showQuizSetup: false,
+    });
+  },
+
+  // 开始测验，使用当前UI选择的条件
+  startQuizWithCurrentUI(event: WechatMiniprogram.CustomEvent) {
+    if (!this.data.queryParams.categoryId) {
+      return;
+    }
+    this.closeQuizSetup();
+    const { mode, type, limit } = event.detail as quizQuery;
+    wx.navigateTo({
+      url: `/pages/quiz/index?mode=${mode}&type=${type}&limit=${limit}&categoryId=${this.data.queryParams.categoryId}`,
+    });
+  },
+
   onLoad(options: PageOptions) {
     const q = this.parseParams(options as PageOptions);
     const { categoryId, status, keyword } = q;
@@ -147,7 +175,4 @@ Page({
       url: `/pages/cardEdit/index${query}`,
     });
   },
-
-  // 打开测验启动页面
-  openQuizSetup() {},
 });

@@ -68,11 +68,11 @@
       </view>
     </view>
 
-    <!-- <QuizSetupSheet
-      :open="showQuizSetup"
-      :categoryId="queryParams.categoryId"
-      @close="closeQuizSetup"
-      @start="startQuizWithCurrentUI"
-    /> -->
+    <quiz-setup-sheet
+      open="{{showQuizSetup}}"
+      categoryId="{{queryParams.categoryId || ''}}"
+      bind:close="closeQuizSetup"
+      bind:start="startQuizWithCurrentUI"
+    />
   </view>
 </scroll-view>
