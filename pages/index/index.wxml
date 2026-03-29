@@ -68,6 +68,6 @@
       </view>
     </view>
 
-    <!-- <QuizSetupSheet :open="showQuizSetup" @close="closeQuizSetup" @start="startQuizWithCurrentUI" /> -->
+    <quiz-setup-sheet open="{{showQuizSetup}}" bind:close="closeQuizSetup" bind:start="startQuizWithCurrentUI" />
   </view>
 </scroll-view>

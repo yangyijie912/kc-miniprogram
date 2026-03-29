@@ -1,4 +1,5 @@
 import { loadAllViewData, type CategoryViewPageData } from '../../view-model/card-view';
+import type { quizQuery } from '../../types/quiz';
 
 Page({
   data: {
@@ -7,9 +8,31 @@ Page({
     categoryViewList: [] as CategoryViewPageData['categoryViewList'],
     unmasteredCount: 0,
     searchQuery: '',
+    showQuizSetup: false as boolean,
   },
 
-  openQuizSetup() {},
+  // 打开测验设置界面
+  openQuizSetup() {
+    this.setData({
+      showQuizSetup: true,
+    });
+  },
+
+  // 关闭测验设置界面
+  closeQuizSetup() {
+    this.setData({
+      showQuizSetup: false,
+    });
+  },
+
+  // 开始测验，使用当前UI选择的条件
+  startQuizWithCurrentUI(event: WechatMiniprogram.CustomEvent) {
+    this.closeQuizSetup();
+    const { mode, type, limit } = event.detail as quizQuery;
+    wx.navigateTo({
+      url: `/pages/quiz/index?mode=${mode}&type=${type}&limit=${limit}`,
+    });
+  },
 
   // 打开所有卡片的列表页
   goToCardListByAll() {
@@ -60,5 +83,12 @@ Page({
 
   onShow() {
     this.loadAllData();
+  },
+
+  onHide() {
+    // 页面隐藏时关闭测验设置界面，避免下次打开时状态异常
+    this.setData({
+      showQuizSetup: false,
+    });
   },
 });

@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "知识卡"
+  "navigationBarTitleText": "知识卡",
+  "usingComponents": {
+    "quiz-setup-sheet": "/components/quiz-setup-sheet/index"
+  }
 }
