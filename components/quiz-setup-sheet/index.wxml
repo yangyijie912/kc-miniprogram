@@ -1,120 +1,117 @@
-<!--index.wxml-->
-<scroll-view class="scrollarea" scroll-y type="list">
-  <view>
-    <view wx:if="{{open}}" class="quiz-setup-mask" bindtap="closeQuiz"></view>
+<view>
+  <view wx:if="{{open}}" class="quiz-setup-mask" bindtap="closeQuiz"></view>
 
-    <view wx:if="{{open}}" class="quiz-setup-sheet"
-      style="max-height: {{windowStyles.maxHeight}}rpx;"
-    >
-      <view class="quiz-setup-handle"></view>
+  <view wx:if="{{open}}" class="quiz-setup-sheet"
+    style="max-height: {{windowStyles.maxHeight}}rpx;"
+  >
+    <view class="quiz-setup-handle"></view>
 
-      <view class="quiz-setup-head">
-        <view>
-          <view class="quiz-setup-title">开始测验</view>
-          <view class="quiz-setup-subtitle"> 选择测验类型和练习模式，开启刷题之旅！ </view>
-        </view>
-        <view class="quiz-setup-close" bindtap="closeQuiz">×</view>
+    <view class="quiz-setup-head">
+      <view>
+        <view class="quiz-setup-title">开始测验</view>
+        <view class="quiz-setup-subtitle"> 选择测验类型和练习模式，开启刷题之旅！ </view>
       </view>
+      <view class="quiz-setup-close" bindtap="closeQuiz">×</view>
+    </view>
 
-      <view class="quiz-setup-section">
-        <view class="quiz-setup-label">测验类型</view>
-        <view class="quiz-option-row">
-          <view
-            class="quiz-option {{ selectedQuizType === 'freedom' ? 'active' : '' }}"
-            bindtap="onSelectQuizType"
-            data-type="freedom"
-          >
-            <view class="quiz-option-title">自由测验</view>
-            <view class="quiz-option-desc">每次进入都重新开始，适合随手练习。</view>
-          </view>
-          <view
-            class="quiz-option {{ selectedQuizType === 'today' ? 'active' : '' }}"
-            wx:if="{{!categoryId}}"
-            bindtap="onSelectQuizType"
-            data-type="today"
-          >
-            <view class="quiz-option-title">每日测验</view>
-            <view class="quiz-option-desc">后续支持按天固定题集和中断恢复。</view>
-          </view>
-        </view>
-      </view>
-
-      <view class="quiz-setup-section" wx:if="{{selectedQuizType !== 'today'}}">
-        <view class="quiz-setup-label">练习模式</view>
-        <view class="quiz-chip-row">
-          <view
-            class="quiz-chip {{ selectedPracticeMode === 'review' ? 'active' : '' }}"
-            bindtap="onSelectPracticeMode"
-            data-mode="review"
-          >
-            复习模式
-          </view>
-          <view
-            class="quiz-chip {{ selectedPracticeMode === 'unknown' ? 'active' : '' }}"
-            bindtap="onSelectPracticeMode"
-            data-mode="unknown"
-          >
-            只测不会
-          </view>
-          <view
-            class="quiz-chip {{ selectedPracticeMode === 'all' ? 'active' : '' }}"
-            bindtap="onSelectPracticeMode"
-            data-mode="all"
-          >
-            全部随机
-          </view>
-        </view>
-      </view>
-
-      <view class="quiz-setup-section" wx:if="{{selectedQuizType !== 'today'}}">
-        <view class="quiz-setup-label">练习数量</view>
-        <view class="quiz-chip-row quiz-limit-row">
-          <view
-            class="quiz-chip quiz-limit-chip {{ selectedLimit === 10 ? 'active' : '' }}"
-            bindtap="onSelectLimit"
-            data-limit="{{10}}"
-            >10</view
-          >
-          <view
-            class="quiz-chip quiz-limit-chip {{ selectedLimit === 20 ? 'active' : '' }}"
-            bindtap="onSelectLimit"
-            data-limit="{{20}}"
-            >20</view
-          >
-          <view
-            class="quiz-chip quiz-limit-chip {{ selectedLimit === 30 ? 'active' : '' }}"
-            bindtap="onSelectLimit"
-            data-limit="{{30}}"
-            >30</view
-          >
-          <view class="quiz-limit-custom">
-            <input
-              class="quiz-limit-input"
-              type="number"
-              min="1"
-              placeholder="自定义数量"
-              value="{{customLimit}}"
-              bindinput="onCustomLimitInput"
-            />
-          </view>
-        </view>
-      </view>
-
-      <view class="quiz-setup-note">
-        <view class="quiz-setup-note-label">当前预览</view>
-        <view class="quiz-setup-note-text"
-          >当前选择：{{ selectedQuizType === 'today' ? '每日测验' : '自由测验' }}。
-          {{ selectedQuizType !== 'today' ? practiceModeText + '，' : '' }}
-          数量：{{ selectedQuizType !== 'today' ? selectedLimit : '固定' + dailyQuizLimit }}</view
+    <view class="quiz-setup-section">
+      <view class="quiz-setup-label">测验类型</view>
+      <view class="quiz-option-row">
+        <view
+          class="quiz-option {{ selectedQuizType === 'freedom' ? 'active' : '' }}"
+          bindtap="onSelectQuizType"
+          data-type="freedom"
         >
-      </view>
-
-      <view class="quiz-setup-actions">
-        <view class="quiz-setup-btn quiz-setup-btn-secondary" bindtap="closeQuiz">稍后再说</view>
-        <view class="quiz-setup-btn quiz-setup-btn-primary" bindtap="startQuiz"
-          >按当前条件开始</view
+          <view class="quiz-option-title">自由测验</view>
+          <view class="quiz-option-desc">每次进入都重新开始，适合随手练习。</view>
+        </view>
+        <view
+          class="quiz-option {{ selectedQuizType === 'today' ? 'active' : '' }}"
+          wx:if="{{!categoryId}}"
+          bindtap="onSelectQuizType"
+          data-type="today"
         >
+          <view class="quiz-option-title">每日测验</view>
+          <view class="quiz-option-desc">后续支持按天固定题集和中断恢复。</view>
+        </view>
       </view>
     </view>
+
+    <view class="quiz-setup-section" wx:if="{{selectedQuizType !== 'today'}}">
+      <view class="quiz-setup-label">练习模式</view>
+      <view class="quiz-chip-row">
+        <view
+          class="quiz-chip {{ selectedPracticeMode === 'review' ? 'active' : '' }}"
+          bindtap="onSelectPracticeMode"
+          data-mode="review"
+        >
+          复习模式
+        </view>
+        <view
+          class="quiz-chip {{ selectedPracticeMode === 'unknown' ? 'active' : '' }}"
+          bindtap="onSelectPracticeMode"
+          data-mode="unknown"
+        >
+          只测不会
+        </view>
+        <view
+          class="quiz-chip {{ selectedPracticeMode === 'all' ? 'active' : '' }}"
+          bindtap="onSelectPracticeMode"
+          data-mode="all"
+        >
+          全部随机
+        </view>
+      </view>
+    </view>
+
+    <view class="quiz-setup-section" wx:if="{{selectedQuizType !== 'today'}}">
+      <view class="quiz-setup-label">练习数量</view>
+      <view class="quiz-chip-row quiz-limit-row">
+        <view
+          class="quiz-chip quiz-limit-chip {{ selectedLimit === 10 ? 'active' : '' }}"
+          bindtap="onSelectLimit"
+          data-limit="{{10}}"
+          >10</view
+        >
+        <view
+          class="quiz-chip quiz-limit-chip {{ selectedLimit === 20 ? 'active' : '' }}"
+          bindtap="onSelectLimit"
+          data-limit="{{20}}"
+          >20</view
+        >
+        <view
+          class="quiz-chip quiz-limit-chip {{ selectedLimit === 30 ? 'active' : '' }}"
+          bindtap="onSelectLimit"
+          data-limit="{{30}}"
+          >30</view
+        >
+        <view class="quiz-limit-custom">
+          <input
+            class="quiz-limit-input"
+            type="number"
+            min="1"
+            placeholder="自定义数量"
+            value="{{customLimit}}"
+            bindinput="onCustomLimitInput"
+          />
+        </view>
+      </view>
+    </view>
+
+    <view class="quiz-setup-note">
+      <view class="quiz-setup-note-label">当前预览</view>
+      <view class="quiz-setup-note-text"
+        >当前选择：{{ selectedQuizType === 'today' ? '每日测验' : '自由测验' }}。
+        {{ selectedQuizType !== 'today' ? practiceModeText + '，' : '' }}
+        数量：{{ selectedQuizType !== 'today' ? selectedLimit : '固定' + dailyQuizLimit }}</view
+      >
+    </view>
+
+    <view class="quiz-setup-actions">
+      <view class="quiz-setup-btn quiz-setup-btn-secondary" bindtap="closeQuiz">稍后再说</view>
+      <view class="quiz-setup-btn quiz-setup-btn-primary" bindtap="startQuiz"
+        >按当前条件开始</view
+      >
+    </view>
   </view>
-</scroll-view>
+</view>

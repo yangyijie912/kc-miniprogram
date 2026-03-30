@@ -1,0 +1,63 @@
+<view class="content-toolbar">
+    <view class="content-toolbar-head">
+        <view class="content-toolbar-title">Markdown 工具</view>
+        <view class="content-toolbar-hint">常用格式快捷插入</view>
+    </view>
+    <view class="content-actions">
+        <view class="content-action action-image" bindtap="insertImageTemplate">
+        <view class="content-action-icon">IMG</view>
+        <view class="content-action-text">图片</view>
+        </view>
+        <view class="content-action action-code" bindtap="insertCodeBlock">
+        <view class="content-action-icon">&lt;/&gt;</view>
+        <view class="content-action-text">代码块</view>
+        </view>
+        <view class="content-action action-list" bindtap="insertList">
+        <view class="content-action-icon">•</view>
+        <view class="content-action-text">列表</view>
+        </view>
+        <view class="content-action action-table" bindtap="insertTable">
+        <view class="content-action-icon">TBL</view>
+        <view class="content-action-text">表格</view>
+        </view>
+        <view wx:if="!isMore" class="content-toggle" bindtap="showMore">
+        <view class="content-toggle-icon">+</view>
+        </view>
+
+        <view wx:if="isMore" class="content-action action-heading" bindtap="insertHeading">
+        <view class="content-action-icon">H</view>
+        <view class="content-action-text">标题</view>
+        </view>
+        <view wx:if="isMore" class="content-action action-strong" bindtap="insertBold">
+        <view class="content-action-icon">B</view>
+        <view class="content-action-text">加粗</view>
+        </view>
+        <view wx:if="isMore" class="content-action action-quote" bindtap="insertQuote">
+        <view class="content-action-icon">“</view>
+        <view class="content-action-text">引用</view>
+        </view>
+        <view wx:if="isMore" class="content-action action-link" bindtap="insertLink">
+        <view class="content-action-icon">@</view>
+        <view class="content-action-text">链接</view>
+        </view>
+        <view wx:if="isMore" class="content-action action-divider" bindtap="insertDivider">
+        <view class="content-action-icon">---</view>
+        <view class="content-action-text">分割线</view>
+        </view>
+
+        <view wx:if="isMore" class="content-toggle content-toggle-close" bindtap="showLess">
+        <view class="content-toggle-icon">−</view>
+        </view>
+    </view>
+    <textarea
+        value="{{localContent}}"
+        bindinput="onInput"
+        bindfocus="onFocus"
+        bindblur="onBlur"
+        class="form-textarea form-textarea-content"
+        placeholder="补充更完整的解释、例子或笔记内容。"
+        placeholder-class="input-placeholder"
+        maxlength="-1"
+        auto-height
+    />
+</view>
