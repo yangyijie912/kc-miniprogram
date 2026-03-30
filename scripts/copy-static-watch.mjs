@@ -19,7 +19,36 @@ const watchedEntries = [
   'constants',
   'data',
   'pages',
+  'package.json',
 ];
+
+function getRuntimeDependencies() {
+  const packageJsonPath = path.join(rootDir, 'package.json');
+  if (!existsSync(packageJsonPath)) {
+    return [];
+  }
+
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+  return Object.keys(packageJson.dependencies || {});
+}
+
+async function syncVendorModulesToDist() {
+  const dependencies = getRuntimeDependencies();
+  for (const dependencyName of dependencies) {
+    const dependencySource = path.join(rootDir, 'node_modules', dependencyName);
+    const dependencyTarget = path.join(distDir, 'miniprogram_npm', dependencyName);
+
+    if (!existsSync(dependencySource)) {
+      continue;
+    }
+
+    await mkdir(path.dirname(dependencyTarget), { recursive: true });
+    await cp(dependencySource, dependencyTarget, {
+      recursive: true,
+      force: true,
+    });
+  }
+}
 
 function toPosixPath(value) {
   return value.replace(/\\/g, '/');
@@ -86,6 +115,7 @@ async function removeOne(sourcePath) {
 }
 
 await mkdir(distDir, { recursive: true });
+await syncVendorModulesToDist();
 
 async function safeRun(action, payloadPath) {
   try {
@@ -114,6 +144,9 @@ const watcher = chokidar.watch(initialTargets, {
 watcher
   .on('add', async (filePath) => {
     await safeRun(async () => {
+      if (path.basename(filePath) === 'package.json') {
+        await syncVendorModulesToDist();
+      }
       const generatedJsPath = trySyncDataJsonToJs(filePath);
       await copyOne(filePath);
       if (generatedJsPath) {
@@ -123,6 +156,9 @@ watcher
   })
   .on('change', async (filePath) => {
     await safeRun(async () => {
+      if (path.basename(filePath) === 'package.json') {
+        await syncVendorModulesToDist();
+      }
       const generatedJsPath = trySyncDataJsonToJs(filePath);
       await copyOne(filePath);
       if (generatedJsPath) {

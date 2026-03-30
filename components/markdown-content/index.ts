@@ -2,9 +2,12 @@ import MarkdownIt from 'markdown-it';
 
 Component({
   properties: {
-    constent: {
+    content: {
       type: String,
       value: '',
+      observer() {
+        this.renderMarkdown();
+      },
     },
   },
 
@@ -20,10 +23,13 @@ Component({
         linkify: true, // 自动识别链接
         typographer: true, // 启用一些语言替换 + 引号美化
       });
-      if (!this.data.constent) {
-        return '';
+      if (!this.data.content) {
+        this.setData({
+          renderMarkdownToRichText: '',
+        });
+        return;
       }
-      const html = md.render(this.data.constent);
+      const html = md.render(this.data.content);
       this.setData({
         renderMarkdownToRichText: html,
       });

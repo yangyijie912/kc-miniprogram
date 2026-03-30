@@ -1,6 +1,35 @@
-<!--index.wxml-->
 <scroll-view class="scrollarea" scroll-y type="list">
-  <view class="container">
-    Weixinaa
+  <view class="page">
+    <view class="detail-card">
+      <view class="detail-head">
+        <view class="detail-category">{{ categoryName }}</view>
+        <view class="icon-btn edit-btn"bindtap="goToEdit">
+          <text class="icon-mark">✎</text>
+        </view>
+      </view>
+      <view class="detail-title">{{ cardData.question }}</view>
+      <view class="detail-summary">
+        <view class="detail-top">
+          <view class="detail-status status-{{cardData.status}}">
+            {{ cardData.statusText }}
+          </view>
+          <view class="detail-tag">
+            {{ cardData.tagsText }}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="panel">
+      <view class="panel-title">答案</view>
+      <view class="panel-text">
+        {{ cardData.answer }}
+      </view>
+    </view>
+
+    <view class="panel">
+      <view class="panel-title">笔记</view>
+      <markdown-content content="{{ cardData.content || '' }}" />
+    </view>
   </view>
 </scroll-view>

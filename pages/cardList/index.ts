@@ -63,20 +63,12 @@ Page({
 
   // 查询卡片列表，更新页面数据
   searchCard() {
-    if (!this.data.inputKeyword?.trim()) {
-      wx.showToast({
-        title: '请输入搜索关键词',
-        icon: 'none',
-      });
-      return;
-    }
-
-    this.setData({
-      queryParams: {
-        ...this.data.queryParams,
-        keyword: this.data.inputKeyword.trim(),
-      },
-    });
+    const keyword = this.data.inputKeyword?.trim();
+    const query = {
+      ...this.data.queryParams,
+      keyword: keyword ? keyword : undefined,
+    };
+    this.setData({ queryParams: query });
     this.loadData();
   },
 

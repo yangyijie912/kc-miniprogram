@@ -21,6 +21,34 @@ const entriesToCopy = [
   'pages',
 ];
 
+function getRuntimeDependencies() {
+  const packageJsonPath = path.join(rootDir, 'package.json');
+  if (!existsSync(packageJsonPath)) {
+    return [];
+  }
+
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+  return Object.keys(packageJson.dependencies || {});
+}
+
+async function syncVendorModulesToDist() {
+  const dependencies = getRuntimeDependencies();
+  for (const dependencyName of dependencies) {
+    const dependencySource = path.join(rootDir, 'node_modules', dependencyName);
+    const dependencyTarget = path.join(distDir, 'miniprogram_npm', dependencyName);
+
+    if (!existsSync(dependencySource)) {
+      continue;
+    }
+
+    await mkdir(path.dirname(dependencyTarget), { recursive: true });
+    await cp(dependencySource, dependencyTarget, {
+      recursive: true,
+      force: true,
+    });
+  }
+}
+
 function syncDataJsonToJsModules() {
   const dataDir = path.join(rootDir, 'data');
   const jsonFiles = ['cards.json', 'category.json'];
@@ -84,3 +112,5 @@ for (const entry of entriesToCopy) {
     filter,
   });
 }
+
+await syncVendorModulesToDist();
