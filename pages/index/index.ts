@@ -37,7 +37,7 @@ Page({
   // 打开所有卡片的列表页
   goToCardListByAll() {
     wx.navigateTo({
-      url: '/package-card/pages/cardList/index',
+      url: '/package-card/cardList/index',
     });
   },
 
@@ -58,8 +58,7 @@ Page({
       return;
     }
     wx.navigateTo({
-      url:
-        '/package-card/pages/cardList/index?keyword=' + encodeURIComponent(this.data.searchQuery),
+      url: '/package-card/cardList/index?keyword=' + encodeURIComponent(this.data.searchQuery),
     });
   },
 
@@ -67,7 +66,7 @@ Page({
   goToCardListByCategory(event: WechatMiniprogram.BaseEvent) {
     const categoryId = event.currentTarget.dataset.categoryId;
     wx.navigateTo({
-      url: `/package-card/pages/cardList/index?categoryId=${categoryId}`,
+      url: `/package-card/cardList/index?categoryId=${categoryId}`,
     });
   },
 

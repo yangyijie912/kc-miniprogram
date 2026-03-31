@@ -47,7 +47,7 @@ Page({
       return;
     }
     wx.navigateTo({
-      url: `/package-card/pages/cardEdit/index?id=${this.data.cardId}`,
+      url: `/package-card/cardEdit/index?id=${this.data.cardId}`,
     });
   },
 
