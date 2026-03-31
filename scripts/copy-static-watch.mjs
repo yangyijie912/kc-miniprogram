@@ -23,8 +23,8 @@ const watchedEntries = [
   'package.json',
 ];
 
-function getRuntimeDependencies() {
-  const packageJsonPath = path.join(rootDir, 'package.json');
+function getRuntimeDependencies(packageJsonDir = rootDir) {
+  const packageJsonPath = path.join(packageJsonDir, 'package.json');
   if (!existsSync(packageJsonPath)) {
     return [];
   }
@@ -34,10 +34,35 @@ function getRuntimeDependencies() {
 }
 
 async function syncVendorModulesToDist() {
-  const dependencies = getRuntimeDependencies();
-  for (const dependencyName of dependencies) {
+  // Get subpackage dependencies
+  const subpackageDependencies = new Set(
+    getRuntimeDependencies(path.join(rootDir, 'package-card')),
+  );
+
+  // Get main package dependencies (excluding those only in subpackage)
+  const mainDependencies = getRuntimeDependencies();
+  const mainOnlyDependencies = mainDependencies.filter((dep) => !subpackageDependencies.has(dep));
+
+  // Copy main package dependencies to dist/miniprogram_npm
+  for (const dependencyName of mainOnlyDependencies) {
     const dependencySource = path.join(rootDir, 'node_modules', dependencyName);
     const dependencyTarget = path.join(distDir, 'miniprogram_npm', dependencyName);
+
+    if (!existsSync(dependencySource)) {
+      continue;
+    }
+
+    await mkdir(path.dirname(dependencyTarget), { recursive: true });
+    await cp(dependencySource, dependencyTarget, {
+      recursive: true,
+      force: true,
+    });
+  }
+
+  // Copy subpackage-only dependencies to dist/package-card/miniprogram_npm
+  for (const dependencyName of subpackageDependencies) {
+    const dependencySource = path.join(rootDir, 'node_modules', dependencyName);
+    const dependencyTarget = path.join(distDir, 'package-card', 'miniprogram_npm', dependencyName);
 
     if (!existsSync(dependencySource)) {
       continue;
