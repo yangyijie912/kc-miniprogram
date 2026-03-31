@@ -6,7 +6,12 @@
     "minified": true,
     "uglifyFileName": false,
     "enhance": true,
-    "packNpmRelationList": [],
+    "packNpmRelationList": [
+      {
+        "packageJsonPath": "package-card/package.json",
+        "miniprogramNpmDistDir": "package-card/miniprogram_npm"
+      }
+    ],
     "babelSetting": {
       "ignore": [],
       "disablePlugins": [],

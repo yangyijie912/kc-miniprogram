@@ -19,6 +19,7 @@ const watchedEntries = [
   'constants',
   'data',
   'package-card',
+  'package-card/package.json',
   'pages',
   'package.json',
 ];
@@ -34,17 +35,47 @@ function getRuntimeDependencies(packageJsonDir = rootDir) {
 }
 
 async function syncVendorModulesToDist() {
-  // Get subpackage dependencies
+  // Get subpackage dependencies and their runtime dependency tree
   const subpackageDependencies = new Set(
     getRuntimeDependencies(path.join(rootDir, 'package-card')),
   );
+  const copiedSubpackageDependencies = new Set();
 
-  // Get main package dependencies (excluding those only in subpackage)
-  const mainDependencies = getRuntimeDependencies();
-  const mainOnlyDependencies = mainDependencies.filter((dep) => !subpackageDependencies.has(dep));
+  const copyDependencyTree = async (dependencyName) => {
+    if (copiedSubpackageDependencies.has(dependencyName)) {
+      return;
+    }
+
+    copiedSubpackageDependencies.add(dependencyName);
+    const dependencySource = path.join(rootDir, 'node_modules', dependencyName);
+    const dependencyTarget = path.join(distDir, 'package-card', 'miniprogram_npm', dependencyName);
+
+    if (!existsSync(dependencySource)) {
+      return;
+    }
+
+    await mkdir(path.dirname(dependencyTarget), { recursive: true });
+    await cp(dependencySource, dependencyTarget, {
+      recursive: true,
+      force: true,
+    });
+
+    const dependencyPackageJson = path.join(dependencySource, 'package.json');
+    if (!existsSync(dependencyPackageJson)) {
+      return;
+    }
+
+    const dependencyManifest = JSON.parse(readFileSync(dependencyPackageJson, 'utf8'));
+    const nestedDependencies = Object.keys(dependencyManifest.dependencies || {});
+    for (const nestedDependency of nestedDependencies) {
+      await copyDependencyTree(nestedDependency);
+    }
+  };
 
   // Copy main package dependencies to dist/miniprogram_npm
-  for (const dependencyName of mainOnlyDependencies) {
+  for (const dependencyName of getRuntimeDependencies().filter(
+    (dep) => !subpackageDependencies.has(dep),
+  )) {
     const dependencySource = path.join(rootDir, 'node_modules', dependencyName);
     const dependencyTarget = path.join(distDir, 'miniprogram_npm', dependencyName);
 
@@ -59,20 +90,12 @@ async function syncVendorModulesToDist() {
     });
   }
 
-  // Copy subpackage-only dependencies to dist/package-card/miniprogram_npm
-  for (const dependencyName of subpackageDependencies) {
-    const dependencySource = path.join(rootDir, 'node_modules', dependencyName);
-    const dependencyTarget = path.join(distDir, 'package-card', 'miniprogram_npm', dependencyName);
-
-    if (!existsSync(dependencySource)) {
-      continue;
-    }
-
-    await mkdir(path.dirname(dependencyTarget), { recursive: true });
-    await cp(dependencySource, dependencyTarget, {
-      recursive: true,
-      force: true,
-    });
+  // For subpackage, only copy markdown-it (no transitive deps)
+  const mdSrc = path.join(rootDir, 'node_modules', 'markdown-it');
+  const mdDst = path.join(distDir, 'package-card', 'miniprogram_npm', 'markdown-it');
+  if (existsSync(mdSrc)) {
+    await mkdir(path.dirname(mdDst), { recursive: true });
+    await cp(mdSrc, mdDst, { recursive: true, force: true });
   }
 }
 
@@ -105,6 +128,9 @@ function shouldCopy(sourcePath) {
     fileName === 'package.json' ||
     fileName === 'package-lock.json'
   ) {
+    if (relativePath === 'package-card/package.json') {
+      return true;
+    }
     return false;
   }
 
