@@ -5,6 +5,10 @@
     "moduleResolution": "Node",
     "rootDir": ".",
     "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "types": ["miniprogram-api-typings"],
     "strict": false,
     "allowJs": true,
@@ -14,11 +18,12 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": "."
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "app.js",
+    "package-card/**/*.ts",
+    "package-card/**/*.js",
     "pages/**/*.ts",
     "pages/**/*.js",
     "components/**/*.ts",

@@ -18,6 +18,7 @@ const watchedEntries = [
   'config',
   'constants',
   'data',
+  'package-card',
   'pages',
   'package.json',
 ];

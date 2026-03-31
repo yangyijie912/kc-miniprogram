@@ -154,7 +154,7 @@ Page({
   goToDetail(event: WechatMiniprogram.BaseEvent) {
     const id = event.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/cardDetail/index?id=${id}`,
+      url: `/package-card/pages/cardDetail/index?id=${id}`,
     });
   },
 
@@ -164,7 +164,7 @@ Page({
       ? `?categoryId=${this.data.queryParams.categoryId}`
       : '';
     wx.navigateTo({
-      url: `/pages/cardEdit/index${query}`,
+      url: `/package-card/pages/cardEdit/index${query}`,
     });
   },
 });

@@ -18,6 +18,7 @@ const entriesToCopy = [
   'config',
   'constants',
   'data',
+  'package-card',
   'pages',
 ];
 

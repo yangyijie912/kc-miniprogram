@@ -3,16 +3,19 @@
     "pages/index/index",
     "pages/categoryManage/index",
     "pages/categoryEdit/index",
-    "pages/cardList/index",
-    "pages/cardDetail/index",
-    "pages/cardEdit/index",
     "pages/quiz/index",
     "pages/quizResult/index",
     "pages/mine/index"
   ],
+  "subpackages": [
+    {
+      "root": "package-card",
+      "pages": ["cardList/index", "cardDetail/index", "cardEdit/index"]
+    }
+  ],
   "window": {
     "navigationBarBackgroundColor": "#f8f2e8",
-    "navigationBarTextStyle":"black"
+    "navigationBarTextStyle": "black"
   },
   "tabBar": {
     "color": "#8C8479",
