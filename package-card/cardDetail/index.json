@@ -1,6 +1,6 @@
 {
   "navigationBarTitleText": "详情",
   "usingComponents": {
-    "markdown-content": "/components/markdown-content/index"
+    "markdown-content": "/package-card/components/markdown-content/index"
   }
 }
