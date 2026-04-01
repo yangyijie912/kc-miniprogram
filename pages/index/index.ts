@@ -30,7 +30,7 @@ Page({
     this.closeQuizSetup();
     const { mode, type, limit } = event.detail as quizQuery;
     wx.navigateTo({
-      url: `/pages/quiz/index?mode=${mode}&type=${type}&limit=${limit}`,
+      url: `/package-card/quiz/index?mode=${mode}&type=${type}&limit=${limit}`,
     });
   },
 

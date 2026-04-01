@@ -51,12 +51,13 @@ function filterQuizCards(
   },
 ): Card[] {
   let list = [...cardList];
-
   if (!ignoreMode && quizOptions.categoryId) {
     list = list.filter((card) => card.categoryId === quizOptions.categoryId);
   }
   if (quizOptions.mode === 'review') {
-    return list.filter((card) => card.status === 'unknown' || card.status === 'fuzzy');
+    return list.filter(
+      (card) => card.status === 'unknown' || card.status === 'fuzzy' || !card.status,
+    );
   }
   if (quizOptions.mode === 'unknown') {
     return list.filter((card) => card.status === 'unknown');

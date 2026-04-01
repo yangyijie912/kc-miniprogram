@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "测验",
+  "usingComponents": {
+    "markdown-content": "/package-card/components/markdown-content/index"
+  }
+}

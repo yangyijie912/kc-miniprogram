@@ -1,0 +1,60 @@
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="page">
+    <view wx:if="{{cardQueue.length > 0}}" class="quiz-container">
+      <view class="progress-card">
+        <view class="progress-top">
+          <view class="progress-label">开始测验</view>
+          <view class="progress-count">{{ cardIndex + 1 }} / {{ cardQueue.length }}</view>
+        </view>
+        <view class="progress-track">
+          <view
+            class="progress-bar"
+            style="width: {{ ((cardIndex + 1) / cardQueue.length) * 100 }}%;"
+          ></view>
+        </view>
+      </view>
+
+      <view class="question-card">
+        <view class="question-top">
+          <view class="question-category">
+            {{ currentCard.categoryName }}
+          </view>
+          <view class="question-tag">
+            {{ currentCard.tagText }}
+          </view>
+        </view>
+        <view class="question-title">{{ currentCard.question }}</view>
+        <!-- <view class="question-desc">{{ currentCard.description }}</view> -->
+        <view bindtap="toggleAnswer">
+          <view class="reveal-btn" wx:if="{{ !showAnswer }}"> 展开查看答案 </view>
+        </view>
+      </view>
+
+      <view wx:if="{{ showAnswer }}" class="answer-panel">
+        <view class="answer-label">参考答案</view>
+        <view class="answer-text">{{ currentCard.answer }}</view>
+        <!-- <view class="answer-tip">记忆点：先想 useEffect 的返回值，再判断 async 会不会破坏这个约定。</view> -->
+
+        <view class="content-block">
+          <view class="content-label">补充笔记</view>
+          <markdown-content content="{{ currentCard.content || '' }}" />
+        </view>
+      </view>
+
+      <view class="bottom-row">
+        <view class="status-btn status-unknown" bindtap="onQuiz" data-status="unknown">不会</view>
+        <view class="status-btn status-fuzzy" bindtap="onQuiz" data-status="fuzzy">模糊</view>
+        <view class="status-btn status-mastered" bindtap="onQuiz" data-status="mastered">掌握</view>
+      </view>
+    </view>
+
+    <view wx:else class="no-card-container">
+      <view class="empty-card">
+        <view class="empty-badge">Quiz</view>
+        <view class="empty-title">没有待测验的卡片了</view>
+        <view class="empty-text">当前条件下还没有可用题目。</view>
+        <view class="empty-text">去看看其他分类，或者新增一些卡片再回来测验。</view>
+      </view>
+    </view>
+  </view>
+</scroll-view>

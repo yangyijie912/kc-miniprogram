@@ -3,14 +3,18 @@
     "pages/index/index",
     "pages/categoryManage/index",
     "pages/categoryEdit/index",
-    "pages/quiz/index",
-    "pages/quizResult/index",
     "pages/mine/index"
   ],
   "subpackages": [
     {
       "root": "package-card",
-      "pages": ["cardList/index", "cardDetail/index", "cardEdit/index"]
+      "pages": [
+        "cardList/index",
+        "cardDetail/index",
+        "cardEdit/index",
+        "quiz/index",
+        "quizResult/index"
+      ]
     }
   ],
   "window": {

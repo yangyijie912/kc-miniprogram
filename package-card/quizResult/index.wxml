@@ -1,0 +1,65 @@
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="page">
+    <view class="hero-card">
+      <view class="hero-badge">Quiz</view>
+      <view class="title">测验结果</view>
+      <view class="subtitle">
+        {{ quizResult.total }} 道题，{{ quizResult.unknown }} 道不会，{{ quizResult.fuzzy }} 道模糊，{{
+          quizResult.mastered
+        }}
+        道掌握。
+      </view>
+    </view>
+
+    <view class="summary-grid">
+      <view class="summary-card summary-card-total">
+        <view class="summary-label">总题数</view>
+        <view class="summary-value">{{ quizResult.total }}</view>
+      </view>
+      <view class="summary-card summary-card-mastered">
+        <view class="summary-label">掌握</view>
+        <view class="summary-value">{{ quizResult.mastered }}</view>
+      </view>
+    </view>
+
+    <view class="status-panel">
+      <view class="panel-head">
+        <view class="panel-title">本轮分布</view>
+        <view class="panel-hint">按当前测验结果统计</view>
+      </view>
+
+      <view class="status-list">
+        <view class="status-item status-item-unknown">
+          <view class="status-item-left">
+            <view class="status-dot"></view>
+            <view class="status-name">不会</view>
+          </view>
+          <view class="status-count">{{ quizResult.unknown }}</view>
+        </view>
+
+        <view class="status-item status-item-fuzzy">
+          <view class="status-item-left">
+            <view class="status-dot"></view>
+            <view class="status-name">模糊</view>
+          </view>
+          <view class="status-count">{{ quizResult.fuzzy }}</view>
+        </view>
+
+        <view class="status-item status-item-mastered">
+          <view class="status-item-left">
+            <view class="status-dot"></view>
+            <view class="status-name">掌握</view>
+          </view>
+          <view class="status-count">{{ quizResult.mastered }}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="action-row">
+      <view class="action-btn action-btn-secondary" bindtap="toHome">返回</view>
+      <view wx:if="{{quizOptions.type === 'freedom'}}" class="action-btn action-btn-primary" bindtap="restartQuiz">
+        再来一轮
+      </view>
+    </view>
+  </view>
+</scroll-view>
