@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "编辑"
+  "navigationBarTitleText": "编辑",
+  "usingComponents": {
+    "markdown-toolbar": "/package-card/components/markdown-toolbar/index"
+  }
 }

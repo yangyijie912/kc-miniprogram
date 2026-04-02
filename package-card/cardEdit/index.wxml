@@ -12,54 +12,63 @@
         <view class="form-tip">修改基础信息，答案尽量概括，正文内容可补充更完整的解释、例子或笔记内容。</view>
       </view>
 
-      <!-- <view class="form-group">
+      <view class="form-group">
         <view class="form-label">分类</view>
-        <picker :range="categoryOptions" range-key="name" :value="pickerIndex" @change="onCategoryChange">
-          <view class="picker-input" :class="{ 'picker-placeholder': !selectedCategoryName }">
-            {{ selectedCategoryName || '请选择分类' }}
+        <picker
+          mode="selector"
+          range="{{categoryOptions}}"
+          range-key="name"
+          value="{{formData.categoryIndex}}"
+          bindchange="onCategoryChange"
+        >
+          <view class="picker-input {{!formData.categoryName ? 'picker-placeholder' : ''}}">
+            {{ formData.categoryName || '请选择分类' }}
           </view>
         </picker>
-      </view> -->
+      </view>
 
-      <!-- <view class="form-group">
+      <view class="form-group">
         <view class="form-label">问题</view>
         <textarea
-          v-model="form.question"
+          value="{{formData.question}}"
+          bindinput="onQuestionInput"
           class="form-textarea form-textarea-title"
           placeholder="例如：Vue 的 computed 和 watch 有什么区别？"
           placeholder-class="input-placeholder"
           maxlength="-1"
           auto-height
         />
-      </view> -->
+      </view>
 
-      <!-- <view class="form-group">
+      <view class="form-group">
         <view class="form-label">答案</view>
         <textarea
-          v-model="form.answer"
+          value="{{formData.answer}}"
+          bindinput="onAnswerInput"
           class="form-textarea"
           placeholder="先写一个简短、能直接展示的答案。"
           placeholder-class="input-placeholder"
-          maxlength="-1"
+          maxlength="10000"
           auto-height
         />
-      </view> -->
+      </view>
 
-      <!-- <view class="form-group">
+      <view class="form-group">
         <view class="form-label">正文内容</view>
-        <MarkdownToolbar v-model="form.content" />
-      </view> -->
+        <markdown-toolbar modelValue="{{formData.content}}" bind:update="onContentInput" />
+      </view>
 
-      <!-- <view class="form-group">
+      <view class="form-group">
         <view class="form-label">标签</view>
         <input
-          v-model="form.tagsText"
+          value="{{formData.tagsText}}"
+          bindinput="onTagsInput"
           class="form-input"
           placeholder="例如：响应式、生命周期、组件通信"
           placeholder-class="input-placeholder"
         />
         <view class="field-tip">用顿号或逗号分隔。</view>
-      </view> -->
+      </view>
 
       <view wx:if="{{cardId}}" class="danger-card">
         <view>
