@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, readdirSync, mkdirSync } from 'node:fs';
 import { cp, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,14 +24,89 @@ export function getRuntimeDependencies(packageJsonDir = rootDir) {
   return Object.keys(packageJson.dependencies || {});
 }
 
+// 获取 data 目录下的 JSON 文件列表
+function getDataJsonFiles(dataDir = path.join(rootDir, 'data')) {
+  if (!existsSync(dataDir)) {
+    return [];
+  }
+
+  return readdirSync(dataDir).filter((fileName) => fileName.endsWith('.json'));
+}
+
+// 将 JSON 数据写入 JS 模块，导出一个对象
+function writeDataModule(targetPath, data) {
+  mkdirSync(path.dirname(targetPath), { recursive: true });
+  writeFileSync(targetPath, `module.exports = ${JSON.stringify(data, null, 2)};\n`, 'utf8');
+}
+
+// 同步 data 目录下的 JSON 文件到 dist 目录，并生成对应的 JS 模块
+export async function syncDataJsonArtifacts() {
+  const dataDir = path.join(rootDir, 'data');
+  const distDataDir = path.join(distDir, 'data');
+
+  await mkdir(distDataDir, { recursive: true });
+
+  for (const fileName of getDataJsonFiles(dataDir)) {
+    const jsonPath = path.join(dataDir, fileName);
+    if (!existsSync(jsonPath)) {
+      continue;
+    }
+
+    const data = JSON.parse(readFileSync(jsonPath, 'utf8'));
+    const jsFileName = fileName.replace(/\.json$/, '.js');
+    const sourceJsPath = path.join(dataDir, jsFileName);
+    const distJsonPath = path.join(distDataDir, fileName);
+    const distJsPath = path.join(distDataDir, jsFileName);
+
+    writeDataModule(sourceJsPath, data);
+    await cp(jsonPath, distJsonPath, { force: true });
+    writeDataModule(distJsPath, data);
+  }
+}
+
+// 移除 dist 目录中对应的 data JSON 文件和 JS 模块
+export async function removeDataJsonArtifacts(sourceJsonPath) {
+  const relativePath = path.relative(rootDir, sourceJsonPath).replace(/\\/g, '/');
+  if (!relativePath.startsWith('data/') || !relativePath.endsWith('.json')) {
+    return;
+  }
+
+  const jsRelativePath = relativePath.replace(/\.json$/, '.js');
+  await rm(path.join(rootDir, jsRelativePath), {
+    force: true,
+    maxRetries: 5,
+    retryDelay: 100,
+  });
+  await rm(path.join(distDir, relativePath), {
+    force: true,
+    maxRetries: 5,
+    retryDelay: 100,
+  });
+  await rm(path.join(distDir, jsRelativePath), {
+    force: true,
+    maxRetries: 5,
+    retryDelay: 100,
+  });
+}
+
 // 同步依赖到 dist 目录
 export async function syncVendorModulesToDist() {
   const mainVendorDir = path.join(distDir, 'miniprogram_npm');
   const subVendorDir = path.join(distDir, 'package-card', 'miniprogram_npm');
 
   // 先清空，避免旧依赖残留
-  await rm(mainVendorDir, { recursive: true, force: true });
-  await rm(subVendorDir, { recursive: true, force: true });
+  await rm(mainVendorDir, {
+    recursive: true,
+    force: true,
+    maxRetries: 5,
+    retryDelay: 100,
+  });
+  await rm(subVendorDir, {
+    recursive: true,
+    force: true,
+    maxRetries: 5,
+    retryDelay: 100,
+  });
 
   await mkdir(mainVendorDir, { recursive: true });
   await mkdir(subVendorDir, { recursive: true });
@@ -129,6 +204,10 @@ export function shouldCopy(source) {
 
   // data 目录下的 JSON 文件不直接复制，而是通过 syncDataJsonToJsModules 转换为 JS 模块
   if (relativePath.startsWith('data/') && fileName.endsWith('.json')) {
+    return false;
+  }
+
+  if (relativePath.startsWith('data/') && fileName.endsWith('.js')) {
     return false;
   }
 

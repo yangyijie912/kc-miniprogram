@@ -1,11 +1,12 @@
 import { cp, mkdir, rm } from 'node:fs/promises';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import chokidar from 'chokidar';
 import {
   syncVendorModulesToDist,
+  syncDataJsonArtifacts,
+  removeDataJsonArtifacts,
   shouldCopy,
-  toPosixPath,
   rootDir,
   distDir,
 } from './copy-static.shared.mjs';
@@ -24,30 +25,6 @@ const watchedEntries = [
   'package.json',
 ];
 
-// 将 data 目录下的 JSON 文件转换为 JS 模块，方便在小程序中直接 require 使用
-function trySyncDataJsonToJs(sourcePath) {
-  const jsPath = getDistPathFromJson(sourcePath);
-  if (!jsPath) {
-    return null;
-  }
-
-  const data = JSON.parse(readFileSync(sourcePath, 'utf8'));
-  mkdirSync(path.dirname(jsPath), { recursive: true });
-  writeFileSync(jsPath, `module.exports = ${JSON.stringify(data, null, 2)};\n`, 'utf8');
-  return jsPath;
-}
-
-// 获取Json文件对应的JS模块路径
-function getDistPathFromJson(sourcePath) {
-  const relativePath = toPosixPath(path.relative(rootDir, sourcePath));
-  if (!relativePath.startsWith('data/') || !relativePath.endsWith('.json')) {
-    return null;
-  }
-  // 去掉 data/ 前缀和 .json 后缀，拼接成 dist/data/*.js 的路径
-  const jsRelativePath = relativePath.replace(/^data\//, '').replace(/\.json$/, '.js');
-  return path.join(distDir, 'data', jsRelativePath);
-}
-
 async function copyOne(sourcePath) {
   if (!shouldCopy(sourcePath)) {
     return;
@@ -63,11 +40,35 @@ async function copyOne(sourcePath) {
 async function removeOne(sourcePath) {
   const relativePath = path.relative(rootDir, sourcePath);
   const targetPath = path.join(distDir, relativePath);
-  await rm(targetPath, { force: true, recursive: true });
+  await rm(targetPath, {
+    force: true,
+    recursive: true,
+    maxRetries: 5,
+    retryDelay: 100,
+  });
 }
 
 await mkdir(distDir, { recursive: true });
 await syncVendorModulesToDist();
+await syncDataJsonArtifacts();
+
+// 设为 false，启动时不再因为 package.json 的初始 add 事件反复清理 vendor 目录
+// 等监听准备好后再响应 package.json 的变化事件，避免重复构建。
+let watcherReady = false;
+
+// 当 package.json 变化时，重新同步 vendor 模块到 dist 目录
+async function syncVendorModulesWhenReady(filePath) {
+  if (!watcherReady || path.basename(filePath) !== 'package.json') {
+    return;
+  }
+
+  await syncVendorModulesToDist();
+}
+
+function isDataJsonFile(filePath) {
+  const relativePath = path.relative(rootDir, filePath).replace(/\\/g, '/');
+  return relativePath.startsWith('data/') && relativePath.endsWith('.json');
+}
 
 async function safeRun(action, payloadPath) {
   try {
@@ -75,7 +76,7 @@ async function safeRun(action, payloadPath) {
   } catch (error) {
     const e = /** @type {{ code?: string }} */ (error);
     // 当文件被非常快速地创建/删除时，忽略瞬态竞争条件。
-    if (e && (e.code === 'ENOENT' || e.code === 'EBUSY')) {
+    if (e && (e.code === 'ENOENT' || e.code === 'EBUSY' || e.code === 'EPERM')) {
       return;
     }
     console.error(`[copy-static-watch] failed for ${payloadPath}:`, error);
@@ -98,29 +99,29 @@ const watcher = chokidar.watch(initialTargets, {
 watcher
   .on('add', async (filePath) => {
     await safeRun(async () => {
-      if (path.basename(filePath) === 'package.json') {
-        await syncVendorModulesToDist();
+      await syncVendorModulesWhenReady(filePath);
+      if (isDataJsonFile(filePath)) {
+        await syncDataJsonArtifacts();
       }
-      trySyncDataJsonToJs(filePath);
       await copyOne(filePath);
     }, filePath);
   })
   .on('change', async (filePath) => {
     await safeRun(async () => {
-      if (path.basename(filePath) === 'package.json') {
-        await syncVendorModulesToDist();
+      await syncVendorModulesWhenReady(filePath);
+      if (isDataJsonFile(filePath)) {
+        await syncDataJsonArtifacts();
       }
-      trySyncDataJsonToJs(filePath);
       await copyOne(filePath);
     }, filePath);
   })
   .on('unlink', async (filePath) => {
     await safeRun(async () => {
-      await removeOne(filePath);
-
-      const distJsPath = getDistPathFromJson(filePath);
-      if (distJsPath) {
-        await rm(distJsPath, { force: true });
+      const relativePath = path.relative(rootDir, filePath).replace(/\\/g, '/');
+      if (relativePath.startsWith('data/') && relativePath.endsWith('.json')) {
+        await removeDataJsonArtifacts(filePath);
+      } else {
+        await removeOne(filePath);
       }
     }, filePath);
   })
@@ -142,5 +143,6 @@ watcher
     console.error('[copy-static-watch] error:', error);
   })
   .on('ready', () => {
+    watcherReady = true;
     console.log('[copy-static-watch] watching static assets...');
   });

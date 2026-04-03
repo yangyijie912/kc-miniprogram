@@ -5,7 +5,7 @@
     "clean": "node -e \"try { require('fs').rmSync('dist', { recursive: true, force: true }); } catch (e) { if (e && e.code !== 'EBUSY') throw e; }\"",
     "build:ts": "tsc -p tsconfig.json",
     "build:assets": "node scripts/copy-static.mjs",
-    "build": "npm run clean && npm run build:ts && npm run build:assets",
+    "build": "npm run clean && npm run build:assets && npm run build:ts",
     "watch:ts": "tsc -p tsconfig.json -w --preserveWatchOutput",
     "watch:assets": "node scripts/copy-static-watch.mjs",
     "dev": "concurrently \"npm:watch:ts\" \"npm:watch:assets\""
