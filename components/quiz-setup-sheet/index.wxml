@@ -1,7 +1,10 @@
 <view>
   <view wx:if="{{open}}" class="quiz-setup-mask" bindtap="closeQuiz"></view>
 
-  <view wx:if="{{open}}" class="quiz-setup-sheet"
+  <scroll-view
+    wx:if="{{open}}"
+    class="quiz-setup-sheet"
+    scroll-y
     style="max-height: {{windowStyles.maxHeight}}rpx;"
   >
     <view class="quiz-setup-handle"></view>
@@ -113,5 +116,5 @@
         >按当前条件开始</view
       >
     </view>
-  </view>
+  </scroll-view>
 </view>

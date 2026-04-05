@@ -213,17 +213,21 @@ export async function syncVendorModulesToDist() {
     // 白名单
     // 特殊处理 markdown-it 以避免复制整个包体积过大
     if (dependencyName === 'markdown-it') {
-      const markdownItRuntimeSource = path.join(dependencySource, 'dist', 'markdown-it.min.js');
+      const markdownItDistDir = path.join(dependencyTarget, 'dist');
+      // 如果忽略报错只考虑性能可以只引入 markdown-it.min.js
+      const markdownItFiles = ['index.cjs.js', 'markdown-it.js', 'markdown-it.min.js'];
 
-      if (existsSync(markdownItRuntimeSource)) {
-        await mkdir(path.join(dependencyTarget, 'dist'), { recursive: true });
-        await cp(
-          markdownItRuntimeSource,
-          path.join(dependencyTarget, 'dist', 'markdown-it.min.js'),
-          {
-            force: true,
-          },
-        );
+      await mkdir(markdownItDistDir, { recursive: true });
+
+      for (const fileName of markdownItFiles) {
+        const markdownItRuntimeSource = path.join(dependencySource, 'dist', fileName);
+        if (!existsSync(markdownItRuntimeSource)) {
+          continue;
+        }
+
+        await cp(markdownItRuntimeSource, path.join(markdownItDistDir, fileName), {
+          force: true,
+        });
       }
 
       return;

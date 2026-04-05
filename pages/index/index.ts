@@ -3,7 +3,6 @@ import type { quizQuery } from '../../types/quiz';
 
 Page({
   data: {
-    categoryList: [] as CategoryViewPageData['categoryList'],
     cardList: [] as CategoryViewPageData['cardList'],
     categoryViewList: [] as CategoryViewPageData['categoryViewList'],
     unmasteredCount: 0,
@@ -72,9 +71,8 @@ Page({
 
   // 加载所有数据，包括分类列表、卡片列表和分类视图列表
   loadAllData() {
-    const { categoryList, cardList, categoryViewList } = loadAllViewData();
+    const { cardList, categoryViewList } = loadAllViewData();
     this.setData({
-      categoryList,
       cardList,
       categoryViewList,
       unmasteredCount: cardList.filter((card) => card.status !== 'mastered').length,
