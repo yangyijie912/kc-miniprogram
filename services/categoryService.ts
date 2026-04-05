@@ -141,3 +141,9 @@ export function deleteCategory(id: string): ServiceResult<null> {
   saveCategoriesToStorage(nextList);
   return success(null);
 }
+
+// 保存所有分类（覆盖式），用于导入时批量保存
+export function saveAllCategories(categories: Category[]): ServiceResult<null> {
+  saveCategoriesToStorage(categories);
+  return success(null);
+}

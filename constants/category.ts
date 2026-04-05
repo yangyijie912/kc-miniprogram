@@ -7,4 +7,5 @@ export const UNCATEGORIZED_CATEGORY: Category = {
   id: UNCATEGORIZED_ID,
   name: UNCATEGORIZED_NAME,
   sort: Number.MAX_SAFE_INTEGER,
+  isSystem: true,
 };

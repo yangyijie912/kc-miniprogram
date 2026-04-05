@@ -7,7 +7,7 @@
       <view class="action-grid">
         <view class="action-card action-card-import" bindtap="importData">
           <view class="action-title">数据导入</view>
-          <view class="action-desc">支持从 JSON 文件恢复卡片与分类（开发中）</view>
+          <view class="action-desc">支持从 JSON 文件恢复卡片与分类</view>
         </view>
 
         <view class="action-card action-card-export" bindtap="exportData">

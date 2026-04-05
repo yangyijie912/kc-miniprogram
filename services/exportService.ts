@@ -1,6 +1,6 @@
 import { getCategories } from './categoryService';
 import { getCards } from './cardService';
-import type { ExportData } from '../types/exports';
+import type { ExportData } from '../types/migration';
 
 // 导出的数据结构
 export const buildExportData = async (): Promise<ExportData> => {
