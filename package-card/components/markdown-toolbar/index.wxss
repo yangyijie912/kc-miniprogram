@@ -181,3 +181,104 @@
   color: #9d9487;
   font-size: 28rpx;
 }
+
+.dialog-config {
+  display: flex;
+  flex-direction: column;
+  gap: 22rpx;
+}
+
+.dialog-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.dialog-section-tip {
+  color: #6c645a;
+  font-size: 24rpx;
+  line-height: 1.7;
+}
+
+.dialog-field-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.dialog-field {
+  flex: 1;
+}
+
+.dialog-field-label {
+  margin-bottom: 10rpx;
+  color: #3c342c;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.dialog-field-input {
+  width: 100%;
+  height: 84rpx;
+  padding: 0 20rpx;
+  border-radius: 18rpx;
+  border: 1rpx solid rgba(61, 43, 24, 0.1);
+  background: rgba(255, 255, 255, 0.86);
+  color: #1e1c18;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.dialog-input-placeholder {
+  color: #9d9487;
+  font-size: 26rpx;
+}
+
+.chip-grid {
+  display: grid;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.chip-grid-title {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.chip-grid-list {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+.dialog-chip {
+  min-height: 70rpx;
+  padding: 0 18rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18rpx;
+  border: 1rpx solid rgba(61, 43, 24, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  color: #6c645a;
+  font-size: 24rpx;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.dialog-chip.active {
+  border-color: rgba(31, 94, 255, 0.18);
+  background: linear-gradient(135deg, rgba(18, 122, 114, 0.12), rgba(31, 94, 255, 0.12));
+  color: #1f5eff;
+}
+
+.dialog-chip:active {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+@media (max-width: 360px) {
+  .dialog-field-row {
+    flex-direction: column;
+  }
+
+  .content-action {
+    min-width: 74rpx;
+  }
+}

@@ -1,3 +1,6 @@
 {
-  "component": true
+  "component": true,
+  "usingComponents": {
+    "base-dialog": "/package-card/components/base-dialog/index"
+  }
 }

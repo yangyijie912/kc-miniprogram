@@ -4,45 +4,62 @@
         <view class="content-toolbar-hint">常用格式快捷插入</view>
     </view>
     <view class="content-actions">
-        <view class="content-action action-image" bindtap="insertImageTemplate">
-        <view class="content-action-icon">IMG</view>
-        <view class="content-action-text">图片</view>
-        </view>
+
         <view class="content-action action-code" bindtap="insertCodeBlock">
-        <view class="content-action-icon">{{"</>"}}</view>
-        <view class="content-action-text">代码块</view>
+            <view class="content-action-icon">{{"</>"}}</view>
+            <view class="content-action-text">代码块</view>
         </view>
-        <view class="content-action action-list" bindtap="insertList">
-        <view class="content-action-icon">•</view>
-        <view class="content-action-text">列表</view>
+        <view
+            class="content-action action-list"
+            bindtap="openContentDialog"
+            data-type="list"
+            data-title="插入列表"
+        >
+            <view class="content-action-icon">•</view>
+            <view class="content-action-text">列表</view>
         </view>
-        <view class="content-action action-table" bindtap="insertTable">
-        <view class="content-action-icon">TBL</view>
-        <view class="content-action-text">表格</view>
+        <view
+            class="content-action action-table"
+            bindtap="openContentDialog"
+            data-type="table"
+            data-title="插入表格"
+        >
+            <view class="content-action-icon">TBL</view>
+            <view class="content-action-text">表格</view>
+        </view>
+        <view class="content-action action-divider" bindtap="insertDivider">
+            <view class="content-action-icon">---</view>
+            <view class="content-action-text">分割线</view>
         </view>
         <view wx:if="{{!isMore}}" class="content-toggle" bindtap="showMore">
-        <view class="content-toggle-icon">+</view>
+            <view class="content-toggle-icon">+</view>
         </view>
 
-        <view wx:if="{{isMore}}" class="content-action action-heading" bindtap="insertHeading">
-        <view class="content-action-icon">H</view>
-        <view class="content-action-text">标题</view>
+        <view
+            wx:if="{{isMore}}"
+            class="content-action action-heading"
+            bindtap="openContentDialog"
+            data-type="title"
+            data-title="插入标题"
+        >
+            <view class="content-action-icon">H</view>
+            <view class="content-action-text">标题</view>
         </view>
         <view wx:if="{{isMore}}" class="content-action action-strong" bindtap="insertBold">
-        <view class="content-action-icon">B</view>
-        <view class="content-action-text">加粗</view>
+            <view class="content-action-icon">B</view>
+            <view class="content-action-text">加粗</view>
         </view>
         <view wx:if="{{isMore}}" class="content-action action-quote" bindtap="insertQuote">
-        <view class="content-action-icon">“</view>
-        <view class="content-action-text">引用</view>
+            <view class="content-action-icon">“</view>
+            <view class="content-action-text">引用</view>
         </view>
         <view wx:if="{{isMore}}" class="content-action action-link" bindtap="insertLink">
-        <view class="content-action-icon">@</view>
-        <view class="content-action-text">链接</view>
+            <view class="content-action-icon">@</view>
+            <view class="content-action-text">链接</view>
         </view>
-        <view wx:if="{{isMore}}" class="content-action action-divider" bindtap="insertDivider">
-        <view class="content-action-icon">---</view>
-        <view class="content-action-text">分割线</view>
+        <view wx:if="{{isMore}}" class="content-action action-image" bindtap="insertImageTemplate">
+            <view class="content-action-icon">IMG</view>
+            <view class="content-action-text">图片</view>
         </view>
 
         <view wx:if="{{isMore}}" class="content-toggle content-toggle-close" bindtap="showLess">
@@ -60,4 +77,77 @@
         maxlength="10000"
         auto-height
     />
+
+    <base-dialog
+        open="{{dialogState.visible}}"
+        title="{{dialogState.title}}"
+        bind:confirm="onContentConfirm"
+        bind:close="closeContentDialog"
+    >
+        <view class="dialog-config">
+            <view wx:if="{{dialogState.type === 'table'}}" class="dialog-section">
+                <view class="dialog-section-tip">设置表格的行列数，确认后会自动插入模板。</view>
+                <view class="dialog-field-row">
+                    <view class="dialog-field">
+                    <view class="dialog-field-label">行数</view>
+                    <input
+                        class="dialog-field-input"
+                        type="number"
+                        value="{{tableRows}}"
+                        placeholder="默认 3 行"
+                        placeholder-class="dialog-input-placeholder"
+                        bindinput="onTableRowsInput"
+                    />
+                    </view>
+                    <view class="dialog-field">
+                    <view class="dialog-field-label">列数</view>
+                    <input
+                        class="dialog-field-input"
+                        type="number"
+                        value="{{tableColumns}}"
+                        placeholder="默认 3 列"
+                        placeholder-class="dialog-input-placeholder"
+                        bindinput="onTableColumnsInput"
+                    />
+                    </view>
+                </view>
+            </view>
+
+            <view wx:if="{{dialogState.type === 'title'}}" class="dialog-section">
+                <view class="dialog-section-tip">选择标题级别后，确认会插入对应层级的 Markdown 标题。</view>
+                <view class="chip-grid chip-grid-title">
+                    <view
+                        wx:for="{{titleLevels}}"
+                        wx:for-item="level"
+                        wx:key="value"
+                        class="dialog-chip {{ titleLevel === level.value ? 'active' : '' }}"
+                        bindtap="onTitleLevelSelect"
+                        data-value="{{level.value}}"
+                    >
+                        {{ level.label }}
+                    </view>
+                </view>
+            </view>
+
+            <view wx:if="{{dialogState.type === 'list'}}" class="dialog-section">
+                <view class="dialog-section-tip">选择列表类型后，确认将快速插入对应列表模板。</view>
+                <view class="chip-grid chip-grid-list">
+                    <view
+                        class="dialog-chip {{ listType === 'unordered' ? 'active' : '' }}"
+                        bindtap="onListTypeSelect"
+                        data-value="unordered"
+                    >
+                        无序列表
+                    </view>
+                    <view
+                        class="dialog-chip {{ listType === 'ordered' ? 'active' : '' }}"
+                        bindtap="onListTypeSelect"
+                        data-value="ordered"
+                    >
+                        有序列表
+                    </view>
+                </view>
+            </view>
+        </view>
+    </base-dialog>
 </view>

@@ -142,7 +142,6 @@ Page({
 
   // 保存
   save() {
-    console.log('保存卡片，数据：', this.data.formData);
     const isValid = this.validateForm(this.data.formData);
     if (!isValid) {
       return;

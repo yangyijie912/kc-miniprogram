@@ -1,0 +1,17 @@
+<view wx:if="{{open}}" class="dialog-mask" bindtap="onMaskTap">
+    <view class="dialog-wrapper" catchtap="noop">
+        <view class="dialog-header">
+            <view class="dialog-title">{{ title }}</view>
+            <view class="dialog-close" bindtap="onClose">×</view>
+        </view>
+        <view class="dialog-body">
+            <slot />
+        </view>
+        <view wx:if="{{showFooter}}" class="dialog-footer">
+            <view class="dialog-footer-default">
+                <view class="btn btn-cancel" bindtap="onClose">取消</view>
+                <view class="btn btn-confirm" bindtap="onConfirm">确定</view>
+            </view>
+        </view>
+    </view>
+</view>
