@@ -4,7 +4,7 @@ import {
   getDailyQuizSession,
   updateDailyQuizSessionProgress,
 } from '../../services/quizService';
-import { jsonToUrlParam } from '../../utils/jsonToUrl';
+import { jsonToUrlParam } from '../utils/jsonToUrl';
 import type { CardStatus, CardView } from '../../types/card';
 import type { quizQuery, QuizResultSummary } from '../../types/quiz';
 

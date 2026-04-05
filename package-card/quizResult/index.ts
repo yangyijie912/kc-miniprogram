@@ -1,4 +1,4 @@
-import { jsonToUrlParam } from '../../utils/jsonToUrl';
+import { jsonToUrlParam } from '../utils/jsonToUrl';
 import type { quizQuery, QuizResultSummary } from '../../types/quiz';
 
 Page({
