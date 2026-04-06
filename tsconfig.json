@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2019",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    "target": "es2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "rootDir": ".",
     "outDir": "dist",
     "baseUrl": ".",
@@ -10,15 +10,15 @@
       "@/*": ["./*"]
     },
     "types": ["miniprogram-api-typings"],
-    "strict": false,
+    "strict": true,
     "allowJs": true,
     "checkJs": false,
-    "noEmit": false,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "noEmit": false, // 为ture时只做类型检查，不生成JS文件，但是这里负责生成到dist目录，所以设置为false
+    "resolveJsonModule": true, // 允许导入 JSON 模块
+    "esModuleInterop": true, // 允许使用 ES 模块默认导入语法，比如 import fs from 'fs';
+    "allowSyntheticDefaultImports": true, // 允许从没有默认导出的模块中默认导入，比如 import React from 'react';
+    "skipLibCheck": true, // 跳过库文件的类型检查，比如 node_modules 中的类型定义文件
+    "forceConsistentCasingInFileNames": true // 强制文件名一致的大小写，因为Mac不区分大小写
   },
   "include": [
     "app.js",

@@ -15,7 +15,7 @@ Page({
       } else {
         wx.showToast({ title: res.message || '导入失败', icon: 'none' });
       }
-    } catch (err) {
+    } catch (_err) {
       wx.showToast({ title: '导入失败', icon: 'none' });
     }
   },

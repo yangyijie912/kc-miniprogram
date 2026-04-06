@@ -83,9 +83,6 @@ function toCard(rawCard: RawCard): Card {
 const defaultCards: Card[] = (cards as RawCard[]).map((rawCard) => toCard(rawCard));
 const defaultCardById = new Map(defaultCards.map((card) => [card.id, cloneCard(card)]));
 
-// 当前的卡片列表，后续会从本地存储加载或使用默认卡片
-let cardList: Card[] = [];
-
 // 克隆一个卡片对象，确保外部修改不会影响内部数据
 function cloneCard(card: Card): Card {
   return {
@@ -127,7 +124,6 @@ function loadCardsFromStorage(): Card[] {
 function saveCardsToStorage(list: Card[]) {
   const normalizedList = list.map(normalizeCard);
   wx.setStorageSync(CARD_STORAGE_KEY, JSON.stringify(normalizedList));
-  cardList = normalizedList.map(cloneCard);
 }
 
 loadCardsFromStorage();

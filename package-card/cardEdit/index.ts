@@ -1,7 +1,6 @@
 import type { Category } from '../../types/card';
 import { getCategories } from '../../services/categoryService';
 import { getCardById, updateCard, addCard, deleteCard } from '../../services/cardService';
-import category from '@/data/category';
 
 Page({
   data: {
@@ -159,13 +158,7 @@ Page({
         .filter((tag) => tag),
     };
 
-    let res = undefined;
-
-    if (cardId) {
-      res = updateCard({ id: cardId, ...params });
-    } else {
-      res = addCard(params);
-    }
+    const res = cardId ? updateCard({ id: cardId, ...params }) : addCard(params);
 
     if (res.success) {
       wx.showToast({
@@ -239,7 +232,7 @@ Page({
       this.loadCategories();
     }
     this.setData({
-      cardId: options?.id || null,
+      cardId: options?.id || undefined,
     });
     if (options?.id) {
       this.loadCard(options?.id);

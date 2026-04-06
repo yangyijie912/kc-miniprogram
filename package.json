@@ -8,12 +8,22 @@
     "build": "npm run clean && npm run build:assets && npm run build:ts",
     "watch:ts": "tsc -p tsconfig.json -w --preserveWatchOutput",
     "watch:assets": "node scripts/copy-static-watch.mjs",
-    "dev": "concurrently \"npm:watch:ts\" \"npm:watch:assets\""
+    "dev": "concurrently \"npm:watch:ts\" \"npm:watch:assets\"",
+    "lint": "eslint .",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run typecheck && npm run format:check"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "chokidar": "^4.0.3",
     "concurrently": "^9.1.2",
+    "eslint": "^10.2.0",
+    "jiti": "^2.6.1",
     "miniprogram-api-typings": "^5.1.2",
-    "typescript": "^5.8.3"
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.58.0"
   }
 }

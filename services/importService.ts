@@ -29,7 +29,7 @@ export function pickImportData(): Promise<string> {
             success: (fileRes) => {
               try {
                 resolve(fileRes.data as string);
-              } catch (error) {
+              } catch (_error) {
                 reject(new Error('读取文件失败'));
               }
             },
@@ -55,14 +55,18 @@ export function pickImportData(): Promise<string> {
  */
 
 // 判断导入的数据是否符合 ImportData 的结构，确保数据的有效性和安全性
-function isImportData(data: any): data is ImportData {
+function isImportData(data: unknown): data is ImportData {
+  if (!data || typeof data !== 'object') {
+    return false;
+  }
+
+  const obj = data as Record<string, unknown>;
+
   return (
-    data &&
-    typeof data === 'object' &&
-    Array.isArray(data.categories) &&
-    Array.isArray(data.cards) &&
-    typeof data.version === 'string' &&
-    typeof data.exportedAt === 'number'
+    Array.isArray(obj.categories) &&
+    Array.isArray(obj.cards) &&
+    typeof obj.version === 'string' &&
+    typeof obj.exportedAt === 'number'
   );
 }
 
@@ -72,7 +76,7 @@ function parseImportData(jsonStr: string): ImportData {
   try {
     data = JSON.parse(jsonStr);
   } catch (error) {
-    throw new Error('解析JSON失败');
+    throw new Error('解析JSON失败', { cause: error });
   }
 
   if (!isImportData(data)) {

@@ -40,7 +40,7 @@ Page({
       return;
     }
     // 将排序转换为数字，如果输入为空则默认为 0
-    const sort = formData.sort === '' ? 0 : Number(formData.sort);
+    const sort = formData.sort ? Number(formData.sort) : 0;
     if (Number.isNaN(sort)) {
       wx.showToast({
         title: '排序必须是数字',
@@ -73,7 +73,7 @@ Page({
   },
 
   onLoad(options) {
-    let categoryId = options?.id || null;
+    const categoryId = options?.id || null;
     if (categoryId) {
       // 编辑模式，加载分类数据
       const res = getCategoryById(categoryId);
