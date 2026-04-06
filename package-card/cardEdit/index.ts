@@ -48,25 +48,24 @@ Page({
   loadCard(id: string) {
     const res = getCardById(id);
 
-    if (res.success && res.data) {
-      const categoryInfo = this.data.categoryOptions.find((cat) => cat.id === res.data.categoryId);
-      this.setData({
-        'formData.categoryId': res.data.categoryId,
-        'formData.categoryName': categoryInfo ? categoryInfo.name : '',
-        'formData.categoryIndex': categoryInfo
-          ? this.data.categoryOptions.indexOf(categoryInfo)
-          : -1,
-        'formData.question': res.data.question,
-        'formData.answer': res.data.answer,
-        'formData.content': res.data.content || '',
-        'formData.tagsText': res.data.tags?.join('、') || '',
+    if (!res.success || !res.data) {
+      wx.showToast({
+        title: res.message || '卡片加载失败',
+        icon: 'none',
       });
       return;
     }
 
-    wx.showToast({
-      title: res.message || '卡片加载失败',
-      icon: 'none',
+    const card = res.data;
+    const categoryInfo = this.data.categoryOptions.find((cat) => cat.id === card.categoryId);
+    this.setData({
+      'formData.categoryId': card.categoryId,
+      'formData.categoryName': categoryInfo ? categoryInfo.name : '',
+      'formData.categoryIndex': categoryInfo ? this.data.categoryOptions.indexOf(categoryInfo) : -1,
+      'formData.question': card.question,
+      'formData.answer': card.answer,
+      'formData.content': card.content || '',
+      'formData.tagsText': card.tags?.join('、') || '',
     });
   },
 
@@ -97,13 +96,13 @@ Page({
 
   // 分类选择处理函数
   onCategoryChange(e: WechatMiniprogram.PickerChange) {
-    const index = e.detail.value as unknown;
-    const selectedCategory = this.data.categoryOptions[Number(index)];
+    const index = Number(e.detail.value);
+    const selectedCategory = this.data.categoryOptions[index];
     if (selectedCategory) {
       this.setData({
         'formData.categoryId': selectedCategory.id,
         'formData.categoryName': selectedCategory.name,
-        'formData.categoryIndex': Number(index),
+        'formData.categoryIndex': index,
       });
     }
   },

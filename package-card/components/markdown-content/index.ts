@@ -27,6 +27,16 @@ const IMAGE_STYLE =
   'display: block; width: 100%; max-width: 100%; margin: 22rpx 0; border-radius: 20rpx;';
 const HR_STYLE = 'margin: 28rpx 0; border: none; border-top: 1rpx solid rgba(61, 43, 24, 0.12);';
 
+type MarkdownToken = {
+  tag: string;
+  content: string;
+  attrSet(name: string, value: string): void;
+};
+
+type MarkdownRendererState = {
+  renderToken(tokens: MarkdownToken[], idx: number, options: unknown): string;
+};
+
 function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (character) => {
     switch (character) {
@@ -54,68 +64,128 @@ function createMarkdownIt() {
     typographer: true, // 启用一些语言替换 + 引号美化
   });
 
-  md.renderer.rules.heading_open = (tokens, idx, options, _env, self) => {
+  md.renderer.rules.heading_open = (
+    tokens: MarkdownToken[],
+    idx: number,
+    options: unknown,
+    _env: unknown,
+    self: MarkdownRendererState,
+  ) => {
     const token = tokens[idx];
     token.attrSet('style', HEADING_STYLES[token.tag] || HEADING_STYLES.h3);
     return self.renderToken(tokens, idx, options);
   };
 
-  md.renderer.rules.paragraph_open = (tokens, idx, options, _env, self) => {
+  md.renderer.rules.paragraph_open = (
+    tokens: MarkdownToken[],
+    idx: number,
+    options: unknown,
+    _env: unknown,
+    self: MarkdownRendererState,
+  ) => {
     tokens[idx].attrSet('style', PARAGRAPH_STYLE);
     return self.renderToken(tokens, idx, options);
   };
 
-  md.renderer.rules.bullet_list_open = (tokens, idx, options, _env, self) => {
+  md.renderer.rules.bullet_list_open = (
+    tokens: MarkdownToken[],
+    idx: number,
+    options: unknown,
+    _env: unknown,
+    self: MarkdownRendererState,
+  ) => {
     tokens[idx].attrSet('style', LIST_STYLE);
     return self.renderToken(tokens, idx, options);
   };
 
-  md.renderer.rules.ordered_list_open = (tokens, idx, options, _env, self) => {
+  md.renderer.rules.ordered_list_open = (
+    tokens: MarkdownToken[],
+    idx: number,
+    options: unknown,
+    _env: unknown,
+    self: MarkdownRendererState,
+  ) => {
     tokens[idx].attrSet('style', LIST_STYLE);
     return self.renderToken(tokens, idx, options);
   };
 
-  md.renderer.rules.list_item_open = (tokens, idx, options, _env, self) => {
+  md.renderer.rules.list_item_open = (
+    tokens: MarkdownToken[],
+    idx: number,
+    options: unknown,
+    _env: unknown,
+    self: MarkdownRendererState,
+  ) => {
     tokens[idx].attrSet('style', LIST_ITEM_STYLE);
     return self.renderToken(tokens, idx, options);
   };
 
-  md.renderer.rules.blockquote_open = (tokens, idx, options, _env, self) => {
+  md.renderer.rules.blockquote_open = (
+    tokens: MarkdownToken[],
+    idx: number,
+    options: unknown,
+    _env: unknown,
+    self: MarkdownRendererState,
+  ) => {
     tokens[idx].attrSet('style', BLOCKQUOTE_STYLE);
     return self.renderToken(tokens, idx, options);
   };
 
-  md.renderer.rules.code_inline = (tokens, idx) => {
+  md.renderer.rules.code_inline = (tokens: MarkdownToken[], idx: number) => {
     const token = tokens[idx];
     return `<code style="${INLINE_CODE_STYLE}">${escapeHtml(token.content)}</code>`;
   };
 
-  md.renderer.rules.fence = (tokens, idx) => {
+  md.renderer.rules.fence = (tokens: MarkdownToken[], idx: number) => {
     const token = tokens[idx];
     return `<pre style="${PRE_STYLE}"><code style="${CODE_BLOCK_STYLE}">${escapeHtml(token.content)}</code></pre>`;
   };
 
-  md.renderer.rules.code_block = (tokens, idx) => {
+  md.renderer.rules.code_block = (tokens: MarkdownToken[], idx: number) => {
     const token = tokens[idx];
     return `<pre style="${PRE_STYLE}"><code style="${CODE_BLOCK_STYLE}">${escapeHtml(token.content)}</code></pre>`;
   };
 
-  md.renderer.rules.link_open = (tokens, idx, options, _env, self) => {
+  md.renderer.rules.link_open = (
+    tokens: MarkdownToken[],
+    idx: number,
+    options: unknown,
+    _env: unknown,
+    self: MarkdownRendererState,
+  ) => {
     tokens[idx].attrSet('style', LINK_STYLE);
     return self.renderToken(tokens, idx, options);
   };
 
-  md.renderer.rules.strong_open = (tokens, idx, options, _env, self) => {
+  md.renderer.rules.strong_open = (
+    tokens: MarkdownToken[],
+    idx: number,
+    options: unknown,
+    _env: unknown,
+    self: MarkdownRendererState,
+  ) => {
     tokens[idx].attrSet('style', STRONG_STYLE);
     return self.renderToken(tokens, idx, options);
   };
 
-  md.renderer.rules.em_open = (tokens, idx, options, _env, self) => {
+  md.renderer.rules.em_open = (
+    tokens: MarkdownToken[],
+    idx: number,
+    options: unknown,
+    _env: unknown,
+    self: MarkdownRendererState,
+  ) => {
     tokens[idx].attrSet('style', EM_STYLE);
     return self.renderToken(tokens, idx, options);
   };
 
-  md.renderer.rules.image = (tokens, idx, options, _env, self) => {
+  md.renderer.rules.image = (
+    tokens: MarkdownToken[],
+    idx: number,
+    options: unknown,
+    _env: unknown,
+    self: MarkdownRendererState,
+  ) => {
     tokens[idx].attrSet('style', IMAGE_STYLE);
     return self.renderToken(tokens, idx, options);
   };

@@ -63,7 +63,7 @@ Component({
     },
 
     // 失焦：失去焦点时确保更新光标
-    onBlur(e) {
+    onBlur(e: WechatMiniprogram.Input) {
       if (this.data.lockInsertPosition) {
         return;
       }
@@ -196,7 +196,7 @@ Component({
       const { dialogState, tableRows, tableColumns, titleLevel, listType } = this.data;
       switch (dialogState.type) {
         case 'table':
-          this.insertTable(parseInt(tableRows, 10) || 3, parseInt(tableColumns, 10) || 3);
+          this.insertTable(tableRows, tableColumns);
           break;
         case 'title':
           this.insertHeading(
@@ -215,10 +215,10 @@ Component({
 
     // 更新表格行列数
     onTableRowsInput(e: WechatMiniprogram.Input) {
-      this.setData({ tableRows: e.detail.value });
+      this.setData({ tableRows: Number(e.detail.value) || 0 });
     },
     onTableColumnsInput(e: WechatMiniprogram.Input) {
-      this.setData({ tableColumns: e.detail.value });
+      this.setData({ tableColumns: Number(e.detail.value) || 0 });
     },
     // 更新标题级别
     onTitleLevelSelect(e: WechatMiniprogram.BaseEvent) {

@@ -12,7 +12,7 @@ Page({
   data: {
     cardQueue: [] as CardView[],
     cardIndex: 0 as number,
-    currentCard: {} as CardView & { tagText?: string },
+    currentCard: null as (CardView & { tagText?: string }) | null,
     quizResult: {
       total: 0,
       unknown: 0,
@@ -49,7 +49,10 @@ Page({
     }
     updateDailyQuizSessionProgress({
       currentIndex: this.data.cardIndex,
-      result: { ...this.data.quizResult, total: this.data.cardQueue.length },
+      result: {
+        ...this.data.quizResult,
+        total: this.data.cardQueue.length,
+      },
       finished,
     });
   },
@@ -73,11 +76,18 @@ Page({
   },
 
   // 获取当前题目卡片
-  getCurrentCard(cardIndex, cardQueue): (CardView & { tagText?: string }) | null {
-    const tags = cardQueue[cardIndex]?.tags;
+  getCurrentCard(
+    cardIndex: number,
+    cardQueue: CardView[],
+  ): (CardView & { tagText?: string }) | null {
+    const card = cardQueue[cardIndex];
+    if (!card) {
+      return null;
+    }
+    const tags = card.tags;
     const tagText = Array.isArray(tags) && tags.length > 0 ? '/ ' + tags.join('•') : '';
     return {
-      ...cardQueue[cardIndex],
+      ...card,
       tagText,
     };
   },

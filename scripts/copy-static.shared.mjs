@@ -205,7 +205,9 @@ export async function syncVendorModulesToDist() {
     const dependencyTarget = path.join(subVendorDir, dependencyName);
 
     if (!existsSync(dependencySource)) {
-      return;
+      throw new Error(
+        `[copy-static] 找不到分包依赖 "${dependencyName}"，请先安装它，或检查 package-card/package.json 中的依赖声明。期望路径：${dependencySource}`,
+      );
     }
 
     await mkdir(path.dirname(dependencyTarget), { recursive: true });
