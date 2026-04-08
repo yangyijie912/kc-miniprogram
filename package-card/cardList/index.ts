@@ -1,6 +1,8 @@
 import type { QueryParams, PageOptions, CardStatus, CardView } from '../../types/card';
 import type { quizQuery } from '../../types/quiz';
-import { loadAllViewData } from '../../view-model/card-view';
+import { createCardViewList, loadCardPage, loadCategories } from '../../view-model/card-view';
+
+const PAGE_SIZE = 10;
 
 // 定义状态标签类型
 type StatusTab = {
@@ -31,6 +33,11 @@ Page({
     inputKeyword: '',
     queryParams: {} as QueryParams,
     cardViewList: [] as CardView[],
+    currentPage: 0 as number,
+    pageSize: PAGE_SIZE,
+    total: 0 as number,
+    hasMore: true as boolean,
+    isLoading: false as boolean,
     showQuizAction: false as boolean,
     isSearchResultMode: false as boolean,
     statusTabs: buildStatusTabs(),
@@ -69,7 +76,7 @@ Page({
       keyword: keyword ? keyword : undefined,
     };
     this.setData({ queryParams: query });
-    this.loadData();
+    this.loadData(true);
   },
 
   // 切换状态筛选条件
@@ -84,14 +91,40 @@ Page({
       },
       statusTabs: buildStatusTabs(status),
     });
-    this.loadData();
+    this.loadData(true);
   },
 
-  // 加载数据，根据当前查询参数获取卡片视图列表
-  loadData() {
-    const { cardViewList } = loadAllViewData(this.data.queryParams);
+  // 加载数据，根据当前查询参数获取分页卡片视图列表
+  loadData(reset = false) {
+    if (this.data.isLoading) {
+      return;
+    }
+
+    if (!reset && !this.data.hasMore) {
+      return;
+    }
+
+    const nextPage = reset ? 1 : this.data.currentPage + 1;
     this.setData({
-      cardViewList,
+      isLoading: true,
+    });
+
+    const { list, total, page, pageSize } = loadCardPage({
+      ...this.data.queryParams,
+      page: nextPage,
+      pageSize: this.data.pageSize,
+    });
+    const categoryList = loadCategories();
+    const cardViewList = createCardViewList(list, categoryList);
+    const nextCardViewList = reset ? cardViewList : this.data.cardViewList.concat(cardViewList);
+
+    this.setData({
+      cardViewList: nextCardViewList,
+      currentPage: page,
+      total,
+      pageSize,
+      hasMore: page * pageSize < total,
+      isLoading: false,
     });
   },
 
@@ -142,12 +175,16 @@ Page({
   },
 
   onShow() {
-    this.loadData();
+    this.loadData(true);
   },
 
   onPullDownRefresh() {
-    this.loadData();
+    this.loadData(true);
     wx.stopPullDownRefresh();
+  },
+
+  onReachBottom() {
+    this.loadData(false);
   },
 
   // 进入卡片详情

@@ -8,7 +8,7 @@ export const buildExportData = async (): Promise<ExportData> => {
   const cardsRes = await getCards();
 
   const categories = categoriesRes.data || [];
-  const cards = cardsRes.data || [];
+  const cards = cardsRes.data?.list || [];
 
   return {
     categories,

@@ -130,7 +130,7 @@ export function deleteCategory(id: string): ServiceResult<null> {
   // 将被删除的分类下的卡片移动到未分类
   const res = getCards({ categoryId: id });
   if (res.success && res.data) {
-    res.data.forEach((card) => {
+    res.data.list.forEach((card) => {
       updateCard({
         id: card.id,
         categoryId: uncategorizedId,

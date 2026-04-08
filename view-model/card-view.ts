@@ -1,4 +1,5 @@
 import type { Card, Category, CategoryView, CardView } from '../types/card';
+import type { PageResult } from '../types/common';
 import type { ServiceResult } from '../types/service';
 import { getCards } from '../services/cardService';
 import { getCategories } from '../services/categoryService';
@@ -15,6 +16,8 @@ export type CategoryViewPageData = {
 
 export type CardQueryParams = Partial<Card> & {
   keyword?: string;
+  page?: number;
+  pageSize?: number;
 };
 
 // 创建一个映射，统计每个分类的卡片数量，格式为 { [categoryId]: count }
@@ -57,9 +60,9 @@ export function createCardViewList(cardList: Card[], categoryList: Category[]): 
 
 // 加载卡片列表
 export function loadCards(query: CardQueryParams): Card[] {
-  const res = getCards(query) as ServiceResult<Card[]>;
+  const res = getCards(query);
   if (res.success && res.data) {
-    return res.data;
+    return res.data.list || [];
   }
   wx.showToast({
     title: res.message || '加载卡片失败',
@@ -79,6 +82,26 @@ export function loadCategories(): Category[] {
     icon: 'none',
   });
   return [];
+}
+
+// 加载单页卡片列表，用于需要分页的页面
+export function loadCardPage(query: CardQueryParams = {}): PageResult<Card> {
+  const res = getCards(query);
+  if (res.success && res.data) {
+    return res.data;
+  }
+
+  wx.showToast({
+    title: res.message || '加载卡片失败',
+    icon: 'none',
+  });
+
+  return {
+    list: [],
+    total: 0,
+    page: query.page || 1,
+    pageSize: query.pageSize || 10,
+  };
 }
 
 // 返回所有数据

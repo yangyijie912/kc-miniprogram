@@ -1,5 +1,5 @@
 <!--index.wxml-->
-<scroll-view class="scrollarea" scroll-y type="list">
+<scroll-view class="scrollarea" scroll-y type="list" bindscrolltolower="onReachBottom" lower-threshold="120">
   <view class="page">
     <view wx-if="{{!isSearchResultMode}}" class="toolbar">
       <input
@@ -65,6 +65,11 @@
       <view wx-if="{{ cardViewList.length === 0 }}" class="result-banner">
         <view class="result-title">没有找到相关卡片</view>
         <view class="result-keyword">试试调整搜索关键词或筛选条件？</view>
+      </view>
+
+      <view wx-if="{{ cardViewList.length > 0 }}" class="list-footer">
+        <view wx-if="{{ isLoading }}" class="list-footer-text">正在加载更多...</view>
+        <view wx:elif="{{ !hasMore }}" class="list-footer-text">没有更多了</view>
       </view>
     </view>
 

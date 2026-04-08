@@ -245,7 +245,7 @@ export async function importFromJsonFile(jsonStr: string): Promise<ServiceResult
     const importData = parseImportData(jsonStr);
     // 2、获取当前系统数据
     const currentCategories = getCategories().data || [];
-    const currentCards = getCards().data || [];
+    const currentCards = getCards().data?.list || [];
     // 3、合并分类和卡片数据，并处理分类ID映射关系
     const mergeResult = mergeCategories(importData.categories, currentCategories);
     const mergedCategories = mergeResult.mergedCategories;

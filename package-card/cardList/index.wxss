@@ -208,3 +208,14 @@
   font-size: 26rpx;
   line-height: 1.7;
 }
+
+.list-footer {
+  padding: 14rpx 0 0;
+  display: flex;
+  justify-content: center;
+}
+
+.list-footer-text {
+  color: #9d9487;
+  font-size: 24rpx;
+}

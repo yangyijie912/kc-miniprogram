@@ -4,6 +4,7 @@ import { UNCATEGORIZED_ID } from '../constants/category';
 import { CARD_STORAGE_KEY } from '../constants/storageKeys';
 import type { Card, Category, RawCard } from '../types/card';
 import type { ServiceResult } from '../types/service';
+import type { PageResult } from '../types/common';
 import { success, fail } from './serviceHelper';
 import { generateUUID } from '../utils/uuid';
 
@@ -130,15 +131,22 @@ loadCardsFromStorage();
 
 type CardQueryParams = Partial<Card> & {
   keyword?: string;
+  page?: number;
+  pageSize?: number;
 };
 
 // 根据参数获取卡片
-export function getCards(params?: CardQueryParams): ServiceResult<Card[]> {
+export function getCards(params?: CardQueryParams): ServiceResult<PageResult<Card>> {
   const currentList = loadCardsFromStorage();
   if (!params) {
-    return success(currentList.map(cloneCard));
+    return success({
+      list: currentList.map(cloneCard),
+      total: currentList.length,
+      page: 1,
+      pageSize: currentList.length,
+    });
   }
-  const { keyword, ...filters } = params;
+  const { keyword, page = 1, pageSize, ...filters } = params;
   const k = keyword?.trim().toLowerCase();
   const result = currentList.filter((card) => {
     // keyword 模糊搜索
@@ -164,7 +172,20 @@ export function getCards(params?: CardQueryParams): ServiceResult<Card[]> {
     return true;
   });
 
-  return success(result.map(cloneCard));
+  let paginatedResult = result;
+  // 分页计算
+  if (page && pageSize) {
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    paginatedResult = result.slice(start, end);
+  }
+
+  return success({
+    list: paginatedResult.map(cloneCard),
+    total: result.length,
+    page,
+    pageSize: pageSize ?? result.length,
+  });
 }
 
 // 根据 id 获取单个卡片
