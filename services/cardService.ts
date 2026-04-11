@@ -201,6 +201,7 @@ export function addCard(card: Omit<Card, 'id'>): ServiceResult<Card> {
   const newCard: Card = {
     id: generateUUID(),
     ...card,
+    createdAt: Date.now(),
   };
   const updatedList = [...currentList, newCard];
   saveCardsToStorage(updatedList);
@@ -217,11 +218,34 @@ export function updateCard(updates: Partial<Card>): ServiceResult<Card> {
   const updatedCard: Card = {
     ...currentList[index],
     ...updates,
+    updatedAt: Date.now(),
   };
   const updatedList = [...currentList];
   updatedList[index] = updatedCard;
   saveCardsToStorage(updatedList);
   return success(cloneCard(updatedCard));
+}
+
+// 批量更新卡片
+export function batchUpdateCards(ids: string[], patch: Partial<Card>): ServiceResult<null> {
+  const currentList = loadCardsFromStorage();
+  // 先检查所有 id 是否都存在
+  for (const id of ids) {
+    if (!currentList.some((item) => item.id === id)) {
+      return fail(`题目 ID ${id} 未找到，无法批量更新`);
+    }
+  }
+  ids.forEach((id) => {
+    const index = currentList.findIndex((item) => item.id === id);
+    const updatedCard: Card = {
+      ...currentList[index],
+      ...patch,
+      updatedAt: Date.now(),
+    };
+    currentList[index] = updatedCard;
+  });
+  saveCardsToStorage(currentList);
+  return success(null);
 }
 
 // 删除卡片
@@ -230,6 +254,20 @@ export function deleteCard(id: string): ServiceResult<null> {
   const nextList = currentList.filter((card) => card.id !== id);
   if (nextList.length === currentList.length) {
     return fail('题目未找到');
+  }
+  saveCardsToStorage(nextList);
+  return success(null);
+}
+
+// 批量删除卡片
+export function batchDeleteCards(ids: string[]): ServiceResult<null> {
+  const currentList = loadCardsFromStorage();
+  const nextList = currentList.filter((card) => !ids.includes(card.id));
+  if (nextList.length === currentList.length) {
+    return fail('没有找到要删除的题目');
+  }
+  if (currentList.length - nextList.length !== ids.length) {
+    return fail('部分题目未找到，无法批量删除');
   }
   saveCardsToStorage(nextList);
   return success(null);

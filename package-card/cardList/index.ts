@@ -1,6 +1,7 @@
 import type { QueryParams, PageOptions, CardStatus, CardView } from '../../types/card';
 import type { quizQuery } from '../../types/quiz';
 import { createCardViewList, loadCardPage, loadCategories } from '../../view-model/card-view';
+import { batchDeleteCards, batchUpdateCards } from '../../services/cardService';
 
 const PAGE_SIZE = 10;
 
@@ -28,6 +29,40 @@ function buildStatusTabs(status?: CardStatus): StatusTab[] {
   }));
 }
 
+// 根据 selectedCards 列表更新 cardViewList 中的 isSelected 字段
+function applySelectionState(cardViewList: CardView[], selectedCards: string[]): CardView[] {
+  return cardViewList.map((item) => ({
+    ...item,
+    isSelected: selectedCards.includes(item.id),
+  }));
+}
+
+// 同步转移分类的选择状态，确保在分类列表变化时 selectedTransferCategoryId 始终有效
+function syncTransferCategoryState(
+  categoryOptions: Array<{ id: string; name: string }>,
+  selectedTransferCategoryId: string,
+) {
+  if (categoryOptions.length === 0) {
+    return {
+      selectedTransferCategoryId: '',
+      selectedTransferCategoryName: '',
+      selectedTransferCategoryIndex: 0,
+    };
+  }
+
+  const matchedIndex = categoryOptions.findIndex(
+    (category) => category.id === selectedTransferCategoryId,
+  );
+  const fallbackIndex = matchedIndex >= 0 ? matchedIndex : 0;
+  const fallbackCategory = categoryOptions[fallbackIndex];
+
+  return {
+    selectedTransferCategoryId: fallbackCategory.id,
+    selectedTransferCategoryName: fallbackCategory.name,
+    selectedTransferCategoryIndex: fallbackIndex,
+  };
+}
+
 Page({
   data: {
     inputKeyword: '',
@@ -42,6 +77,13 @@ Page({
     isSearchResultMode: false as boolean,
     statusTabs: buildStatusTabs(),
     showQuizSetup: false as boolean,
+    isEditMode: false as boolean,
+    selectedCards: [] as string[],
+    categoryDialogVisible: false as boolean,
+    categoryOptions: [] as Array<{ id: string; name: string }>,
+    selectedTransferCategoryIndex: 0 as number,
+    selectedTransferCategoryId: '' as string,
+    selectedTransferCategoryName: '' as string,
   },
 
   // 解析状态参数，确保它是合法的 CardStatus 值
@@ -117,14 +159,29 @@ Page({
     const categoryList = loadCategories();
     const cardViewList = createCardViewList(list, categoryList);
     const nextCardViewList = reset ? cardViewList : this.data.cardViewList.concat(cardViewList);
+    const nextSelectedCards = reset ? [] : this.data.selectedCards;
+    const transferCategoryState = syncTransferCategoryState(
+      categoryList.map((category) => ({
+        id: category.id,
+        name: category.name,
+      })),
+      this.data.selectedTransferCategoryId,
+    );
 
     this.setData({
-      cardViewList: nextCardViewList,
+      cardViewList: applySelectionState(nextCardViewList, nextSelectedCards),
       currentPage: page,
       total,
       pageSize,
       hasMore: page * pageSize < total,
       isLoading: false,
+      categoryOptions: categoryList.map((category) => ({
+        id: category.id,
+        name: category.name,
+      })),
+      isEditMode: reset ? false : this.data.isEditMode,
+      selectedCards: reset ? [] : this.data.selectedCards,
+      ...transferCategoryState,
     });
   },
 
@@ -187,9 +244,23 @@ Page({
     this.loadData(false);
   },
 
-  // 进入卡片详情
-  goToDetail(event: WechatMiniprogram.BaseEvent) {
+  // 点击卡片多选或进入详情
+  onCardClick(event: WechatMiniprogram.BaseEvent) {
     const id = event.currentTarget.dataset.id;
+    const { isEditMode, selectedCards } = this.data;
+    let arr = [...selectedCards];
+    if (isEditMode) {
+      if (arr.includes(id)) {
+        arr = arr.filter((cardId) => cardId !== id);
+      } else {
+        arr.push(id);
+      }
+      this.setData({
+        selectedCards: arr,
+        cardViewList: applySelectionState(this.data.cardViewList, arr),
+      });
+      return;
+    }
     wx.navigateTo({
       url: `/package-card/cardDetail/index?id=${id}`,
     });
@@ -202,6 +273,133 @@ Page({
       : '';
     wx.navigateTo({
       url: `/package-card/cardEdit/index${query}`,
+    });
+  },
+
+  // 进入编辑模式（长按卡片）
+  onEdit(event: WechatMiniprogram.BaseEvent) {
+    const id = event.currentTarget.dataset.id;
+    const { selectedCards } = this.data;
+    this.setData({
+      isEditMode: true,
+    });
+    if (!selectedCards.includes(id)) {
+      const nextSelectedCards = [...selectedCards, id];
+      this.setData({
+        selectedCards: nextSelectedCards,
+        cardViewList: applySelectionState(this.data.cardViewList, nextSelectedCards),
+      });
+      return;
+    }
+    this.setData({
+      cardViewList: applySelectionState(this.data.cardViewList, selectedCards),
+    });
+  },
+
+  exitEditMode() {
+    this.setData({
+      isEditMode: false,
+      selectedCards: [],
+      cardViewList: applySelectionState(this.data.cardViewList, []),
+    });
+    this.closeCategoryDialog();
+  },
+
+  // 选择转移的分类
+  onTransferCategoryChange(e: WechatMiniprogram.PickerChange) {
+    const { categoryOptions } = this.data;
+    const index = Number(e.detail.value);
+    const category = categoryOptions[index];
+
+    if (category) {
+      this.setData({
+        selectedTransferCategoryId: category.id,
+        selectedTransferCategoryName: category.name,
+        selectedTransferCategoryIndex: index,
+      });
+    }
+  },
+  openCategoryDialog() {
+    const { categoryOptions, selectedCards, selectedTransferCategoryId } = this.data;
+    if (selectedCards.length === 0) {
+      wx.showToast({ title: '请先选择卡片', icon: 'none' });
+      return;
+    }
+
+    const transferCategoryState = syncTransferCategoryState(
+      categoryOptions,
+      selectedTransferCategoryId,
+    );
+
+    this.setData({
+      ...transferCategoryState,
+      categoryDialogVisible: true,
+    });
+  },
+
+  closeCategoryDialog() {
+    this.setData({
+      categoryDialogVisible: false,
+    });
+  },
+
+  // 选择分类并转移
+  selectCategory() {
+    this.openCategoryDialog();
+  },
+
+  confirmTransferCategory() {
+    const { selectedCards, selectedTransferCategoryId } = this.data;
+    if (selectedCards.length === 0) {
+      wx.showToast({ title: '请先选择卡片', icon: 'none' });
+      return;
+    }
+
+    if (!selectedTransferCategoryId) {
+      wx.showToast({ title: '请选择分类', icon: 'none' });
+      return;
+    }
+
+    const res = batchUpdateCards(selectedCards, {
+      categoryId: selectedTransferCategoryId,
+    });
+
+    if (res.success) {
+      wx.showToast({ title: '转移成功', icon: 'success' });
+      this.closeCategoryDialog();
+      this.exitEditMode();
+      this.loadData(true);
+      return;
+    }
+
+    wx.showToast({ title: res.message || '转移失败', icon: 'none' });
+  },
+
+  // 批量删除
+  batchDelete() {
+    const { selectedCards } = this.data;
+    if (selectedCards.length === 0) {
+      wx.showToast({ title: '请至少选择一张卡片', icon: 'none' });
+      return;
+    }
+
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除选中的 ${selectedCards.length} 张卡片吗？不可恢复`,
+      confirmText: '删除',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          const { success, message } = batchDeleteCards(selectedCards);
+          if (success) {
+            wx.showToast({ title: message || '删除成功', icon: 'success' });
+            this.exitEditMode();
+            this.loadData(true);
+          } else {
+            wx.showToast({ title: message || '删除失败，请重试', icon: 'none' });
+          }
+        }
+      },
     });
   },
 });

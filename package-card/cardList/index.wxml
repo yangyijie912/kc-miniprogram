@@ -1,6 +1,5 @@
-<!--index.wxml-->
-<scroll-view class="scrollarea" scroll-y type="list" bindscrolltolower="onReachBottom" lower-threshold="120">
-  <view class="page">
+<view class="page">
+  <scroll-view class="scrollarea page-scroll" scroll-y bindscrolltolower="onReachBottom" lower-threshold="120">
     <view wx-if="{{!isSearchResultMode}}" class="toolbar">
       <input
         value="{{ inputKeyword }}"
@@ -25,30 +24,43 @@
             class="filter-chip {{ item.active ? 'active' : '' }}"
             bindtap="toggleStatusFilter"
             data-value="{{ item.value }}"
-          >{{ item.label }}</view
-        >
+          >{{ item.label }}</view>
       </view>
 
       <view class="page-actions">
-        <view wx-if="{{showQuizAction}}" class="action-tool quiz-btn" bindtap="openQuizSetup">
-          <text class="action-tool-icon">▷</text>
+        <view class="page-actions-copy">
+          <view class="page-actions-title">批量操作</view>
+          <view class="page-actions-desc">长按卡片进入多选，支持转移分类与删除</view>
         </view>
-        <view class="action-tool add-btn" bindtap="goToAddCard">
-          <text class="action-tool-icon">+</text>
+
+        <view class="page-actions-body">
+          <view wx-if="{{showQuizAction}}" class="action-tool quiz-btn" bindtap="openQuizSetup">
+            <text class="action-tool-icon">▷</text>
+          </view>
+          <view class="action-tool add-btn" bindtap="goToAddCard">
+            <text class="action-tool-icon">+</text>
+          </view>
         </view>
       </view>
     </view>
 
-    <view class="card-list">
+    <view class="card-list {{ isEditMode ? 'is-editing' : '' }}">
       <view
         wx:for="{{cardViewList}}"
         wx:for-item="item"
         wx:for-index="index"
         wx:key="id"
-        class="card-item"
-        bindtap="goToDetail"
+        class="card-item {{ isEditMode ? 'is-editing' : '' }} {{ item.isSelected ? 'is-selected' : '' }}"
+        bindtap="onCardClick"
+        bindlongpress="onEdit"
         data-id="{{ item.id }}"
       >
+        <view
+          wx:if="{{isEditMode}}"
+          class="card-check {{ item.isSelected ? 'selected' : '' }}"
+        >
+          <view class="card-check-dot"></view>
+        </view>
         <view class="card-top">
           <view class="card-title">
             <view class="card-category">{{ item.categoryName }}</view>
@@ -62,22 +74,65 @@
         <view class="card-answer">{{ item.answer }}</view>
       </view>
 
-      <view wx-if="{{ cardViewList.length === 0 }}" class="result-banner">
+      <view wx:if="{{ cardViewList.length === 0 }}" class="result-banner">
         <view class="result-title">没有找到相关卡片</view>
         <view class="result-keyword">试试调整搜索关键词或筛选条件？</view>
       </view>
+    </view>
 
-      <view wx-if="{{ cardViewList.length > 0 }}" class="list-footer">
-        <view wx-if="{{ isLoading }}" class="list-footer-text">正在加载更多...</view>
-        <view wx:elif="{{ !hasMore }}" class="list-footer-text">没有更多了</view>
+    <view class="list-footer">
+      <view wx:if="{{ isLoading }}" class="list-footer-text is-loading">正在加载更多...</view>
+      <view wx:elif="{{ !hasMore }}" class="list-footer-text">没有更多了</view>
+    </view>
+
+    <view wx:if="{{isEditMode}}" class="bottom-placeholder"> </view>
+  </scroll-view>
+
+  <view wx:if="{{isEditMode}}" class="batch-bar">
+    <view class="batch-summary">
+      <view class="batch-title">已选 {{ selectedCards.length }} 张</view>
+      <view class="batch-desc">长按继续选择，完成后可批量转移分类或删除</view>
+    </view>
+    <view class="batch-actions">
+      <view class="batch-btn batch-btn-secondary" bindtap="exitEditMode">取消</view>
+      <view class="batch-btn batch-btn-ghost" bindtap="selectCategory">转移分类</view>
+      <view class="batch-btn batch-btn-danger" bindtap="batchDelete">删除</view>
+    </view>
+  </view>
+
+  <base-dialog
+    open="{{categoryDialogVisible}}"
+    title="选择分类"
+    showFooter="{{false}}"
+    bind:close="closeCategoryDialog"
+  >
+    <view class="category-dialog">
+      <view class="category-dialog-tip">请选择要转移到的分类，确认后会批量更新已选卡片。</view>
+      <picker
+        range="{{categoryOptions}}"
+        range-key="name"
+        value="{{selectedTransferCategoryIndex}}"
+        bindchange="onTransferCategoryChange"
+      >
+        <view class="transfer-picker {{ !selectedTransferCategoryName ? 'placeholder' : '' }}">
+          {{ selectedTransferCategoryName || '请选择分类' }}
+        </view>
+      </picker>
+      <view class="transfer-picker-hint">
+        当前选择：{{ selectedTransferCategoryName || '未选择' }}
       </view>
     </view>
 
-    <quiz-setup-sheet
-      open="{{showQuizSetup}}"
-      categoryId="{{queryParams.categoryId || ''}}"
-      bind:close="closeQuizSetup"
-      bind:start="startQuizWithCurrentUI"
-    />
-  </view>
-</scroll-view>
+    <view class="dialog-footer-default">
+      <view class="btn btn-cancel" bindtap="closeCategoryDialog">取消</view>
+      <view class="btn btn-confirm" bindtap="confirmTransferCategory">转移分类</view>
+    </view>
+  </base-dialog>
+
+  <quiz-setup-sheet
+    open="{{showQuizSetup}}"
+    categoryId="{{queryParams.categoryId || ''}}"
+    bind:close="closeQuizSetup"
+    bind:start="startQuizWithCurrentUI"
+  />
+</view>

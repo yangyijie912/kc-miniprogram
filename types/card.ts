@@ -48,6 +48,7 @@ export interface CardView extends Card {
   categoryName?: string;
   tagText?: string;
   statusName?: string;
+  isSelected?: boolean;
 }
 
 // 定义查询参数类型

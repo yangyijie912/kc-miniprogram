@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "列表",
   "usingComponents": {
-    "quiz-setup-sheet": "/components/quiz-setup-sheet/index"
+    "quiz-setup-sheet": "/components/quiz-setup-sheet/index",
+    "base-dialog": "/package-card/components/base-dialog/index"
   }
 }
