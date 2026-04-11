@@ -7,9 +7,21 @@ Page({
       const fileData = await pickImportData();
       const res = await importFromJsonFile(fileData);
       if (res.success && res.data) {
+        const {
+          newCategoryCount,
+          newCardCount,
+          skippedCategoryCount,
+          skippedCardCount,
+          overwrittenCardCount,
+        } = res.data;
+        const content = [
+          `新增 ${newCategoryCount} 个分类，${newCardCount} 张卡片。`,
+          `跳过 ${skippedCategoryCount} 个分类，${skippedCardCount} 张卡片。`,
+          `覆盖 ${overwrittenCardCount} 张卡片。`,
+        ].join('\n');
         wx.showModal({
           title: '导入成功',
-          content: `成功导入 ${res.data.categoryViewCount || 0} 个分类和 ${res.data.cardCount || 0} 张卡片`,
+          content,
           showCancel: false,
         });
       } else {

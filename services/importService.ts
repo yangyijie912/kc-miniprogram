@@ -105,6 +105,15 @@ function parseImportData(jsonStr: string): ImportData {
  * 分类名优先，ID 只拿来辅助判断；同名视为同类，不同名再看是不是 ID 冲突，冲突就新建分类
  */
 
+// 导入结果统计对象，记录整个导入过程中各种情况的数量，最终返回给用户
+const countTotal = {
+  newCategoryCount: 0,
+  newCardCount: 0,
+  skippedCategoryCount: 0,
+  skippedCardCount: 0,
+  overwrittenCardCount: 0,
+};
+
 type MergeCategoriesResult = {
   mergedCategories: Category[];
   importedCategoryMap: Map<string, string>; // key: 导入分类ID，value: 系统分类ID，用于后续关联卡片时转换导入的 categoryId
@@ -126,12 +135,14 @@ function mergeCategories(
     const importedName = importedCategory.name.trim();
     const importedId = importedCategory.id;
     if (!importedName) {
+      countTotal.skippedCategoryCount += 1;
       continue; // 跳过名称为空的分类
     }
 
     // 未分类是系统保留分类，直接跳过
     if (importedId === UNCATEGORIZED_ID || importedName === UNCATEGORIZED_NAME) {
       importedCategoryMap.set(importedId, UNCATEGORIZED_ID); // 无论ID还是名称匹配，都映射到系统的未分类ID
+      countTotal.skippedCategoryCount += 1;
       continue;
     }
 
@@ -141,6 +152,7 @@ function mergeCategories(
     // 1、按名称匹配，认为是同一个分类，不重复添加
     if (nameMatch) {
       importedCategoryMap.set(importedId, nameMatch.id);
+      countTotal.skippedCategoryCount += 1;
       continue;
     }
 
@@ -155,6 +167,7 @@ function mergeCategories(
       importedCategoryMap.set(importedId, newCategory.id);
       nameMap.set(importedName, newCategory); // 更新名称映射，避免后续同名分类重复添加
       idMap.set(importedId, newCategory); // 更新ID映射，避免后续ID冲突重复添加
+      countTotal.newCategoryCount += 1;
       continue;
     }
 
@@ -167,6 +180,7 @@ function mergeCategories(
     importedCategoryMap.set(importedId, newCategory.id);
     nameMap.set(importedName, newCategory);
     idMap.set(importedId, newCategory);
+    countTotal.newCategoryCount += 1;
   }
 
   return {
@@ -206,6 +220,7 @@ function normalizeImportedCard(rawCard: RawCard, mergeResult: MergeCategoriesRes
     console.warn(
       `[importService] 导入卡片数据不完整，缺少 question 或 answer 字段，已跳过。rawCard=${JSON.stringify(rawCard)}`,
     );
+    countTotal.skippedCardCount += 1;
     return null; // 跳过数据不完整的卡片
   }
   return {
@@ -232,6 +247,12 @@ function mergeCards(
     const normalizedCard = normalizeImportedCard(rawCard, mergeResult);
     if (normalizedCard) {
       cardsMap.set(normalizedCard.id, normalizedCard); // ID 冲突时覆盖原有卡片
+      const existed = cardsMap.has(normalizedCard.id);
+      if (existed) {
+        countTotal.overwrittenCardCount += 1;
+      } else {
+        countTotal.newCardCount += 1;
+      }
     }
   }
 
@@ -240,6 +261,12 @@ function mergeCards(
 
 // 最终导入流程
 export async function importFromJsonFile(jsonStr: string): Promise<ServiceResult<ImportResult>> {
+  // 重置计数器，确保每次导入都是独立统计
+  countTotal.newCategoryCount = 0;
+  countTotal.newCardCount = 0;
+  countTotal.skippedCategoryCount = 0;
+  countTotal.skippedCardCount = 0;
+  countTotal.overwrittenCardCount = 0;
   try {
     // 1、解析数据
     const importData = parseImportData(jsonStr);
@@ -264,6 +291,11 @@ export async function importFromJsonFile(jsonStr: string): Promise<ServiceResult
       categoryCount: mergedCategories.length,
       categoryViewCount: getVisibleCategoryCount(mergedCategories, mergedCards),
       cardCount: mergedCards.length,
+      newCategoryCount: countTotal.newCategoryCount,
+      newCardCount: countTotal.newCardCount,
+      skippedCategoryCount: countTotal.skippedCategoryCount,
+      skippedCardCount: countTotal.skippedCardCount,
+      overwrittenCardCount: countTotal.overwrittenCardCount,
     });
   } catch (error: unknown) {
     return fail(error instanceof Error ? error.message : '导入失败');
