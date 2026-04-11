@@ -1,11 +1,11 @@
-import { CARD_STORAGE_KEY, DAILY_QUIZ_SESSION_KEY } from '../constants/storageKeys';
-import type { ServiceResult } from '../types/service';
-import { success, fail } from './serviceHelper';
-import { shuffle } from '../utils/arrayUtils';
-import type { Card, CardView } from '../types/card';
-import type { DailyQuizSession, quizQuery, QuizResultSummary } from '../types/quiz';
-import { getCategories } from './categoryService';
-import { toCardViews } from '../utils/cardView';
+import { CARD_STORAGE_KEY, DAILY_QUIZ_SESSION_KEY } from '@/constants/storageKeys';
+import type { ServiceResult } from '@/types/service';
+import { success, fail } from '@/services/serviceHelper';
+import { shuffle } from '@/utils/arrayUtils';
+import type { Card, CardView } from '@/types/card';
+import type { DailyQuizSession, quizQuery, QuizResultSummary } from '@/types/quiz';
+import { getCategories } from '@/services/categoryService';
+import { toCardViews } from '@/utils/cardView';
 
 // 每日测验的题目数量限制，默认值为10
 export const dailyQuizLimit = 10;

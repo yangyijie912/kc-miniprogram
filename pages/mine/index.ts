@@ -1,5 +1,5 @@
-import { exportToJson } from '../../services/exportService';
-import { pickImportData, importFromJsonFile } from '../../services/importService';
+import { exportToJson } from '@/services/exportService';
+import { pickImportData, importFromJsonFile } from '@/services/importService';
 
 Page({
   async importData() {

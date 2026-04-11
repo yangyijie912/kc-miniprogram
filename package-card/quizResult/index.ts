@@ -1,5 +1,5 @@
-import { jsonToUrlParam } from '../utils/jsonToUrl';
-import type { quizQuery, QuizResultSummary } from '../../types/quiz';
+import { jsonToUrlParam } from '@/package-card/utils/jsonToUrl';
+import type { quizQuery, QuizResultSummary } from '@/types/quiz';
 
 Page({
   data: {

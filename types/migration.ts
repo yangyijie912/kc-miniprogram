@@ -1,4 +1,4 @@
-import type { Card, Category } from './card';
+import type { Card, Category } from '@/types/card';
 
 export type ExportType = 'json';
 export type ImportType = 'json';

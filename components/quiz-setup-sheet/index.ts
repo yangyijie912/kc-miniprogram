@@ -1,6 +1,6 @@
-import type { quizQuery } from '../../types/quiz';
-import { getWindowStyles } from '../../utils/layout';
-import { dailyQuizLimit } from '../../services/quizService';
+import type { quizQuery } from '@/types/quiz';
+import { getWindowStyles } from '@/utils/layout';
+import { dailyQuizLimit } from '@/services/quizService';
 
 // 计算测验模式选项的文本描述
 function getPracticeModeText(mode: quizQuery['mode']): string {

@@ -1,7 +1,7 @@
-import type { QueryParams, PageOptions, CardStatus, CardView } from '../../types/card';
-import type { quizQuery } from '../../types/quiz';
-import { createCardViewList, loadCardPage, loadCategories } from '../../view-model/card-view';
-import { batchDeleteCards, batchUpdateCards } from '../../services/cardService';
+import type { QueryParams, PageOptions, CardStatus, CardView } from '@/types/card';
+import type { quizQuery } from '@/types/quiz';
+import { createCardViewList, loadCardPage, loadCategories } from '@/view-model/card-view';
+import { batchDeleteCards, batchUpdateCards } from '@/services/cardService';
 
 const PAGE_SIZE = 10;
 

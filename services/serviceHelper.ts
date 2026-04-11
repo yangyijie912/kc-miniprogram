@@ -1,4 +1,4 @@
-import type { ServiceResult } from '../types/service';
+import type { ServiceResult } from '@/types/service';
 
 export function success<T>(data?: T, message?: string): ServiceResult<T> {
   return {

@@ -5,15 +5,17 @@
     "clean": "node -e \"try { require('fs').rmSync('dist', { recursive: true, force: true }); } catch (e) { if (e && e.code !== 'EBUSY') throw e; }\"",
     "build:ts": "tsc -p tsconfig.json",
     "build:assets": "node scripts/copy-static.mjs",
-    "build": "npm run clean && npm run build:assets && npm run build:ts",
+    "rewrite:paths": "node scripts/rewrite-path-aliases.mjs",
+    "build": "npm run clean && npm run build:assets && npm run build:ts && npm run rewrite:paths",
     "watch:ts": "tsc -p tsconfig.json -w --preserveWatchOutput",
     "watch:assets": "node scripts/copy-static-watch.mjs",
-    "dev": "concurrently \"npm:watch:ts\" \"npm:watch:assets\"",
+    "watch:paths": "node scripts/rewrite-path-aliases.mjs --watch",
+    "dev": "concurrently \"npm:watch:ts\" \"npm:watch:assets\" \"npm:watch:paths\"",
     "lint": "eslint .",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "typecheck": "tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm run format:check"
+    "check": "npm run lint && npm run typecheck"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

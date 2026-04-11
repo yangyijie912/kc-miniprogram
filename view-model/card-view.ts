@@ -1,11 +1,11 @@
-import type { Card, Category, CategoryView, CardView } from '../types/card';
-import type { PageResult } from '../types/common';
-import type { ServiceResult } from '../types/service';
-import { getCards } from '../services/cardService';
-import { getCategories } from '../services/categoryService';
-import { UNCATEGORIZED_ID } from '../constants/category';
-import { getCategoryTheme } from '../utils/categoryTheme';
-import { toCardViews } from '../utils/cardView';
+import type { Card, Category, CategoryView, CardView } from '@/types/card';
+import type { PageResult } from '@/types/common';
+import type { ServiceResult } from '@/types/service';
+import { getCards } from '@/services/cardService';
+import { getCategories } from '@/services/categoryService';
+import { UNCATEGORIZED_ID } from '@/constants/category';
+import { getCategoryTheme } from '@/utils/categoryTheme';
+import { toCardViews } from '@/utils/cardView';
 
 export type CategoryViewPageData = {
   cardList: Card[];

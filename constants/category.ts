@@ -1,4 +1,4 @@
-import type { Category } from '../types/card';
+import type { Category } from '@/types/card';
 
 export const UNCATEGORIZED_ID = 'uncategorized';
 export const UNCATEGORIZED_NAME = '未分类';

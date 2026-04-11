@@ -1,5 +1,5 @@
-import { cardStatusTextMap } from '../constants/cardStatus';
-import type { Card, CardView, Category } from '../types/card';
+import { cardStatusTextMap } from '@/constants/cardStatus';
+import type { Card, CardView, Category } from '@/types/card';
 
 // 创建一个映射，将分类ID映射到分类名称，方便在转换卡片视图时使用
 export function createCategoryNameMap(categoryList: Category[]): Map<string, string> {

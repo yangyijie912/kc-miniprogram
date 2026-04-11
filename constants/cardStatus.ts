@@ -1,4 +1,4 @@
-import type { CardStatus } from '../types/card';
+import type { CardStatus } from '@/types/card';
 
 export const cardStatusTextMap: Record<CardStatus, string> = {
   unknown: '未知',

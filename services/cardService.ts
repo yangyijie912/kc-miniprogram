@@ -1,12 +1,12 @@
-import cards from '../data/cards';
-import categories from '../data/category';
-import { UNCATEGORIZED_ID } from '../constants/category';
-import { CARD_STORAGE_KEY } from '../constants/storageKeys';
-import type { Card, Category, RawCard } from '../types/card';
-import type { ServiceResult } from '../types/service';
-import type { PageResult } from '../types/common';
-import { success, fail } from './serviceHelper';
-import { generateUUID } from '../utils/uuid';
+import cards from '@/data/cards';
+import categories from '@/data/category';
+import { UNCATEGORIZED_ID } from '@/constants/category';
+import { CARD_STORAGE_KEY } from '@/constants/storageKeys';
+import type { Card, Category, RawCard } from '@/types/card';
+import type { ServiceResult } from '@/types/service';
+import type { PageResult } from '@/types/common';
+import { success, fail } from '@/services/serviceHelper';
+import { generateUUID } from '@/utils/uuid';
 
 const defaultCategories = categories as Category[];
 const defaultCategoryIdByName = new Map(

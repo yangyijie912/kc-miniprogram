@@ -1,5 +1,5 @@
-import { loadAllViewData, type CategoryViewPageData } from '../../view-model/card-view';
-import { deleteCategory } from '../../services/categoryService';
+import { loadAllViewData, type CategoryViewPageData } from '@/view-model/card-view';
+import { deleteCategory } from '@/services/categoryService';
 
 Page({
   data: {

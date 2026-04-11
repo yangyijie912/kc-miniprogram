@@ -1,4 +1,4 @@
-import { addCategory, updateCategory, getCategoryById } from '../../services/categoryService';
+import { addCategory, updateCategory, getCategoryById } from '@/services/categoryService';
 
 Page({
   data: {

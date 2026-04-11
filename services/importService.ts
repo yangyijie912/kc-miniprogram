@@ -1,11 +1,11 @@
-import { getCategories, saveAllCategories } from './categoryService';
-import { getCards, saveAllCards } from './cardService';
-import { fail, success } from './serviceHelper';
-import { generateUUID } from '../utils/uuid';
-import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from '../constants/category';
-import type { ImportData, ImportResult } from '../types/migration';
-import type { RawCard, Card, Category } from '../types/card';
-import type { ServiceResult } from '../types/service';
+import { getCategories, saveAllCategories } from '@/services/categoryService';
+import { getCards, saveAllCards } from '@/services/cardService';
+import { fail, success } from '@/services/serviceHelper';
+import { generateUUID } from '@/utils/uuid';
+import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from '@/constants/category';
+import type { ImportData, ImportResult } from '@/types/migration';
+import type { RawCard, Card, Category } from '@/types/card';
+import type { ServiceResult } from '@/types/service';
 
 /**
  * ==============================================================

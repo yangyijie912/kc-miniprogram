@@ -1,4 +1,4 @@
-import MarkdownIt from './markdown-it';
+import MarkdownIt from '@/package-card/components/markdown-content/markdown-it';
 
 const HEADING_STYLES: Record<string, string> = {
   h1: 'font-size: 40rpx; margin: 36rpx 0 18rpx; color: #1e1c18; line-height: 1.45; font-weight: 700;',

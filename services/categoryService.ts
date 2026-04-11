@@ -1,11 +1,11 @@
-import categories from '../data/category';
-import { UNCATEGORIZED_CATEGORY, UNCATEGORIZED_ID } from '../constants/category';
-import { CATEGORY_STORAGE_KEY } from '../constants/storageKeys';
-import type { Category } from '../types/card';
-import type { ServiceResult } from '../types/service';
-import { generateUUID } from '../utils/uuid';
-import { success, fail } from './serviceHelper';
-import { getCards, updateCard } from './cardService';
+import categories from '@/data/category';
+import { UNCATEGORIZED_CATEGORY, UNCATEGORIZED_ID } from '@/constants/category';
+import { CATEGORY_STORAGE_KEY } from '@/constants/storageKeys';
+import type { Category } from '@/types/card';
+import type { ServiceResult } from '@/types/service';
+import { generateUUID } from '@/utils/uuid';
+import { success, fail } from '@/services/serviceHelper';
+import { getCards, updateCard } from '@/services/cardService';
 
 // 固定的未分类ID，确保在任何情况下都存在一个未分类
 export const uncategorizedId = UNCATEGORIZED_ID;

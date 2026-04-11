@@ -1,5 +1,5 @@
-import { loadAllViewData, type CategoryViewPageData } from '../../view-model/card-view';
-import type { quizQuery } from '../../types/quiz';
+import { loadAllViewData, type CategoryViewPageData } from '@/view-model/card-view';
+import type { quizQuery } from '@/types/quiz';
 
 Page({
   data: {

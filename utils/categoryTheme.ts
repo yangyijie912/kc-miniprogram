@@ -1,4 +1,4 @@
-import { CATEGORY_THEMES } from '../constants/themes';
+import { CATEGORY_THEMES } from '@/constants/themes';
 
 // 通过字符串生成一个稳定的哈希值，确保同一个字符串总是得到同一个哈希值
 function hashString(value: string) {

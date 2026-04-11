@@ -1,6 +1,6 @@
-import type { Category } from '../../types/card';
-import { getCategories } from '../../services/categoryService';
-import { getCardById, updateCard, addCard, deleteCard } from '../../services/cardService';
+import type { Category } from '@/types/card';
+import { getCategories } from '@/services/categoryService';
+import { getCardById, updateCard, addCard, deleteCard } from '@/services/cardService';
 
 Page({
   data: {

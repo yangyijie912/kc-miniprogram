@@ -1,12 +1,12 @@
-import { updateCard } from '../../services/cardService';
+import { updateCard } from '@/services/cardService';
 import {
   getFreedomQuizQuestions,
   getDailyQuizSession,
   updateDailyQuizSessionProgress,
-} from '../../services/quizService';
-import { jsonToUrlParam } from '../utils/jsonToUrl';
-import type { CardStatus, CardView } from '../../types/card';
-import type { quizQuery, QuizResultSummary } from '../../types/quiz';
+} from '@/services/quizService';
+import { jsonToUrlParam } from '@/package-card/utils/jsonToUrl';
+import type { CardStatus, CardView } from '@/types/card';
+import type { quizQuery, QuizResultSummary } from '@/types/quiz';
 
 Page({
   data: {

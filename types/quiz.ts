@@ -1,4 +1,4 @@
-import type { CardView } from '../types/card';
+import type { CardView } from '@/types/card';
 
 // 测验页面查询参数类型定义
 export type quizQuery = {

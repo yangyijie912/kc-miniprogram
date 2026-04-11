@@ -1,8 +1,8 @@
-import type { Card } from '../../types/card';
-import { getCardById } from '../../services/cardService';
-import { getCategoryById } from '../../services/categoryService';
-import { UNCATEGORIZED_NAME } from '../../constants/category';
-import { cardStatusTextMap } from '../../constants/cardStatus';
+import type { Card } from '@/types/card';
+import { getCardById } from '@/services/cardService';
+import { getCategoryById } from '@/services/categoryService';
+import { UNCATEGORIZED_NAME } from '@/constants/category';
+import { cardStatusTextMap } from '@/constants/cardStatus';
 
 Page({
   data: {
