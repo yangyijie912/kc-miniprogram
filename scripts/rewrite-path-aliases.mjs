@@ -77,31 +77,48 @@ function resolveAliasTarget(specifier) {
   return candidates.find((candidate) => existsSync(candidate)) || null;
 }
 
+// 解析 TypeScript 可能压成裸名字的本地模块引用，例如同目录的 serviceHelper
+function resolveBareLocalTarget(specifier, filePath) {
+  if (specifier.startsWith('.') || specifier.startsWith('/')) {
+    return null;
+  }
+
+  const directory = path.dirname(filePath);
+  const candidates = [
+    path.join(directory, `${specifier}.js`),
+    path.join(directory, `${specifier}.cjs`),
+    path.join(directory, `${specifier}.mjs`),
+    path.join(directory, `${specifier}.json`),
+    path.join(directory, specifier, 'index.js'),
+    path.join(directory, specifier, 'index.cjs'),
+    path.join(directory, specifier, 'index.mjs'),
+    path.join(directory, specifier, 'index.json'),
+  ];
+
+  return candidates.find((candidate) => existsSync(candidate)) || null;
+}
+
 // 计算从 fromFilePath 到 targetPath 的相对模块路径，并去掉 .js、.cjs、.mjs 后缀
 function toRelativeModuleSpecifier(fromFilePath, targetPath) {
   // 利用 path.relative 计算相对路径
   const relativePath = toPosixPath(path.relative(path.dirname(fromFilePath), targetPath));
-
-  if (relativePath.endsWith('.js')) {
-    return relativePath.slice(0, -3);
-  }
-
-  if (relativePath.endsWith('.cjs') || relativePath.endsWith('.mjs')) {
-    return relativePath.slice(0, -4);
-  }
-
-  return relativePath;
+  const normalizedPath =
+    relativePath.startsWith('.') || relativePath.startsWith('/')
+      ? relativePath
+      : `./${relativePath}`;
+  return normalizedPath;
 }
 
 // 对单个JS文件重写源代码中的路径别名
 function rewriteSourceText(sourceText, filePath) {
   // 这个正则匹配 require('...')、import('...')、import ... from '...' 这三种形式的模块引入，并捕获模块路径
-  const pattern = /(require\(\s*|from\s+|import\(\s*|import\s+)(['"])(@\/[^'"]+)\2/g;
+  const pattern = /(require\(\s*|from\s+|import\(\s*|import\s+)(['"])([^'"]+)\2/g;
 
   // 对文件源码每个匹配项，解析模块路径并替换成相对路径
   // match 是整个匹配的字符串，prefix 是 require(、from 或 import( 这些引入前缀，quote 是引号，specifier 是模块路径
   return sourceText.replace(pattern, (match, prefix, quote, specifier) => {
-    const resolvedTarget = resolveAliasTarget(specifier);
+    const resolvedTarget =
+      resolveAliasTarget(specifier) || resolveBareLocalTarget(specifier, filePath);
 
     if (!resolvedTarget) {
       return match;

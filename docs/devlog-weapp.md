@@ -186,3 +186,14 @@
 关键改动：
 
 - rewrite-path-aliases.mjs：新增 watch 模式的支持，使用 chokidar 监听 src 目录下的文件变更事件，在文件发生变化时执行路径别名重写操作。添加了防抖处理，避免在短时间内多次变更时重复执行重写操作。监听 SIGINT 信号，在按 Ctrl+C 时优雅地关闭文件监视器并退出进程。
+
+**04.20**
+
+修复开发模式下 dist 产物的路径解析问题，确保微信开发者工具可以正常运行
+
+关键改动：
+
+- 将 TypeScript 升级到 6.0.3，并同步调整 tsconfig.json，消除编辑器里关于 `ignoreDeprecations`、`moduleResolution` 和 `baseUrl` 的红线告警。
+- 补齐 cardEdit 页面在 TS 6 下暴露出来的隐式 any 类型问题，避免构建阶段新增类型错误。
+- 调整 rewrite-path-aliases.mjs 的重写逻辑，统一处理本地模块的别名引用和裸模块引用，确保 dist 里的 JS 运行时路径能够被小程序正确解析。
+- 重新验证 `npm run build` 和 `npm run watch:ts`，确认构建链路和监听模式都恢复正常。
