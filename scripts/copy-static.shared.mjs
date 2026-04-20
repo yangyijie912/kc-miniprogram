@@ -206,7 +206,7 @@ export async function syncVendorModulesToDist() {
 
     if (!existsSync(dependencySource)) {
       throw new Error(
-        `[copy-static] 找不到分包依赖 "${dependencyName}"，请先安装它，或检查 package-card/package.json 中的依赖声明。期望路径：${dependencySource}`,
+        `[copy-static] 找不到分包依赖 "${dependencyName}"，请运行 npm install markdown-it@14.1.1 --no-save 安装它，或检查 package-card/package.json 中的依赖声明。期望路径：${dependencySource}`,
       );
     }
 

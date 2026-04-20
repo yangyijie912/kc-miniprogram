@@ -22,7 +22,7 @@ Page({
     const res = getCategories();
     if (res.success && res.data) {
       if (categoryId) {
-        const categoryInfo = res.data.find((cat) => cat.id === categoryId);
+        const categoryInfo = res.data.find((cat: Category) => cat.id === categoryId);
         if (categoryInfo) {
           this.setData({
             'formData.categoryName': categoryInfo.name,
@@ -57,7 +57,9 @@ Page({
     }
 
     const card = res.data;
-    const categoryInfo = this.data.categoryOptions.find((cat) => cat.id === card.categoryId);
+    const categoryInfo = this.data.categoryOptions.find(
+      (cat: Category) => cat.id === card.categoryId,
+    );
     this.setData({
       'formData.categoryId': card.categoryId,
       'formData.categoryName': categoryInfo ? categoryInfo.name : '',
@@ -153,8 +155,8 @@ Page({
       content: form.content ? form.content.trim() : '',
       tags: form.tagsText
         .split(/[,、，]/)
-        .map((tag) => tag.trim())
-        .filter((tag) => tag),
+        .map((tag: string) => tag.trim())
+        .filter((tag: string) => tag),
     };
 
     const res = cardId ? updateCard({ id: cardId, ...params }) : addCard(params);
