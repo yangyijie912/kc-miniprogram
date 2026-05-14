@@ -1,4 +1,4 @@
-import { updateCard } from '@/services/cardService';
+import { updateDailyLearningStats } from '@/services/cardService';
 import {
   getFreedomQuizQuestions,
   getDailyQuizSession,
@@ -153,7 +153,8 @@ Page({
   // 状态更新接口
   changeStatus(cardId: string | undefined, status: CardStatus) {
     if (!cardId) return;
-    const res = updateCard({ id: cardId, status });
+    // 测验场景统一走服务层的专用接口，保证状态时间字段和学习统计口径一起更新。
+    const res = updateDailyLearningStats(cardId, status);
     if (!res.success) {
       wx.showToast({
         title: res.message || '状态更新失败',

@@ -223,6 +223,7 @@ function normalizeImportedCard(rawCard: RawCard, mergeResult: MergeCategoriesRes
     countTotal.skippedCardCount += 1;
     return null; // 跳过数据不完整的卡片
   }
+  const createdAt = rawCard?.createdAt || Date.now();
   return {
     id: rawCard.id || generateUUID(),
     categoryId: transformImportedCategoryId(rawCard, mergeResult),
@@ -231,8 +232,12 @@ function normalizeImportedCard(rawCard: RawCard, mergeResult: MergeCategoriesRes
     content: rawCard?.content,
     tags: rawCard?.tags,
     status: rawCard?.status,
-    createdAt: rawCard?.createdAt || Date.now(), // 时间戳
-    updatedAt: rawCard?.updatedAt,
+    createdAt, // 时间戳
+    updatedAt: rawCard?.updatedAt ?? createdAt,
+    statusUpdatedAt: rawCard?.statusUpdatedAt,
+    masteredAt: rawCard?.masteredAt,
+    contentUpdatedAt: rawCard?.contentUpdatedAt,
+    sort: rawCard?.sort ?? Number.MAX_SAFE_INTEGER,
   };
 }
 

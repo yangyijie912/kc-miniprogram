@@ -1,4 +1,4 @@
-import type { Card, Category, CategoryView, CardView } from '@/types/card';
+import type { Card, Category, CategoryView, CardView, CardSortConfig } from '@/types/card';
 import type { PageResult } from '@/types/common';
 import type { ServiceResult } from '@/types/service';
 import { getCards } from '@/services/cardService';
@@ -18,6 +18,7 @@ export type CardQueryParams = Partial<Card> & {
   keyword?: string;
   page?: number;
   pageSize?: number;
+  cardSortConfig?: CardSortConfig;
 };
 
 // 创建一个映射，统计每个分类的卡片数量，格式为 { [categoryId]: count }
@@ -47,7 +48,7 @@ function createCategoryViewList(categoryList: Category[], cardList: Card[]): Cat
         canEdit: !isUncategorized,
         canDelete: !isUncategorized,
         visible: !(isUncategorized && cardCount === 0),
-        theme: getCategoryTheme(category.name),
+        theme: getCategoryTheme(category),
       };
     })
     .filter((category) => category.visible);

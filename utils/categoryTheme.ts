@@ -1,21 +1,96 @@
+import { UNCATEGORIZED_ID } from '@/constants/category';
 import { CATEGORY_THEMES } from '@/constants/themes';
+import type { Category } from '@/types/card';
 
-// 通过字符串生成一个稳定的哈希值，确保同一个字符串总是得到同一个哈希值
+// 通过字符串生成稳定哈希，给旧数据回退主题时继续沿用之前的颜色规则。
 function hashString(value: string) {
   let hash = 0;
 
   for (let i = 0; i < value.length; i += 1) {
-    // 这里使用一个简单的哈希算法，将字符的Unicode值与之前的哈希值进行组合
-    // hash << 5 是将之前的哈希值左移5位，相当于乘以32，这样可以增加哈希值的分布范围
     hash = value.charCodeAt(i) + ((hash << 5) - hash);
   }
 
   return Math.abs(hash);
 }
 
-// 根据类别名称获取对应的主题颜色，使用哈希函数确保同一类别总是得到同一主题
-export function getCategoryTheme(name: string) {
-  // 取余以后将其映射到主题数组的索引范围内
-  const index = hashString(name) % CATEGORY_THEMES.length;
+type CategoryThemeSource = Pick<Category, 'id' | 'name' | 'themeIndex' | 'isSystem'>;
+
+const UNCATEGORIZED_THEME = {
+  background: 'linear-gradient(135deg, #6b7280, #9ca3af)',
+  color: '#f9fafb',
+};
+
+export function isValidCategoryThemeIndex(themeIndex: unknown): themeIndex is number {
+  return (
+    Number.isInteger(themeIndex) &&
+    Number(themeIndex) >= 0 &&
+    Number(themeIndex) < CATEGORY_THEMES.length
+  );
+}
+
+// 旧分类首次升级时使用旧哈希结果补齐 themeIndex，避免名称不变但颜色漂移。
+export function getCategoryThemeIndexByName(name: string) {
+  return hashString(name) % CATEGORY_THEMES.length;
+}
+
+function countThemeUsage(categories: CategoryThemeSource[]) {
+  const usage = Array.from({ length: CATEGORY_THEMES.length }, () => 0);
+
+  categories.forEach((category) => {
+    if (category.id === UNCATEGORIZED_ID || category.isSystem) {
+      return;
+    }
+
+    if (isValidCategoryThemeIndex(category.themeIndex)) {
+      usage[category.themeIndex] += 1;
+    }
+  });
+
+  return usage;
+}
+
+// 新分类优先复用首选主题；如果主题池已经用完，则按最少使用次数轮转复用。
+export function pickAvailableCategoryThemeIndex(
+  categories: CategoryThemeSource[],
+  preferredThemeIndex?: number,
+) {
+  const usage = countThemeUsage(categories);
+
+  if (isValidCategoryThemeIndex(preferredThemeIndex) && usage[preferredThemeIndex] === 0) {
+    return preferredThemeIndex;
+  }
+
+  const minUsage = Math.min(...usage);
+  if (isValidCategoryThemeIndex(preferredThemeIndex) && usage[preferredThemeIndex] === minUsage) {
+    return preferredThemeIndex;
+  }
+
+  const startIndex =
+    categories.filter((category) => category.id !== UNCATEGORIZED_ID && !category.isSystem).length %
+    CATEGORY_THEMES.length;
+
+  for (let offset = 0; offset < CATEGORY_THEMES.length; offset += 1) {
+    const index = (startIndex + offset) % CATEGORY_THEMES.length;
+    if (usage[index] === minUsage) {
+      return index;
+    }
+  }
+
+  return 0;
+}
+
+export function getCategoryTheme(category: CategoryThemeSource | string) {
+  if (typeof category === 'string') {
+    return CATEGORY_THEMES[getCategoryThemeIndexByName(category)];
+  }
+
+  if (category.id === UNCATEGORIZED_ID || category.isSystem) {
+    return UNCATEGORIZED_THEME;
+  }
+
+  const index = isValidCategoryThemeIndex(category.themeIndex)
+    ? category.themeIndex
+    : getCategoryThemeIndexByName(category.name);
+
   return CATEGORY_THEMES[index];
 }

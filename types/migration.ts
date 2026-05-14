@@ -1,4 +1,4 @@
-import type { Card, Category } from '@/types/card';
+import type { Card, Category, DailyLearningStats } from '@/types/card';
 
 export type ExportType = 'json';
 export type ImportType = 'json';
@@ -6,6 +6,7 @@ export type ImportType = 'json';
 export interface ExportData {
   categories: Category[];
   cards: Card[];
+  dailyLearningStats?: DailyLearningStats[];
   version: string;
   exportedAt: number;
 }
@@ -13,6 +14,7 @@ export interface ExportData {
 export interface ImportData {
   categories: Category[];
   cards: Card[];
+  dailyLearningStats?: DailyLearningStats[];
   version: string;
   exportedAt: number;
 }
@@ -27,3 +29,10 @@ export interface ImportResult {
   skippedCardCount: number; // 跳过的卡片数量（不规范的卡片）
   overwrittenCardCount: number; // 覆盖的卡片数量（同 ID 覆盖）
 }
+
+export type ImportMode = 'merge' | 'overwrite';
+
+export type MergeConfig = {
+  statusStrategy?: 'imported' | 'clear';
+  conflictStrategy?: 'overwrite' | 'skip';
+};

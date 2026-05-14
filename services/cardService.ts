@@ -1,19 +1,117 @@
 import cards from '@/data/cards';
 import categories from '@/data/category';
 import { UNCATEGORIZED_ID } from '@/constants/category';
-import { CARD_STORAGE_KEY } from '@/constants/storageKeys';
-import type { Card, Category, RawCard } from '@/types/card';
+import {
+  CATEGORY_STORAGE_KEY,
+  CARD_STORAGE_KEY,
+  DAILY_LEARNING_STATS_KEY,
+} from '@/constants/storageKeys';
+import { SORT_STEP } from '@/constants/sortConfig';
+import { CARD_STATUS_TO_CODE } from '@/constants/cardStatus';
+import type {
+  Card,
+  Category,
+  RawCard,
+  CardSortConfig,
+  DailyLearningStats,
+  CardStatus,
+  CardStatusCode,
+} from '@/types/card';
 import type { ServiceResult } from '@/types/service';
-import type { PageResult } from '@/types/common';
+import type { PageResult, StatsResult } from '@/types/common';
 import { success, fail } from '@/services/serviceHelper';
 import { generateUUID } from '@/utils/uuid';
+import { sortCards } from '@/utils/cardSort';
+import { getStoredDailyQuizSession } from '@/utils/storage';
+import { getDateKey, getTimestampDaysAgo, dateKeyToTimestamp } from '@/utils/date';
 
 const defaultCategories = categories as Category[];
+
+// 默认种子数据里仍然允许 category 名称写法，这里只在初始化阶段把它转换成 categoryId。
 const defaultCategoryIdByName = new Map(
   defaultCategories.map((category) => [category.name, category.id]),
 );
 
-// 只把静态默认卡片映射成可存储的 categoryId，不处理导入时的分类冲突。
+type CategorySortCache = {
+  snapshot: string;
+  categories: Category[];
+};
+
+type CardQueryCache = {
+  version: number;
+  signature: string;
+  result: Card[];
+};
+
+let cardDataVersion = 0;
+let categorySortCache: CategorySortCache | null = null;
+let cardQueryCache: CardQueryCache | null = null;
+const MAX_DAILY_LEARNING_STATS_DAYS = 60;
+
+function cloneCategory(category: Category): Category {
+  return { ...category };
+}
+
+// 查询排序不能只盯着静态 category 数据，要跟当前 storage 里的分类顺序保持一致。
+function loadCategoriesForSort(): CategorySortCache {
+  const saved = wx.getStorageSync(CATEGORY_STORAGE_KEY);
+  const snapshot = saved || '__empty__';
+
+  if (categorySortCache && categorySortCache.snapshot === snapshot) {
+    return {
+      snapshot: categorySortCache.snapshot,
+      categories: categorySortCache.categories.map(cloneCategory),
+    };
+  }
+
+  if (!saved) {
+    const nextCache = {
+      snapshot,
+      categories: [...defaultCategories],
+    };
+    categorySortCache = nextCache;
+    return {
+      snapshot: nextCache.snapshot,
+      categories: nextCache.categories.map(cloneCategory),
+    };
+  }
+
+  try {
+    const savedList = JSON.parse(saved) as Category[];
+    if (!Array.isArray(savedList) || savedList.length === 0) {
+      const nextCache = {
+        snapshot,
+        categories: [...defaultCategories],
+      };
+      categorySortCache = nextCache;
+      return {
+        snapshot: nextCache.snapshot,
+        categories: nextCache.categories.map(cloneCategory),
+      };
+    }
+
+    const nextCache = {
+      snapshot,
+      categories: savedList.map(cloneCategory),
+    };
+    categorySortCache = nextCache;
+    return {
+      snapshot: nextCache.snapshot,
+      categories: nextCache.categories.map(cloneCategory),
+    };
+  } catch {
+    const nextCache = {
+      snapshot,
+      categories: [...defaultCategories],
+    };
+    categorySortCache = nextCache;
+    return {
+      snapshot: nextCache.snapshot,
+      categories: nextCache.categories.map(cloneCategory),
+    };
+  }
+}
+
 function resolveDefaultCategoryId(rawCard: RawCard): string {
   const rawCategoryName = rawCard.category?.trim();
 
@@ -31,9 +129,7 @@ function resolveDefaultCategoryId(rawCard: RawCard): string {
   return UNCATEGORIZED_ID;
 }
 
-// 清洗标签数据，去除空字符串和重复项
 function normalizeTags(tags?: string[]): string[] | undefined {
-  // 使用 Set 来去重，同时保持原有的顺序
   const tagSet = new Set<string>();
   (tags ?? []).forEach((tag) => {
     const normalizedTag = tag.trim();
@@ -44,11 +140,10 @@ function normalizeTags(tags?: string[]): string[] | undefined {
   if (tagSet.size === 0) {
     return undefined;
   }
-  // 将 Set 转换回数组，并返回
   return Array.from(tagSet);
 }
 
-// 清洗卡片数据，确保每个字段都符合预期的格式
+// 统一把卡片对象压成稳定结构，后续无论页面、导入还是统计都基于这一层结果工作。
 function normalizeCard(card: Card): Card {
   return {
     id: card.id,
@@ -60,12 +155,16 @@ function normalizeCard(card: Card): Card {
     status: card.status,
     createdAt: card.createdAt,
     updatedAt: card.updatedAt,
+    statusUpdatedAt: card.statusUpdatedAt,
+    masteredAt: card.masteredAt,
+    contentUpdatedAt: card.contentUpdatedAt,
+    sort: card.sort,
   };
 }
 
-// 将原始卡片数据转换为Card类型
 function toCard(rawCard: RawCard): Card {
   const categoryId = resolveDefaultCategoryId(rawCard);
+  const createdAt = Date.now();
 
   return {
     id: rawCard.id,
@@ -75,16 +174,20 @@ function toCard(rawCard: RawCard): Card {
     content: rawCard.content,
     tags: normalizeTags(rawCard.tags),
     status: rawCard.status,
-    createdAt: rawCard.createdAt,
-    updatedAt: rawCard.updatedAt,
+    createdAt: rawCard.createdAt ?? createdAt,
+    updatedAt: rawCard.updatedAt ?? createdAt,
+    statusUpdatedAt: rawCard.statusUpdatedAt,
+    masteredAt: rawCard.masteredAt,
+    contentUpdatedAt: rawCard.contentUpdatedAt,
+    sort: rawCard.sort ?? Number.MAX_SAFE_INTEGER,
   };
 }
 
-// 默认的卡片列表，从静态数据文件加载
 const defaultCards: Card[] = (cards as RawCard[]).map((rawCard) => toCard(rawCard));
 const defaultCardById = new Map(defaultCards.map((card) => [card.id, cloneCard(card)]));
 
-// 克隆一个卡片对象，确保外部修改不会影响内部数据
+let cardList: Card[] = [];
+
 function cloneCard(card: Card): Card {
   return {
     ...card,
@@ -92,7 +195,7 @@ function cloneCard(card: Card): Card {
   };
 }
 
-// 对已经存在于本地 storage 的旧卡片做轻量迁移：只补齐缺失的 tags，避免覆盖用户自行编辑过的数据。
+// 这一层先只做缺字段补齐，不主动改动用户已有业务数据内容。
 function mergeMissingCardFields(card: Card): Card {
   const defaultCard = defaultCardById.get(card.id);
 
@@ -107,24 +210,62 @@ function mergeMissingCardFields(card: Card): Card {
   });
 }
 
-// 从本地存储加载卡片列表，如果没有则使用默认卡片，并保存到本地存储
 function loadCardsFromStorage(): Card[] {
+  if (cardList.length > 0) {
+    return cardList.map(cloneCard);
+  }
+
   const saved = wx.getStorageSync(CARD_STORAGE_KEY);
   if (saved) {
     const savedCards = JSON.parse(saved) as Card[];
     const normalizedCards = savedCards.map(mergeMissingCardFields);
     saveCardsToStorage(normalizedCards);
     return normalizedCards.map(cloneCard);
-  } else {
-    saveCardsToStorage(defaultCards); // 保存默认卡片到本地存储
-    return defaultCards.map(cloneCard);
   }
+
+  saveCardsToStorage(defaultCards);
+  return defaultCards.map(cloneCard);
 }
 
-// 保存整个卡片列表到本地存储
 function saveCardsToStorage(list: Card[]) {
   const normalizedList = list.map(normalizeCard);
   wx.setStorageSync(CARD_STORAGE_KEY, JSON.stringify(normalizedList));
+  cardList = normalizedList.map(cloneCard);
+  cardDataVersion += 1;
+  cardQueryCache = null;
+}
+
+// 学习统计单独存，避免统计口径完全依赖卡片时间字段，后续调整空间也更大。
+export function loadDailyLearningStats(): DailyLearningStats[] {
+  const saved = wx.getStorageSync(DAILY_LEARNING_STATS_KEY);
+  if (saved) {
+    try {
+      return JSON.parse(saved) as DailyLearningStats[];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+export function saveDailyLearningStats(stats: DailyLearningStats[]) {
+  const trimmedStats = [...stats]
+    .sort((left, right) => dateKeyToTimestamp(left.date) - dateKeyToTimestamp(right.date))
+    .slice(-MAX_DAILY_LEARNING_STATS_DAYS);
+  wx.setStorageSync(DAILY_LEARNING_STATS_KEY, JSON.stringify(trimmedStats));
+}
+
+function hasOwnField<T extends object>(target: T, key: keyof T) {
+  return Object.prototype.hasOwnProperty.call(target, key);
+}
+
+function shouldUpdateContentTimestamp(updates: Partial<Card>) {
+  return (
+    hasOwnField(updates, 'content') ||
+    hasOwnField(updates, 'question') ||
+    hasOwnField(updates, 'answer') ||
+    hasOwnField(updates, 'tags')
+  );
 }
 
 loadCardsFromStorage();
@@ -133,9 +274,89 @@ type CardQueryParams = Partial<Card> & {
   keyword?: string;
   page?: number;
   pageSize?: number;
+  cardSortConfig?: CardSortConfig;
 };
 
-// 根据参数获取卡片
+function buildCardQuerySignature(params: {
+  keyword?: string;
+  filters: Partial<Card>;
+  sortBy: CardSortConfig['sortBy'];
+  order: CardSortConfig['order'];
+  categorySnapshot: string;
+}): string {
+  const filterEntries = Object.entries(params.filters)
+    .filter(([, value]) => value !== undefined)
+    .sort(([key1], [key2]) => key1.localeCompare(key2));
+
+  return [
+    `keyword:${params.keyword || ''}`,
+    `sortBy:${params.sortBy}`,
+    `order:${params.order || 'asc'}`,
+    `categorySnapshot:${params.categorySnapshot}`,
+    ...filterEntries.map(([key, value]) => `${key}:${String(value)}`),
+  ].join('|');
+}
+
+// 先做过滤再做排序，并把结果缓存下来，给同一组查询条件的翻页请求直接复用。
+function getMatchedCards(params: CardQueryParams): Card[] {
+  const { keyword, page, pageSize, cardSortConfig, ...filters } = params;
+  const normalizedKeyword = keyword?.trim().toLowerCase();
+  const defaultSortConfig: CardSortConfig = {
+    sortBy: 'customSort',
+    order: 'asc',
+  };
+  const { sortBy, order } = cardSortConfig || defaultSortConfig;
+  const categorySortState = loadCategoriesForSort();
+  const querySignature = buildCardQuerySignature({
+    keyword: normalizedKeyword,
+    filters,
+    sortBy,
+    order,
+    categorySnapshot: categorySortState.snapshot,
+  });
+
+  if (
+    cardQueryCache &&
+    cardQueryCache.version === cardDataVersion &&
+    cardQueryCache.signature === querySignature
+  ) {
+    return cardQueryCache.result;
+  }
+
+  const currentList = loadCardsFromStorage();
+  const filteredList = currentList.filter((card) => {
+    if (normalizedKeyword) {
+      const matchKeyword =
+        card.question.toLowerCase().includes(normalizedKeyword) ||
+        card.answer.toLowerCase().includes(normalizedKeyword) ||
+        card.content?.toLowerCase().includes(normalizedKeyword) ||
+        card.tags?.some((tag) => tag.toLowerCase().includes(normalizedKeyword));
+
+      if (!matchKeyword) {
+        return false;
+      }
+    }
+
+    for (const key of Object.keys(filters) as Array<keyof Card>) {
+      const value = filters[key];
+      if (value !== undefined && card[key] !== value) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  const sortedList = sortCards(filteredList, sortBy, order, categorySortState.categories);
+  cardQueryCache = {
+    version: cardDataVersion,
+    signature: querySignature,
+    result: sortedList,
+  };
+
+  return sortedList;
+}
+
 export function getCards(params?: CardQueryParams): ServiceResult<PageResult<Card>> {
   const currentList = loadCardsFromStorage();
   if (!params) {
@@ -146,34 +367,10 @@ export function getCards(params?: CardQueryParams): ServiceResult<PageResult<Car
       pageSize: currentList.length,
     });
   }
-  const { keyword, page = 1, pageSize, ...filters } = params;
-  const k = keyword?.trim().toLowerCase();
-  const result = currentList.filter((card) => {
-    // keyword 模糊搜索
-    if (k) {
-      const matchKeyword =
-        card.question.toLowerCase().includes(k) ||
-        card.answer.toLowerCase().includes(k) ||
-        card.content?.toLowerCase().includes(k) ||
-        card.tags?.some((tag) => tag.toLowerCase().includes(k));
 
-      if (!matchKeyword) return false;
-    }
-
-    // 精确过滤
-    for (const key of Object.keys(filters) as Array<keyof Card>) {
-      const value = filters[key];
-      // 如果参数中有这个字段，并且卡片的对应字段不等于这个值，则过滤掉这个卡片
-      if (value !== undefined && card[key] !== value) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-
+  const { page = 1, pageSize } = params;
+  const result = getMatchedCards(params);
   let paginatedResult = result;
-  // 分页计算
   if (page && pageSize) {
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
@@ -188,37 +385,61 @@ export function getCards(params?: CardQueryParams): ServiceResult<PageResult<Car
   });
 }
 
-// 根据 id 获取单个卡片
 export function getCardById(id: string): ServiceResult<Card | undefined> {
   const currentList = loadCardsFromStorage();
   const card = currentList.find((item) => item.id === id);
   return card ? success(cloneCard(card)) : fail('题目未找到');
 }
 
-// 添加新卡片
-export function addCard(card: Omit<Card, 'id'>): ServiceResult<Card> {
+export function addCard(
+  card: Omit<
+    Card,
+    | 'id'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'statusUpdatedAt'
+    | 'masteredAt'
+    | 'contentUpdatedAt'
+    | 'sort'
+  >,
+): ServiceResult<Card> {
   const currentList = loadCardsFromStorage();
+  const createdAt = Date.now();
   const newCard: Card = {
     id: generateUUID(),
     ...card,
-    createdAt: Date.now(),
+    createdAt,
+    updatedAt: createdAt,
+    sort: currentList.length > 0 ? (currentList.length + 1) * SORT_STEP : SORT_STEP,
   };
   const updatedList = [...currentList, newCard];
   saveCardsToStorage(updatedList);
   return success(cloneCard(newCard));
 }
 
-// 更新卡片
+// 页面侧普通编辑继续走 updateCard，由服务层统一补状态时间和内容时间。
 export function updateCard(updates: Partial<Card>): ServiceResult<Card> {
   const currentList = loadCardsFromStorage();
   const index = currentList.findIndex((item) => item.id === updates.id);
   if (index === -1) {
     return fail('题目未找到');
   }
+
+  const now = Date.now();
+  if (hasOwnField(updates, 'status') && updates.status) {
+    updates.statusUpdatedAt = now;
+    if (updates.status === 'mastered') {
+      updates.masteredAt = now;
+    }
+  }
+  if (shouldUpdateContentTimestamp(updates)) {
+    updates.contentUpdatedAt = now;
+  }
+
   const updatedCard: Card = {
     ...currentList[index],
     ...updates,
-    updatedAt: Date.now(),
+    updatedAt: now,
   };
   const updatedList = [...currentList];
   updatedList[index] = updatedCard;
@@ -226,10 +447,48 @@ export function updateCard(updates: Partial<Card>): ServiceResult<Card> {
   return success(cloneCard(updatedCard));
 }
 
-// 批量更新卡片
+// 测验场景单独走这个入口，把状态写入和学习统计收口到同一个服务里。
+export function updateDailyLearningStats(cardId: string, status: CardStatus): ServiceResult<Card> {
+  const currentList = loadCardsFromStorage();
+  const index = currentList.findIndex((item) => item.id === cardId);
+  if (index === -1) {
+    return fail('题目未找到');
+  }
+
+  const now = Date.now();
+  const updatedCard: Card = {
+    ...currentList[index],
+    status,
+    statusUpdatedAt: now,
+    masteredAt: status === 'mastered' ? now : currentList[index].masteredAt,
+    updatedAt: now,
+  };
+  const updatedList = [...currentList];
+  updatedList[index] = updatedCard;
+
+  const dailyStats = loadDailyLearningStats();
+  const todayKey = getDateKey(new Date(now));
+  const todayStatsIndex = dailyStats.findIndex((stats) => stats.date === todayKey);
+  if (todayStatsIndex !== -1) {
+    const todayStats = dailyStats[todayStatsIndex];
+    todayStats.practicedCardIds.push(cardId);
+    todayStats.practiceStatuses.push(CARD_STATUS_TO_CODE[status]);
+    dailyStats[todayStatsIndex] = todayStats;
+  } else {
+    dailyStats.push({
+      date: todayKey,
+      practicedCardIds: [cardId],
+      practiceStatuses: [CARD_STATUS_TO_CODE[status]],
+    });
+  }
+
+  saveDailyLearningStats(dailyStats);
+  saveCardsToStorage(updatedList);
+  return success(cloneCard(updatedCard));
+}
+
 export function batchUpdateCards(ids: string[], patch: Partial<Card>): ServiceResult<null> {
   const currentList = loadCardsFromStorage();
-  // 先检查所有 id 是否都存在
   for (const id of ids) {
     if (!currentList.some((item) => item.id === id)) {
       return fail(`题目 ID ${id} 未找到，无法批量更新`);
@@ -248,7 +507,6 @@ export function batchUpdateCards(ids: string[], patch: Partial<Card>): ServiceRe
   return success(null);
 }
 
-// 删除卡片
 export function deleteCard(id: string): ServiceResult<null> {
   const currentList = loadCardsFromStorage();
   const nextList = currentList.filter((card) => card.id !== id);
@@ -259,7 +517,6 @@ export function deleteCard(id: string): ServiceResult<null> {
   return success(null);
 }
 
-// 批量删除卡片
 export function batchDeleteCards(ids: string[]): ServiceResult<null> {
   const currentList = loadCardsFromStorage();
   const nextList = currentList.filter((card) => !ids.includes(card.id));
@@ -273,8 +530,173 @@ export function batchDeleteCards(ids: string[]): ServiceResult<null> {
   return success(null);
 }
 
-// 保存所有卡片（覆盖式），用于导入时批量保存
 export function saveAllCards(cards: Card[]): ServiceResult<null> {
   saveCardsToStorage(cards);
   return success(null);
+}
+
+export function getCardStats(): ServiceResult<StatsResult> {
+  const currentList = loadCardsFromStorage();
+  const currentCategories = loadCategoriesForSort().categories;
+  const dailyStats = loadDailyLearningStats();
+  const todayKey = getDateKey(new Date());
+  const todayStart = dateKeyToTimestamp(todayKey);
+  const now = Date.now();
+
+  const total = currentList.length;
+  const mastered = currentList.filter((card) => card.status === 'mastered').length;
+  const fuzzy = currentList.filter((card) => card.status === 'fuzzy').length;
+  const unknown = currentList.filter((card) => card.status === 'unknown').length;
+
+  const { dailyQuizLimit, dailyQuizCurrentIndex } = getAnsweredCount();
+  const hasTodayDailyStats = hasDailyStatsInRange(dailyStats, todayStart);
+  const todayPracticeIds = hasTodayDailyStats
+    ? getCardIdsFromDailyStats(dailyStats, todayStart)
+    : getCardIdsByTime(currentList, 'statusUpdatedAt', todayStart, now);
+  const todayMasteredIds = hasTodayDailyStats
+    ? getCardIdsFromDailyStats(dailyStats, todayStart, CARD_STATUS_TO_CODE.mastered)
+    : getCardIdsByTime(currentList, 'masteredAt', todayStart, now);
+  const dailyStudied = getUniqueCount(todayPracticeIds);
+  const dailyMastered = getUniqueCount(todayMasteredIds);
+
+  const categoryStats: StatsResult['categoryStats'] = {};
+  currentCategories.forEach((category) => {
+    const categoryCards = currentList.filter((card) => card.categoryId === category.id);
+    categoryStats[category.id] = {
+      total: categoryCards.length,
+      mastered: categoryCards.filter((card) => card.status === 'mastered').length,
+      fuzzy: categoryCards.filter((card) => card.status === 'fuzzy').length,
+      unknown: categoryCards.filter((card) => card.status === 'unknown').length,
+    };
+  });
+
+  const activityStats = getActivityStats(currentList, dailyStats);
+
+  return success({
+    total,
+    mastered,
+    fuzzy,
+    unknown,
+    dailyQuizLimit,
+    dailyQuizCurrentIndex,
+    dailyStudied,
+    dailyMastered,
+    categoryStats,
+    activityStats,
+  });
+}
+
+function countCardsByTime(
+  cards: Card[],
+  field: 'createdAt' | 'contentUpdatedAt' | 'statusUpdatedAt' | 'masteredAt',
+  start: number,
+  end: number,
+) {
+  return cards.filter((card) => {
+    const value = card[field];
+    return typeof value === 'number' && value >= start && value <= end;
+  }).length;
+}
+
+function getAnsweredCount() {
+  const quizSession = getStoredDailyQuizSession();
+  if (!quizSession) {
+    return {
+      dailyQuizLimit: 0,
+      dailyQuizCurrentIndex: 0,
+    };
+  }
+
+  return {
+    dailyQuizLimit: quizSession.limit,
+    dailyQuizCurrentIndex: quizSession.finished
+      ? quizSession.queue.length
+      : quizSession.currentIndex,
+  };
+}
+
+function getCardIdsByTime(
+  cards: Card[],
+  field: 'createdAt' | 'contentUpdatedAt' | 'statusUpdatedAt' | 'masteredAt',
+  start: number,
+  end: number,
+) {
+  return cards
+    .filter((card) => {
+      const value = card[field];
+      return typeof value === 'number' && value >= start && value <= end;
+    })
+    .map((card) => card.id);
+}
+
+function getCardIdsFromDailyStats(
+  dailyStats: DailyLearningStats[],
+  start: number,
+  statusCode?: CardStatusCode,
+) {
+  const ids: string[] = [];
+
+  dailyStats.forEach((stats) => {
+    if (dateKeyToTimestamp(stats.date) < start) {
+      return;
+    }
+
+    const pairCount = Math.min(stats.practicedCardIds.length, stats.practiceStatuses.length);
+    for (let index = 0; index < pairCount; index += 1) {
+      if (statusCode === undefined || stats.practiceStatuses[index] === statusCode) {
+        ids.push(stats.practicedCardIds[index]);
+      }
+    }
+  });
+
+  return ids;
+}
+
+function getUniqueCount(ids: string[]) {
+  return new Set(ids).size;
+}
+
+function hasDailyStatsInRange(dailyStats: DailyLearningStats[], start: number) {
+  return dailyStats.some((stats) => dateKeyToTimestamp(stats.date) >= start);
+}
+
+// 新增和内容更新继续读卡片时间字段；练习和掌握优先读 dailyStats，避免状态修改把统计口径搅乱。
+function getActivityStats(
+  currentList: Card[],
+  dailyStats: DailyLearningStats[],
+): StatsResult['activityStats'] {
+  const now = Date.now();
+  const day7Start = getTimestampDaysAgo(7);
+  const day30Start = getTimestampDaysAgo(30);
+
+  const hasDay7DailyStats = hasDailyStatsInRange(dailyStats, day7Start);
+  const hasDay30DailyStats = hasDailyStatsInRange(dailyStats, day30Start);
+
+  const day7PracticeIds = hasDay7DailyStats
+    ? getCardIdsFromDailyStats(dailyStats, day7Start)
+    : getCardIdsByTime(currentList, 'statusUpdatedAt', day7Start, now);
+  const day30PracticeIds = hasDay30DailyStats
+    ? getCardIdsFromDailyStats(dailyStats, day30Start)
+    : getCardIdsByTime(currentList, 'statusUpdatedAt', day30Start, now);
+  const day7MasteredIds = hasDay7DailyStats
+    ? getCardIdsFromDailyStats(dailyStats, day7Start, CARD_STATUS_TO_CODE.mastered)
+    : getCardIdsByTime(currentList, 'masteredAt', day7Start, now);
+  const day30MasteredIds = hasDay30DailyStats
+    ? getCardIdsFromDailyStats(dailyStats, day30Start, CARD_STATUS_TO_CODE.mastered)
+    : getCardIdsByTime(currentList, 'masteredAt', day30Start, now);
+
+  return {
+    '7day': {
+      added: countCardsByTime(currentList, 'createdAt', day7Start, now),
+      updated: countCardsByTime(currentList, 'contentUpdatedAt', day7Start, now),
+      practice: getUniqueCount(day7PracticeIds),
+      mastered: getUniqueCount(day7MasteredIds),
+    },
+    '30day': {
+      added: countCardsByTime(currentList, 'createdAt', day30Start, now),
+      updated: countCardsByTime(currentList, 'contentUpdatedAt', day30Start, now),
+      practice: getUniqueCount(day30PracticeIds),
+      mastered: getUniqueCount(day30MasteredIds),
+    },
+  };
 }

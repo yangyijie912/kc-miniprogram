@@ -2,6 +2,11 @@ import categories from '@/data/category';
 import { UNCATEGORIZED_CATEGORY, UNCATEGORIZED_ID } from '@/constants/category';
 import { CATEGORY_STORAGE_KEY } from '@/constants/storageKeys';
 import type { Category } from '@/types/card';
+import {
+  getCategoryThemeIndexByName,
+  isValidCategoryThemeIndex,
+  pickAvailableCategoryThemeIndex,
+} from '@/utils/categoryTheme';
 import type { ServiceResult } from '@/types/service';
 import { generateUUID } from '@/utils/uuid';
 import { success, fail } from '@/services/serviceHelper';
@@ -24,10 +29,39 @@ function cloneCategory(category: Category): Category {
   return { ...category };
 }
 
+// 统一在服务层补齐 themeIndex，这样页面读取分类时只消费稳定结果。
+function normalizeCategory(category: Category, index: number): Category {
+  const normalizedCategory: Category = {
+    ...category,
+    name: category.name.trim(),
+    sort:
+      typeof category.sort === 'number' && Number.isFinite(category.sort) ? category.sort : index,
+  };
+
+  if (normalizedCategory.id === UNCATEGORIZED_ID || normalizedCategory.isSystem) {
+    return {
+      ...normalizedCategory,
+      isSystem: true,
+      themeIndex: undefined,
+    };
+  }
+
+  return {
+    ...normalizedCategory,
+    themeIndex: isValidCategoryThemeIndex(normalizedCategory.themeIndex)
+      ? normalizedCategory.themeIndex
+      : getCategoryThemeIndexByName(normalizedCategory.name),
+  };
+}
+
+function createThemeIndex(currentCategories: Category[], preferredThemeIndex?: number) {
+  return pickAvailableCategoryThemeIndex(currentCategories, preferredThemeIndex);
+}
+
 // 对分类列表进行排序，首先按照 sort 字段升序排序，如果 sort 相同则按照 name 字段的字母顺序排序
 function normalizeCategories(list: Category[]): Category[] {
   return list
-    .map(cloneCategory)
+    .map((category, index) => normalizeCategory(cloneCategory(category), index))
     .sort((left, right) => left.sort - right.sort || left.name.localeCompare(right.name));
 }
 
@@ -92,6 +126,7 @@ export function addCategory(category: Omit<Category, 'id'>): ServiceResult<Categ
   const newCategory: Category = {
     id: generateUUID(),
     ...category,
+    themeIndex: createThemeIndex(currentList, category.themeIndex),
   };
 
   saveCategoriesToStorage([...currentList, newCategory]);
