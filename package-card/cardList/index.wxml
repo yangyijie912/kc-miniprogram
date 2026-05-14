@@ -90,7 +90,7 @@
       </view>
     </view>
 
-    <view class="list-footer">
+    <view wx:if="{{ cardViewList.length !== 0 }}" class="list-footer">
       <view wx:if="{{ isLoading }}" class="list-footer-text is-loading">正在加载更多...</view>
       <view wx:elif="{{ !hasMore }}" class="list-footer-text">没有更多了</view>
     </view>

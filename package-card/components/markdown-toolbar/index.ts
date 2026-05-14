@@ -120,7 +120,7 @@ Component({
 
     // 插入代码
     insertCodeBlock() {
-      const language = 'ts';
+      const language = 'typescript';
       const code = `示例代码`;
       const codeBlock = `\`\`\`${language}\n${code}\n\`\`\``;
       this.appendContent(codeBlock);
