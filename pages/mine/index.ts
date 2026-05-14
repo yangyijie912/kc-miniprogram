@@ -99,20 +99,14 @@ Page({
     if (result.success && result.data) {
       const content =
         mode === 'overwrite'
-          ? [
-              `覆盖后当前分类 ${result.data.categoryViewCount} 个，卡片 ${result.data.cardCount} 张`,
-              `跳过 ${result.data.skippedCategoryCount} 个分类，${result.data.skippedCardCount} 张卡片`,
-            ].join('\n')
-          : [
-              `新增 ${result.data.newCategoryCount} 个分类，${result.data.newCardCount} 张卡片`,
-              `跳过 ${result.data.skippedCategoryCount} 个分类，${result.data.skippedCardCount} 张卡片`,
-              `覆盖 ${result.data.overwrittenCardCount} 张卡片`,
-            ].join('\n');
+          ? `覆盖后当前数据：分类 ${result.data.categoryViewCount} 个，卡片 ${result.data.cardCount} 张。跳过：分类 ${result.data.skippedCategoryCount} 个，卡片 ${result.data.skippedCardCount} 张。`
+          : `新增：分类 ${result.data.newCategoryCount} 个，卡片 ${result.data.newCardCount} 张。跳过：分类 ${result.data.skippedCategoryCount} 个，卡片 ${result.data.skippedCardCount} 张。覆盖卡片 ${result.data.overwrittenCardCount} 张。`;
 
       wx.showModal({
         title: '导入成功',
         content,
         showCancel: false,
+        confirmText: '知道了',
       });
       return;
     }
@@ -144,6 +138,13 @@ Page({
       this.showImportResult(res, this.data.importMode);
     } catch (error) {
       const message = error instanceof Error ? error.message : '导入失败';
+      if (/chooseMessageFile:fail cancel/i.test(message)) {
+        wx.showToast({
+          title: '已取消选择文件',
+          icon: 'none',
+        });
+        return;
+      }
       console.error('[mine] 导入失败', error);
       wx.showModal({
         title: '导入失败',
