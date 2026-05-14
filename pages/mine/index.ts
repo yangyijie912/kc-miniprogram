@@ -100,14 +100,13 @@ Page({
       const content =
         mode === 'overwrite'
           ? [
-              `覆盖后当前分类 ${result.data.categoryViewCount} 个，卡片 ${result.data.cardCount} 张。`,
-              `跳过 ${result.data.skippedCategoryCount} 个分类，${result.data.skippedCardCount} 张卡片。`,
-              '学习统计已按导入文件恢复。',
+              `覆盖后当前分类 ${result.data.categoryViewCount} 个，卡片 ${result.data.cardCount} 张`,
+              `跳过 ${result.data.skippedCategoryCount} 个分类，${result.data.skippedCardCount} 张卡片`,
             ].join('\n')
           : [
-              `新增 ${result.data.newCategoryCount} 个分类，${result.data.newCardCount} 张卡片。`,
-              `跳过 ${result.data.skippedCategoryCount} 个分类，${result.data.skippedCardCount} 张卡片。`,
-              `覆盖 ${result.data.overwrittenCardCount} 张卡片。`,
+              `新增 ${result.data.newCategoryCount} 个分类，${result.data.newCardCount} 张卡片`,
+              `跳过 ${result.data.skippedCategoryCount} 个分类，${result.data.skippedCardCount} 张卡片`,
+              `覆盖 ${result.data.overwrittenCardCount} 张卡片`,
             ].join('\n');
 
       wx.showModal({
@@ -143,8 +142,14 @@ Page({
       const fileData = await pickImportData();
       const res = await importFromJsonFile(fileData, this.data.importMode, mergeConfig);
       this.showImportResult(res, this.data.importMode);
-    } catch (_err) {
-      wx.showToast({ title: '导入失败', icon: 'none' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '导入失败';
+      console.error('[mine] 导入失败', error);
+      wx.showModal({
+        title: '导入失败',
+        content: message,
+        showCancel: false,
+      });
     } finally {
       this.setData({
         pendingImport: false,

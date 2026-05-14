@@ -5,7 +5,7 @@
         value="{{ inputKeyword }}"
         bindinput="onSearchInput"
         class="search-input"
-        placeholder="搜索问题或答案"
+        placeholder="问题/答案/笔记/标签"
         placeholder-class="placeholder"
       />
       <view class="filter-btn" bindtap="searchCard">筛选</view>

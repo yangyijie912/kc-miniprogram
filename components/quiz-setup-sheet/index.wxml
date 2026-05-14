@@ -35,7 +35,7 @@
           data-type="today"
         >
           <view class="quiz-option-title">每日测验</view>
-          <view class="quiz-option-desc">后续支持按天固定题集和中断恢复。</view>
+          <view class="quiz-option-desc">按天固定题集，支持中断恢复。</view>
         </view>
       </view>
     </view>

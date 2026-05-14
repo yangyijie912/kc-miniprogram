@@ -24,7 +24,7 @@ export function pickImportData(): Promise<string> {
     wx.chooseMessageFile({
       count: 1,
       type: 'file',
-      extensions: ['json'],
+      extension: ['json'],
       success: (res) => {
         const file = res.tempFiles[0];
         if (file) {
@@ -39,7 +39,7 @@ export function pickImportData(): Promise<string> {
               }
             },
             fail: (err) => {
-              reject(err);
+              reject(new Error(err.errMsg || '读取文件失败'));
             },
           });
         } else {
@@ -47,7 +47,7 @@ export function pickImportData(): Promise<string> {
         }
       },
       fail: (err) => {
-        reject(err);
+        reject(new Error(err.errMsg || '选择导入文件失败'));
       },
     });
   });
