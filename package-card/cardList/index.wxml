@@ -73,7 +73,6 @@
         <view class="card-top">
           <view class="card-title">
             <view class="card-category">{{ item.categoryName }}</view>
-            <view class="card-tag">{{ item.tagText }}</view>
           </view>
           <view class="card-status status-{{ item.status ? item.status : 'undefined' }}">
             {{ item.statusName ? item.statusName : '新' }}
@@ -81,6 +80,8 @@
         </view>
         <view class="card-question">{{ item.question }}</view>
         <view class="card-answer">{{ item.answer }}</view>
+        <view wx:if="{{ item.tagText }}" class="card-tag card-tag-bottom">{{ item.tagText }}</view>
+        <view wx:else class="card-empty-tag card-tag-bottom">暂无标签</view>
       </view>
 
       <view wx:if="{{ cardViewList.length === 0 }}" class="result-banner">
