@@ -299,7 +299,8 @@ function buildCardQuerySignature(params: {
 
 // 先做过滤再做排序，并把结果缓存下来，给同一组查询条件的翻页请求直接复用。
 function getMatchedCards(params: CardQueryParams): Card[] {
-  const { keyword, cardSortConfig, ...filters } = params;
+  // page / pageSize 只用于分页，不能混进卡片字段过滤，否则每张卡都会因为没有这两个字段而被筛掉。
+  const { keyword, page: _page, pageSize: _pageSize, cardSortConfig, ...filters } = params;
   const normalizedKeyword = keyword?.trim().toLowerCase();
   const defaultSortConfig: CardSortConfig = {
     sortBy: 'customSort',
