@@ -2,6 +2,12 @@ import { exportToJson } from '@/services/exportService';
 import { pickImportData, importFromJsonFile } from '@/services/importService';
 
 Page({
+  goToStats() {
+    wx.navigateTo({
+      url: '/pages/stats/index',
+    });
+  },
+
   async importData() {
     try {
       const fileData = await pickImportData();

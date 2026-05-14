@@ -46,6 +46,11 @@
   background: linear-gradient(135deg, rgba(31, 94, 255, 0.09), rgba(255, 255, 255, 0.72));
 }
 
+.action-card-stats {
+  border: 1rpx solid rgba(239, 125, 66, 0.14);
+  background: linear-gradient(135deg, rgba(239, 125, 66, 0.1), rgba(255, 255, 255, 0.72));
+}
+
 .action-card-export {
   border: 1rpx solid rgba(18, 122, 114, 0.14);
   background: linear-gradient(135deg, rgba(18, 122, 114, 0.1), rgba(255, 255, 255, 0.72));

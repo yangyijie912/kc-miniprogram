@@ -3,6 +3,7 @@
     "pages/index/index",
     "pages/categoryManage/index",
     "pages/categoryEdit/index",
+    "pages/stats/index",
     "pages/mine/index"
   ],
   "subpackages": [

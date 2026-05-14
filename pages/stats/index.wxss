@@ -1,0 +1,380 @@
+.page {
+  width: 100%;
+  overflow-x: hidden;
+  padding: 24rpx 28rpx 48rpx;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at top left, rgba(239, 125, 66, 0.14), transparent 34%),
+    radial-gradient(circle at top right, rgba(31, 94, 255, 0.12), transparent 30%),
+    linear-gradient(180deg, #f8f2e8 0%, #efe5d5 100%);
+}
+
+/* ============ Section 容器 ============ */
+.section {
+  margin-bottom: 32rpx;
+}
+
+.section-title {
+  color: #1e1c18;
+  font-size: 30rpx;
+  font-weight: 700;
+  margin-bottom: 16rpx;
+}
+
+/* ============ 第一区块：概览 ============ */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14rpx;
+}
+
+.summary-card {
+  padding: 22rpx;
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(61, 43, 24, 0.12);
+  background: rgba(255, 252, 247, 0.84);
+  box-shadow: 0 10rpx 28rpx rgba(80, 55, 25, 0.04);
+}
+
+.summary-card-total .summary-value {
+  color: #1e1c18;
+}
+
+.summary-card-review .summary-value {
+  color: #ef7d42;
+}
+
+.summary-card-mastered .summary-value {
+  color: #127a72;
+}
+
+.summary-card-rate .summary-value {
+  color: #1f5eff;
+}
+
+.summary-label {
+  color: #6c645a;
+  font-size: 22rpx;
+}
+
+.summary-value {
+  margin-top: 12rpx;
+  color: #1e1c18;
+  font-size: 44rpx;
+  line-height: 1;
+  font-weight: 700;
+}
+
+/* ============ 第二区块：今日状态 ============ */
+.today-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.today-main-card,
+.today-side-card {
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(61, 43, 24, 0.12);
+  box-shadow: 0 10rpx 28rpx rgba(80, 55, 25, 0.04);
+  box-sizing: border-box;
+}
+
+.today-main-card {
+  padding: 20rpx;
+  background:
+    linear-gradient(135deg, rgba(31, 94, 255, 0.12), rgba(255, 252, 247, 0.92)),
+    rgba(255, 252, 247, 0.9);
+}
+
+.today-main-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12rpx;
+}
+
+.today-main-label {
+  color: #1e1c18;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.today-main-tip {
+  margin-top: 6rpx;
+  color: #6c645a;
+  font-size: 22rpx;
+}
+
+.today-main-badge {
+  min-width: 78rpx;
+  padding: 8rpx 12rpx;
+  border-radius: 999rpx;
+  background: rgba(31, 94, 255, 0.14);
+  color: #1f5eff;
+  font-size: 22rpx;
+  line-height: 1.2;
+  text-align: center;
+  font-weight: 700;
+  box-sizing: border-box;
+}
+
+.today-progress-track {
+  margin-top: 20rpx;
+  height: 12rpx;
+  border-radius: 999rpx;
+  background: rgba(31, 94, 255, 0.12);
+  overflow: hidden;
+}
+
+.today-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1f5eff 0%, #5b8dff 100%);
+}
+
+.today-side-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12rpx;
+}
+
+.today-side-card {
+  padding: 18rpx;
+  background: rgba(255, 252, 247, 0.88);
+}
+
+.today-side-card-practice {
+  background:
+    linear-gradient(135deg, rgba(239, 125, 66, 0.12), rgba(255, 252, 247, 0.92)),
+    rgba(255, 252, 247, 0.9);
+}
+
+.today-side-card-correct {
+  background:
+    linear-gradient(135deg, rgba(18, 122, 114, 0.12), rgba(255, 252, 247, 0.92)),
+    rgba(255, 252, 247, 0.9);
+}
+
+.today-side-label {
+  color: #6c645a;
+  font-size: 22rpx;
+}
+
+.today-side-value {
+  margin-top: 10rpx;
+  color: #1e1c18;
+  font-size: 36rpx;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.today-side-tip {
+  margin-top: 8rpx;
+  color: #8f877b;
+  font-size: 20rpx;
+}
+
+/* ============ 第三区块：状态分布 ============ */
+.status-distribution {
+  padding: 24rpx;
+  border-radius: 28rpx;
+  border: 1rpx solid rgba(61, 43, 24, 0.12);
+  background: rgba(255, 252, 247, 0.84);
+  box-shadow: 0 16rpx 40rpx rgba(80, 55, 25, 0.06);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.dist-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.dist-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.dist-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+}
+
+.dist-dot-mastered {
+  background: #127a72;
+}
+
+.dist-dot-fuzzy {
+  background: #f59e0b;
+}
+
+.dist-dot-unknown {
+  background: #ef4444;
+}
+
+.dist-dot-undefined {
+  background: #9ca3af;
+}
+
+.dist-name {
+  color: #1e1c18;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.dist-value {
+  color: #1e1c18;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.dist-percent {
+  color: #8f877b;
+  font-size: 20rpx;
+}
+
+/* ============ 第四区块：学习活跃度 ============ */
+.activity-toolbar {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.activity-tab {
+  min-width: 76rpx;
+  padding: 10rpx 18rpx;
+  border-radius: 18rpx;
+  border: 1rpx solid rgba(61, 43, 24, 0.12);
+  background: rgba(255, 252, 247, 0.88);
+  color: #6c645a;
+  font-size: 22rpx;
+  line-height: 1.2;
+  text-align: center;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.activity-tab-active {
+  border-color: rgba(31, 94, 255, 0.2);
+  background: rgba(31, 94, 255, 0.12);
+  color: #1f5eff;
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14rpx;
+}
+
+.activity-card {
+  padding: 22rpx;
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(61, 43, 24, 0.12);
+  background: rgba(255, 252, 247, 0.84);
+  box-shadow: 0 10rpx 28rpx rgba(80, 55, 25, 0.04);
+}
+
+.activity-card-label {
+  color: #6c645a;
+  font-size: 22rpx;
+}
+
+.activity-card-value {
+  margin-top: 12rpx;
+  font-size: 44rpx;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.activity-card-added .activity-card-value {
+  color: #ef7d42;
+}
+
+.activity-card-updated .activity-card-value {
+  color: #1f5eff;
+}
+
+.activity-card-practice .activity-card-value {
+  color: #8b5cf6;
+}
+
+.activity-card-mastered .activity-card-value {
+  color: #127a72;
+}
+
+/* ============ 第五区块：分类表现 ============ */
+.category-table {
+  display: flex;
+  flex-direction: column;
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(61, 43, 24, 0.12);
+  background: rgba(255, 252, 247, 0.88);
+  overflow: hidden;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  column-gap: 8rpx;
+  padding: 14rpx 16rpx;
+  background: rgba(61, 43, 24, 0.04);
+  border-bottom: 1rpx solid rgba(61, 43, 24, 0.08);
+  align-items: center;
+}
+
+.th-name,
+.th-cards,
+.th-rate,
+.th-review {
+  color: #6c645a;
+  font-size: 22rpx;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.th-cards,
+.th-rate,
+.th-review {
+  text-align: center;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  column-gap: 8rpx;
+  padding: 14rpx 16rpx;
+  border-bottom: 1rpx solid rgba(61, 43, 24, 0.06);
+  align-items: center;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.td-name {
+  color: #1e1c18;
+  font-size: 24rpx;
+  font-weight: 600;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.td-cards,
+.td-rate,
+.td-review {
+  color: #1e1c18;
+  font-size: 24rpx;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

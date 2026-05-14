@@ -1,0 +1,132 @@
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="page">
+    <!-- 第一区块：概览 -->
+    <view class="section">
+      <view class="section-title">概览</view>
+      <view class="summary-grid">
+        <view class="summary-card summary-card-total">
+          <view class="summary-label">总卡片数</view>
+          <view class="summary-value">{{ totalCards }}</view>
+        </view>
+        <view class="summary-card summary-card-review">
+          <view class="summary-label">待复习</view>
+          <view class="summary-value">{{ reviewCards }}</view>
+        </view>
+        <view class="summary-card summary-card-mastered">
+          <view class="summary-label">掌握数</view>
+          <view class="summary-value">{{ masteredCards }}</view>
+        </view>
+        <view class="summary-card summary-card-rate">
+          <view class="summary-label">掌握率</view>
+          <view class="summary-value">{{ masteredRate }}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 第二区块：今日状态 -->
+    <view class="section">
+      <view class="section-title">今日状态</view>
+      <view class="today-panel">
+        <view class="today-main-card">
+          <view class="today-main-head">
+            <view>
+              <view class="today-main-label">今日测验进度</view>
+              <view class="today-main-tip">{{ todayProgressText }}</view>
+            </view>
+            <view class="today-main-badge">{{ todayQuizRate }}%</view>
+          </view>
+          <view class="today-progress-track">
+            <view class="today-progress-fill" style="width: {{todayQuizRate}}%;"></view>
+          </view>
+        </view>
+
+        <view class="today-side-grid">
+          <view class="today-side-card today-side-card-practice">
+            <view class="today-side-label">今日刷题数</view>
+            <view class="today-side-value">{{ todayPracticeCount }}</view>
+            <view class="today-side-tip">按卡片去重统计</view>
+          </view>
+          <view class="today-side-card today-side-card-correct">
+            <view class="today-side-label">掌握题数</view>
+            <view class="today-side-value">{{ todayCorrectCount }}</view>
+            <view class="today-side-tip">掌握率 {{ todayCorrectRate }}%</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 第三区块：状态分布 -->
+    <view class="section">
+      <view class="section-title">卡片状态分布</view>
+      <view class="status-distribution">
+        <view wx:for="{{statusDistribution}}" wx:key="key" class="dist-item">
+          <view class="dist-item-head">
+            <view class="dist-dot {{ item.dotClass }}"></view>
+            <view class="dist-name">{{ item.label }}</view>
+          </view>
+          <view class="dist-value">{{ item.count }} 张</view>
+          <view class="dist-percent">{{ item.percent }}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 第四区块：学习活跃度 -->
+    <view class="section">
+      <view class="section-title">学习活跃度</view>
+      <view class="activity-toolbar">
+        <view
+          class="activity-tab {{ activityRange === '7d' ? 'activity-tab-active' : '' }}"
+          bindtap="switchActivityRange"
+          data-range="7d"
+        >
+          7 天
+        </view>
+        <view
+          class="activity-tab {{ activityRange === '30d' ? 'activity-tab-active' : '' }}"
+          bindtap="switchActivityRange"
+          data-range="30d"
+        >
+          30 天
+        </view>
+      </view>
+      <view class="activity-grid">
+        <view class="activity-card activity-card-added">
+          <view class="activity-card-label">新增</view>
+          <view class="activity-card-value">{{ currentActivityStats.added }}</view>
+        </view>
+        <view class="activity-card activity-card-updated">
+          <view class="activity-card-label">更新</view>
+          <view class="activity-card-value">{{ currentActivityStats.updated }}</view>
+        </view>
+        <view class="activity-card activity-card-practice">
+          <view class="activity-card-label">刷题</view>
+          <view class="activity-card-value">{{ currentActivityStats.practice }}</view>
+        </view>
+        <view class="activity-card activity-card-mastered">
+          <view class="activity-card-label">掌握</view>
+          <view class="activity-card-value">{{ currentActivityStats.mastered }}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 第五区块：分类表现 -->
+    <view class="section">
+      <view class="section-title">分类表现</view>
+      <view class="category-table">
+        <view class="table-header">
+          <view class="th-name">分类</view>
+          <view class="th-cards">卡片数</view>
+          <view class="th-rate">掌握率</view>
+          <view class="th-review">待复习</view>
+        </view>
+
+        <view wx:for="{{categoryRows}}" wx:key="id" class="table-row">
+          <view class="td-name">{{ item.name }}</view>
+          <view class="td-cards">{{ item.cards }}</view>
+          <view class="td-rate">{{ item.rate }}</view>
+          <view class="td-review">{{ item.review }}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</scroll-view>
