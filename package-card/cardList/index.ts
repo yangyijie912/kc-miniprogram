@@ -1,7 +1,8 @@
-import type { QueryParams, PageOptions, CardStatus, CardView } from '@/types/card';
+import type { QueryParams, PageOptions, CardStatus, CardView, CardSortConfig } from '@/types/card';
 import type { quizQuery } from '@/types/quiz';
 import { createCardViewList, loadCardPage, loadCategories } from '@/view-model/card-view';
 import { batchDeleteCards, batchUpdateCards } from '@/services/cardService';
+import { CARD_SORT_OPTIONS } from '@/constants/sortConfig';
 
 const PAGE_SIZE = 10;
 
@@ -63,6 +64,14 @@ function syncTransferCategoryState(
   };
 }
 
+function getSortConfig(sortIndex: number): CardSortConfig {
+  return CARD_SORT_OPTIONS[sortIndex]?.value ?? CARD_SORT_OPTIONS[0].value;
+}
+
+function getSortLabel(sortIndex: number): string {
+  return CARD_SORT_OPTIONS[sortIndex]?.label ?? CARD_SORT_OPTIONS[0].label;
+}
+
 Page({
   data: {
     inputKeyword: '',
@@ -77,6 +86,9 @@ Page({
     isSearchResultMode: false as boolean,
     statusTabs: buildStatusTabs(),
     showQuizSetup: false as boolean,
+    selectedSortIndex: 0 as number,
+    selectedSortLabel: getSortLabel(0),
+    sortOptionLabels: CARD_SORT_OPTIONS.map((option) => option.label),
     isEditMode: false as boolean,
     selectedCards: [] as string[],
     categoryDialogVisible: false as boolean,
@@ -136,6 +148,16 @@ Page({
     this.loadData(true);
   },
 
+  // 切换排序配置。这里不让页面自己排数据，而是把排序参数交给服务层统一处理。
+  onSortChange(event: WechatMiniprogram.PickerChange) {
+    const selectedSortIndex = Number(event.detail.value);
+    this.setData({
+      selectedSortIndex,
+      selectedSortLabel: getSortLabel(selectedSortIndex),
+    });
+    this.loadData(true);
+  },
+
   // 加载数据，根据当前查询参数获取分页卡片视图列表
   loadData(reset = false) {
     if (this.data.isLoading) {
@@ -153,6 +175,8 @@ Page({
 
     const { list, total, page, pageSize } = loadCardPage({
       ...this.data.queryParams,
+      // 排序参数和筛选参数一起走服务层，避免页面和服务层各自维护一套排序规则。
+      cardSortConfig: getSortConfig(this.data.selectedSortIndex),
       page: nextPage,
       pageSize: this.data.pageSize,
     });

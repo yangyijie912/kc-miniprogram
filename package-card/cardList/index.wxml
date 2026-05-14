@@ -27,6 +27,15 @@
           >{{ item.label }}</view>
       </view>
 
+      <picker
+        class="sort-picker-wrap"
+        range="{{sortOptionLabels}}"
+        value="{{selectedSortIndex}}"
+        bindchange="onSortChange"
+      >
+        <view class="sort-picker">排序：{{ selectedSortLabel }}</view>
+      </picker>
+
       <view class="page-actions">
         <view class="page-actions-copy">
           <view class="page-actions-title">批量操作</view>
