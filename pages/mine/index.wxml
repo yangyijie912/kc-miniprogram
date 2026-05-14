@@ -12,12 +12,151 @@
 
         <view class="action-card action-card-import" bindtap="importData">
           <view class="action-title">数据导入</view>
-          <view class="action-desc">支持从 JSON 文件恢复卡片与分类</view>
+          <view class="action-desc">支持合并/覆盖导入；学习统计只在覆盖导入时恢复</view>
         </view>
 
         <view class="action-card action-card-export" bindtap="exportData">
           <view class="action-title">数据导出</view>
-          <view class="action-desc">导出当前卡片与分类到 JSON 文件</view>
+          <view class="action-desc">导出卡片、分类和学习统计，最多保留 5 个备份并轮转覆盖</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{ exportDialogVisible }}" class="dialog-mask" catchtap="closeExportDialog">
+      <view class="dialog-card" catchtap="noop">
+        <view class="dialog-header">
+          <view class="dialog-title">导出文件名</view>
+          <view class="dialog-close" bindtap="closeExportDialog">×</view>
+        </view>
+        <view class="dialog-body export-dialog">
+          <view class="export-dialog-tip">
+            请输入文件名，不超过 {{ maxExportFileNameLength }} 个字，留空则使用默认命名规则。
+          </view>
+          <input
+            class="export-input"
+            maxlength="{{ maxExportFileNameLength }}"
+            value="{{ exportFileName }}"
+            placeholder="例如：前端知识卡200张"
+            placeholder-class="export-input-placeholder"
+            bindinput="onExportFileNameInput"
+          />
+        </view>
+        <view class="dialog-footer">
+          <view class="dialog-actions">
+            <view class="dialog-action dialog-action-cancel" bindtap="closeExportDialog">取消</view>
+            <view class="dialog-action dialog-action-confirm" bindtap="confirmExport">
+              {{ pendingExport ? '导出中' : '导出' }}
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{ importDialogVisible }}" class="dialog-mask" catchtap="closeImportDialog">
+      <view class="dialog-card dialog-card-import" catchtap="noop">
+        <view class="dialog-header">
+          <view class="dialog-title">导入设置</view>
+          <view class="dialog-close" bindtap="closeImportDialog">×</view>
+        </view>
+
+        <view class="dialog-body import-dialog">
+          <view class="import-section">
+            <view class="import-section-title">导入模式</view>
+            <view class="import-option-row">
+              <view
+                class="import-option-chip {{ importMode === 'merge' ? 'active' : '' }}"
+                data-mode="merge"
+                bindtap="onImportModeChange"
+              >
+                合并导入
+              </view>
+              <view
+                class="import-option-chip {{ importMode === 'overwrite' ? 'active' : '' }}"
+                data-mode="overwrite"
+                bindtap="onImportModeChange"
+              >
+                覆盖导入
+              </view>
+            </view>
+            <view class="import-section-tip">
+              {{ importMode === 'merge'
+                ? '保留当前数据，并按你的规则处理冲突卡片；学习统计会跳过，继续以本地记录为准。'
+                : '用导入文件整体替换当前分类和卡片，并恢复导入文件里的学习统计。' }}
+            </view>
+          </view>
+
+          <block wx:if="{{ importMode === 'merge' }}">
+            <view class="import-section">
+              <view class="import-section-title">冲突卡片</view>
+              <view class="import-option-column">
+                <view
+                  class="import-choice-card {{ importConflictStrategy === 'skip' ? 'active' : '' }}"
+                  data-strategy="skip"
+                  bindtap="onImportConflictStrategyChange"
+                >
+                  <view class="import-choice-title">跳过冲突</view>
+                </view>
+                <view
+                  class="import-choice-card {{ importConflictStrategy === 'overwrite' ? 'active' : '' }}"
+                  data-strategy="overwrite"
+                  bindtap="onImportConflictStrategyChange"
+                >
+                  <view class="import-choice-title">直接覆盖</view>
+                </view>
+              </view>
+              <view class="import-choice-desc">
+                {{ importConflictStrategy === 'skip'
+                  ? '同 ID 卡片保留本地数据，不做覆盖。'
+                  : '同 ID 卡片以新导入的数据为准。' }}
+              </view>
+            </view>
+
+            <view class="import-section">
+              <view class="import-section-title">导入状态</view>
+              <view class="import-option-column">
+                <view
+                  class="import-choice-card {{ importStatusStrategy === 'imported' ? 'active' : '' }}"
+                  data-strategy="imported"
+                  bindtap="onImportStatusStrategyChange"
+                >
+                  <view class="import-choice-title">保留导入状态</view>
+                </view>
+                <view
+                  class="import-choice-card {{ importStatusStrategy === 'clear' ? 'active' : '' }}"
+                  data-strategy="clear"
+                  bindtap="onImportStatusStrategyChange"
+                >
+                  <view class="import-choice-title">清空导入状态</view>
+                </view>
+              </view>
+              <view class="import-choice-desc">
+                {{ importStatusStrategy === 'imported'
+                  ? '适合导入你自己另一套题库，保留卡片状态。'
+                  : '适合别人的题库，只导入题目内容，不带学习状态。' }}
+              </view>
+            </view>
+          </block>
+
+          <view class="import-dialog-note">
+            <view class="import-dialog-note-title">
+              {{ importMode === 'merge' ? '合并导入提醒' : '覆盖导入提醒' }}
+            </view>
+            <view class="import-dialog-note-text">
+              {{ importMode === 'merge'
+                ? '合并导入只处理分类、卡片和状态策略，不导入学习统计，避免覆盖当前设备上的练习记录。'
+                : '覆盖导入会整体替换当前分类和卡片，导入文件里的内容、状态和学习统计都会直接生效。' }}
+            </view>
+          </view>
+
+        </view>
+
+        <view class="dialog-footer">
+          <view class="dialog-actions">
+            <view class="dialog-action dialog-action-cancel" bindtap="closeImportDialog">取消</view>
+            <view class="dialog-action dialog-action-confirm" bindtap="confirmImport">
+              {{ pendingImport ? '导入中' : '开始导入' }}
+            </view>
+          </view>
         </view>
       </view>
     </view>

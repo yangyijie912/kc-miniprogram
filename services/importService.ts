@@ -1,11 +1,16 @@
 import { getCategories, saveAllCategories } from '@/services/categoryService';
-import { getCards, saveAllCards } from '@/services/cardService';
+import { getCards, saveAllCards, saveDailyLearningStats } from '@/services/cardService';
 import { fail, success } from '@/services/serviceHelper';
 import { generateUUID } from '@/utils/uuid';
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from '@/constants/category';
-import type { ImportData, ImportResult } from '@/types/migration';
-import type { RawCard, Card, Category } from '@/types/card';
+import type { ImportData, ImportResult, ImportMode, MergeConfig } from '@/types/migration';
+import type { RawCard, Card, Category, DailyLearningStats } from '@/types/card';
 import type { ServiceResult } from '@/types/service';
+import {
+  getCategoryThemeIndexByName,
+  isValidCategoryThemeIndex,
+  pickAvailableCategoryThemeIndex,
+} from '@/utils/categoryTheme';
 
 /**
  * ==============================================================
@@ -65,9 +70,32 @@ function isImportData(data: unknown): data is ImportData {
   return (
     Array.isArray(obj.categories) &&
     Array.isArray(obj.cards) &&
+    (obj.dailyLearningStats === undefined || Array.isArray(obj.dailyLearningStats)) &&
     typeof obj.version === 'string' &&
     typeof obj.exportedAt === 'number'
   );
+}
+
+// 学习统计是可选字段，导入前要先清洗，避免旧文件或脏数据把统计结构污染掉。
+function normalizeDailyLearningStats(stats?: DailyLearningStats[]): DailyLearningStats[] {
+  if (!Array.isArray(stats)) {
+    return [];
+  }
+
+  return stats
+    .filter(
+      (item) =>
+        !!item &&
+        typeof item === 'object' &&
+        typeof item.date === 'string' &&
+        Array.isArray(item.practicedCardIds) &&
+        Array.isArray(item.practiceStatuses),
+    )
+    .map((item) => ({
+      date: item.date,
+      practicedCardIds: item.practicedCardIds.filter((id) => typeof id === 'string'),
+      practiceStatuses: item.practiceStatuses.filter((status) => typeof status === 'number'),
+    }));
 }
 
 // 解析JSON
@@ -119,6 +147,18 @@ type MergeCategoriesResult = {
   importedCategoryMap: Map<string, string>; // key: 导入分类ID，value: 系统分类ID，用于后续关联卡片时转换导入的 categoryId
 };
 
+// 导入分类要补 themeIndex，避免旧文件或外部文件进来后主题漂移。
+function resolveImportedCategoryThemeIndex(
+  importedCategory: Category,
+  currentCategories: Category[],
+): number {
+  const preferredThemeIndex = isValidCategoryThemeIndex(importedCategory.themeIndex)
+    ? importedCategory.themeIndex
+    : getCategoryThemeIndexByName(importedCategory.name.trim());
+
+  return pickAvailableCategoryThemeIndex(currentCategories, preferredThemeIndex);
+}
+
 // 处理导入的分类数据，返回合并后的分类列表和导入分类ID到系统分类ID的映射关系
 function mergeCategories(
   importedCategories: ImportData['categories'],
@@ -142,7 +182,7 @@ function mergeCategories(
     // 未分类是系统保留分类，直接跳过
     if (importedId === UNCATEGORIZED_ID || importedName === UNCATEGORIZED_NAME) {
       importedCategoryMap.set(importedId, UNCATEGORIZED_ID); // 无论ID还是名称匹配，都映射到系统的未分类ID
-      countTotal.skippedCategoryCount += 1;
+      // 系统保留分类只做映射，不参与“跳过分类”统计，避免没有实际数据的未分类也被算一条。
       continue;
     }
 
@@ -162,11 +202,12 @@ function mergeCategories(
         id: generateUUID(),
         name: importedName,
         sort: mergedCategories.length, // 新分类排序值放到最后
+        themeIndex: resolveImportedCategoryThemeIndex(importedCategory, mergedCategories),
       };
       mergedCategories.push(newCategory);
       importedCategoryMap.set(importedId, newCategory.id);
       nameMap.set(importedName, newCategory); // 更新名称映射，避免后续同名分类重复添加
-      idMap.set(importedId, newCategory); // 更新ID映射，避免后续ID冲突重复添加
+      idMap.set(newCategory.id, newCategory); // 更新ID映射，避免后续ID冲突重复添加
       countTotal.newCategoryCount += 1;
       continue;
     }
@@ -174,7 +215,9 @@ function mergeCategories(
     // 3、名称和ID都不匹配，认为是新分类，添加到列表中
     const newCategory: Category = {
       ...importedCategory,
+      name: importedName,
       sort: importedCategory.sort ?? mergedCategories.length, // 保留原排序值，或者放到最后
+      themeIndex: resolveImportedCategoryThemeIndex(importedCategory, mergedCategories),
     };
     mergedCategories.push(newCategory);
     importedCategoryMap.set(importedId, newCategory.id);
@@ -215,7 +258,11 @@ function transformImportedCategoryId(rawCard: RawCard, mergeResult: MergeCategor
 }
 
 // 把导入的原始卡片数据转换成系统的卡片数据结构
-function normalizeImportedCard(rawCard: RawCard, mergeResult: MergeCategoriesResult): Card | null {
+function normalizeImportedCard(
+  rawCard: RawCard,
+  mergeResult: MergeCategoriesResult,
+  config?: MergeConfig,
+): Card | null {
   if (!rawCard.question || !rawCard.answer) {
     console.warn(
       `[importService] 导入卡片数据不完整，缺少 question 或 answer 字段，已跳过。rawCard=${JSON.stringify(rawCard)}`,
@@ -223,7 +270,14 @@ function normalizeImportedCard(rawCard: RawCard, mergeResult: MergeCategoriesRes
     countTotal.skippedCardCount += 1;
     return null; // 跳过数据不完整的卡片
   }
+
   const createdAt = rawCard?.createdAt || Date.now();
+  const status = config
+    ? config.statusStrategy === 'imported'
+      ? rawCard?.status
+      : undefined
+    : rawCard?.status;
+
   return {
     id: rawCard.id || generateUUID(),
     categoryId: transformImportedCategoryId(rawCard, mergeResult),
@@ -231,7 +285,7 @@ function normalizeImportedCard(rawCard: RawCard, mergeResult: MergeCategoriesRes
     answer: rawCard?.answer,
     content: rawCard?.content,
     tags: rawCard?.tags,
-    status: rawCard?.status,
+    status,
     createdAt, // 时间戳
     updatedAt: rawCard?.updatedAt ?? createdAt,
     statusUpdatedAt: rawCard?.statusUpdatedAt,
@@ -246,26 +300,50 @@ function mergeCards(
   importedCards: ImportData['cards'],
   currentCards: Card[],
   mergeResult: MergeCategoriesResult,
+  config?: MergeConfig,
 ): Card[] {
   const cardsMap = new Map(currentCards.map((card) => [card.id, card]));
   for (const rawCard of importedCards) {
-    const normalizedCard = normalizeImportedCard(rawCard, mergeResult);
-    if (normalizedCard) {
-      cardsMap.set(normalizedCard.id, normalizedCard); // ID 冲突时覆盖原有卡片
-      const existed = cardsMap.has(normalizedCard.id);
-      if (existed) {
-        countTotal.overwrittenCardCount += 1;
-      } else {
-        countTotal.newCardCount += 1;
-      }
+    const normalizedCard = normalizeImportedCard(rawCard, mergeResult, config);
+    if (!normalizedCard) {
+      continue;
+    }
+
+    const existed = cardsMap.has(normalizedCard.id);
+
+    if (existed && config?.conflictStrategy === 'skip') {
+      countTotal.skippedCardCount += 1;
+      continue;
+    }
+
+    cardsMap.set(normalizedCard.id, normalizedCard); // 新卡和允许覆盖的冲突卡都以导入数据为准
+
+    if (existed) {
+      countTotal.overwrittenCardCount += 1;
+    } else {
+      countTotal.newCardCount += 1;
     }
   }
 
   return Array.from(cardsMap.values());
 }
 
+// 老数据里可能缺 sort，这里在最终写入前补齐，避免列表页排序链路被导入数据打断。
+function ensureCategoriesSort(categories: Category[]): Category[] {
+  return categories.map((category, index) => ({
+    ...category,
+    name: category.name.trim(),
+    sort:
+      typeof category.sort === 'number' && Number.isFinite(category.sort) ? category.sort : index,
+  }));
+}
+
 // 最终导入流程
-export async function importFromJsonFile(jsonStr: string): Promise<ServiceResult<ImportResult>> {
+export async function importFromJsonFile(
+  jsonStr: string,
+  mode: ImportMode = 'merge',
+  config?: MergeConfig,
+): Promise<ServiceResult<ImportResult>> {
   // 重置计数器，确保每次导入都是独立统计
   countTotal.newCategoryCount = 0;
   countTotal.newCardCount = 0;
@@ -273,24 +351,46 @@ export async function importFromJsonFile(jsonStr: string): Promise<ServiceResult
   countTotal.skippedCardCount = 0;
   countTotal.overwrittenCardCount = 0;
   try {
+    if (mode !== 'merge' && mode !== 'overwrite') {
+      return fail('不支持的导入模式');
+    }
+
     // 1、解析数据
     const importData = parseImportData(jsonStr);
-    // 2、获取当前系统数据
-    const currentCategories = getCategories().data || [];
-    const currentCards = getCards().data?.list || [];
-    // 3、合并分类和卡片数据，并处理分类ID映射关系
-    const mergeResult = mergeCategories(importData.categories, currentCategories);
-    const mergedCategories = mergeResult.mergedCategories;
-    const mergedCards = mergeCards(importData.cards, currentCards, mergeResult);
+    const importedDailyLearningStats = normalizeDailyLearningStats(importData.dailyLearningStats);
+    let mergedCategories: Category[] = [];
+    let mergedCards: Card[] = [];
+
+    if (mode === 'merge') {
+      // 合并导入保留本地数据，再按冲突策略处理导入内容；学习统计继续以当前设备为准。
+      const currentCategories = getCategories().data || [];
+      const currentCards = getCards().data?.list || [];
+      const mergeResult = mergeCategories(importData.categories, currentCategories);
+      mergedCategories = mergeResult.mergedCategories;
+      mergedCards = mergeCards(importData.cards, currentCards, mergeResult, config);
+    }
+
+    if (mode === 'overwrite') {
+      // 覆盖导入不是“先清空再慢慢补”，而是把清洗后的新数据一次性落盘。
+      const mergeResult = mergeCategories(importData.categories, []);
+      mergedCategories = mergeResult.mergedCategories;
+      mergedCards = mergeCards(importData.cards, [], mergeResult);
+    }
+
     // 4、批量保存合并后的分类和卡片
+    const categoryRes = saveAllCategories(ensureCategoriesSort(mergedCategories));
+    if (!categoryRes.success) {
+      return fail(categoryRes.message || '导入分类失败');
+    }
     const cardRes = saveAllCards(mergedCards);
     if (!cardRes.success) {
       return fail(cardRes.message || '导入卡片失败');
     }
-    const categoryRes = saveAllCategories(mergedCategories);
-    if (!categoryRes.success) {
-      return fail(categoryRes.message || '导入分类失败');
+
+    if (mode === 'overwrite') {
+      saveDailyLearningStats(importedDailyLearningStats);
     }
+
     // 5、返回导入结果
     return success({
       categoryCount: mergedCategories.length,
