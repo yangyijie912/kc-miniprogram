@@ -225,11 +225,13 @@ function syncTransferCategoryState(
 }
 
 function getSortConfig(sortIndex: number): CardSortConfig {
-  return CARD_SORT_OPTIONS[sortIndex]?.value ?? CARD_SORT_OPTIONS[0].value;
+  const selectedOption = CARD_SORT_OPTIONS[sortIndex];
+  return selectedOption ? selectedOption.value : CARD_SORT_OPTIONS[0].value;
 }
 
 function getSortLabel(sortIndex: number): string {
-  return CARD_SORT_OPTIONS[sortIndex]?.label ?? CARD_SORT_OPTIONS[0].label;
+  const selectedOption = CARD_SORT_OPTIONS[sortIndex];
+  return selectedOption ? selectedOption.label : CARD_SORT_OPTIONS[0].label;
 }
 
 function buildBrowseState(pageData: {
@@ -292,9 +294,9 @@ Page({
   // 解析页面参数，设置查询参数
   parseParams(options?: PageOptions): QueryParams {
     return {
-      categoryId: options?.categoryId || undefined,
-      keyword: options?.keyword || undefined,
-      status: this.parseStatus(options?.status),
+      categoryId: options && options.categoryId ? options.categoryId : undefined,
+      keyword: options && options.keyword ? options.keyword : undefined,
+      status: this.parseStatus(options && options.status ? options.status : undefined),
     };
   },
 
@@ -307,7 +309,7 @@ Page({
 
   // 查询卡片列表，更新页面数据
   searchCard() {
-    const keyword = this.data.inputKeyword?.trim();
+    const keyword = this.data.inputKeyword ? this.data.inputKeyword.trim() : '';
     const query = {
       ...this.data.queryParams,
       keyword: keyword ? keyword : undefined,
@@ -455,25 +457,26 @@ Page({
   onLoad(options: PageOptions) {
     const q = this.parseParams(options as PageOptions);
     const { categoryId, status, keyword } = q;
+    const normalizedKeyword = keyword ? decodeURIComponent(keyword) : undefined;
+    const hasKeyword = Boolean(normalizedKeyword && normalizedKeyword.trim());
 
     const normalizedQuery: QueryParams = {
       categoryId,
       status,
-      keyword: keyword ? decodeURIComponent(keyword) : undefined,
+      keyword: normalizedKeyword,
     };
 
     this.setData({
       queryParams: normalizedQuery,
       inputKeyword: normalizedQuery.keyword || '',
-      enteredFromHomeSearch: Boolean(normalizedQuery.keyword?.trim()),
-      isSearchResultMode: Boolean(normalizedQuery.keyword?.trim()),
-      showQuizAction:
-        Boolean(normalizedQuery.categoryId) && !Boolean(normalizedQuery.keyword?.trim()),
+      enteredFromHomeSearch: hasKeyword,
+      isSearchResultMode: hasKeyword,
+      showQuizAction: Boolean(normalizedQuery.categoryId) && !hasKeyword,
       statusTabs: buildStatusTabs(normalizedQuery.status),
       ...buildInteractionState({
         interactionMode: 'browse',
         queryParams: normalizedQuery,
-        isSearchResultMode: Boolean(normalizedQuery.keyword?.trim()),
+        isSearchResultMode: hasKeyword,
         cardViewList: this.data.cardViewList,
         selectedCards: [],
       }),

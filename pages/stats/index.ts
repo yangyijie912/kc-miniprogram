@@ -78,30 +78,57 @@ Page({
     const undefinedCards = Math.max(stats.total - stats.mastered - stats.fuzzy - stats.unknown, 0);
     const quizDone = stats.dailyQuizCurrentIndex;
     const quizTarget = stats.dailyQuizLimit;
-    const todayPracticeCount = stats.dailyStudied ?? 0;
-    const todayCorrectCount = stats.dailyMastered ?? 0;
+    const todayPracticeCount = typeof stats.dailyStudied === 'number' ? stats.dailyStudied : 0;
+    const todayCorrectCount = typeof stats.dailyMastered === 'number' ? stats.dailyMastered : 0;
+    const activityStats = stats.activityStats;
+    const activityStats7day = activityStats && activityStats['7day'] ? activityStats['7day'] : null;
+    const activityStats30day =
+      activityStats && activityStats['30day'] ? activityStats['30day'] : null;
 
     // 活跃度区间字段和服务层约定保持一致，页面只做 7d / 30d 显示映射。
     const activityStatsMap = {
       '7d': {
-        added: stats.activityStats?.['7day'].added ?? 0,
-        updated: stats.activityStats?.['7day'].updated ?? 0,
-        practice: stats.activityStats?.['7day'].practice ?? 0,
-        mastered: stats.activityStats?.['7day'].mastered ?? 0,
+        added:
+          activityStats7day && activityStats7day.added !== undefined ? activityStats7day.added : 0,
+        updated:
+          activityStats7day && activityStats7day.updated !== undefined
+            ? activityStats7day.updated
+            : 0,
+        practice:
+          activityStats7day && activityStats7day.practice !== undefined
+            ? activityStats7day.practice
+            : 0,
+        mastered:
+          activityStats7day && activityStats7day.mastered !== undefined
+            ? activityStats7day.mastered
+            : 0,
       },
       '30d': {
-        added: stats.activityStats?.['30day'].added ?? 0,
-        updated: stats.activityStats?.['30day'].updated ?? 0,
-        practice: stats.activityStats?.['30day'].practice ?? 0,
-        mastered: stats.activityStats?.['30day'].mastered ?? 0,
+        added:
+          activityStats30day && activityStats30day.added !== undefined
+            ? activityStats30day.added
+            : 0,
+        updated:
+          activityStats30day && activityStats30day.updated !== undefined
+            ? activityStats30day.updated
+            : 0,
+        practice:
+          activityStats30day && activityStats30day.practice !== undefined
+            ? activityStats30day.practice
+            : 0,
+        mastered:
+          activityStats30day && activityStats30day.mastered !== undefined
+            ? activityStats30day.mastered
+            : 0,
       },
     };
 
     // 分类表现直接消费服务返回的 categoryStats，页面只做展示格式转换。
     const categoryRows = categories.map((category: Category) => {
       const categoryStats = stats.categoryStats[category.id];
-      const total = categoryStats?.total ?? 0;
-      const mastered = categoryStats?.mastered ?? 0;
+      const total = categoryStats && categoryStats.total !== undefined ? categoryStats.total : 0;
+      const mastered =
+        categoryStats && categoryStats.mastered !== undefined ? categoryStats.mastered : 0;
 
       return {
         id: category.id,

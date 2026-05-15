@@ -10,7 +10,10 @@ const compareNumber = (a: number, b: number, order: SortOrder = 'asc'): number =
 
 const getSortValue = (card: Card, sortBy: CardSortBy): number => {
   if (sortBy === 'contentUpdatedAt' || sortBy === 'updatedAt') {
-    return getSafeNumber(card.contentUpdatedAt ?? card.updatedAt, 0);
+    return getSafeNumber(
+      card.contentUpdatedAt !== undefined ? card.contentUpdatedAt : card.updatedAt,
+      0,
+    );
   }
 
   if (sortBy === 'createdAt') {
@@ -50,8 +53,12 @@ export const sortCardsByCategoryAndSort = (cards: Card[], categories: Category[]
   );
 
   return [...cards].sort((a, b) => {
-    const aCategorySort = categorySortMap.get(a.categoryId) ?? Number.MAX_SAFE_INTEGER;
-    const bCategorySort = categorySortMap.get(b.categoryId) ?? Number.MAX_SAFE_INTEGER;
+    const rawACategorySort = categorySortMap.get(a.categoryId);
+    const rawBCategorySort = categorySortMap.get(b.categoryId);
+    const aCategorySort =
+      rawACategorySort !== undefined ? rawACategorySort : Number.MAX_SAFE_INTEGER;
+    const bCategorySort =
+      rawBCategorySort !== undefined ? rawBCategorySort : Number.MAX_SAFE_INTEGER;
 
     if (aCategorySort !== bCategorySort) {
       return aCategorySort - bCategorySort;

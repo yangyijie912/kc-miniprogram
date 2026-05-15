@@ -68,7 +68,7 @@ Component({
         return;
       }
       const value = e.detail.value;
-      const pos = e.detail.cursor ?? value.length;
+      const pos = typeof e.detail.cursor === 'number' ? e.detail.cursor : value.length;
       this.setData({ cursorPosition: pos });
     },
 
@@ -194,15 +194,13 @@ Component({
     // 根据对话框类型确认插入内容
     onContentConfirm() {
       const { dialogState, tableRows, tableColumns, titleLevel, listType } = this.data;
+      const matchedTitleLevel = titleLevels.find((item) => item.value === titleLevel);
       switch (dialogState.type) {
         case 'table':
           this.insertTable(tableRows, tableColumns);
           break;
         case 'title':
-          this.insertHeading(
-            titleLevel,
-            titleLevels.find((l) => l.value === titleLevel)?.label ?? '默认标题',
-          );
+          this.insertHeading(titleLevel, matchedTitleLevel ? matchedTitleLevel.label : '默认标题');
           break;
         case 'list':
           this.insertList(listType);

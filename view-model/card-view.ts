@@ -26,7 +26,7 @@ function createCardCountMap(cards: Card[]): Record<string, number> {
   const countMap: Record<string, number> = {};
 
   cards.forEach((card) => {
-    const currentCount = countMap[card.categoryId] ?? 0;
+    const currentCount = countMap[card.categoryId] !== undefined ? countMap[card.categoryId] : 0;
     // 如果出现这个分类ID，表示有一条该分类的卡片，累加一次
     countMap[card.categoryId] = currentCount + 1;
   });
@@ -39,7 +39,7 @@ function createCategoryViewList(categoryList: Category[], cardList: Card[]): Cat
   const cardCountMap = createCardCountMap(cardList);
   return categoryList
     .map((category) => {
-      const cardCount = cardCountMap[category.id] ?? 0;
+      const cardCount = cardCountMap[category.id] !== undefined ? cardCountMap[category.id] : 0;
       const isUncategorized = category.id === UNCATEGORIZED_ID;
 
       return {

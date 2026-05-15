@@ -6,9 +6,10 @@ import type { ExportData } from '@/types/migration';
 export const buildExportData = async (): Promise<ExportData> => {
   const categoriesRes = await getCategories();
   const cardsRes = await getCards();
+  const cardsData = cardsRes.data;
 
   const categories = categoriesRes.data || [];
-  const cards = cardsRes.data?.list || [];
+  const cards = cardsData ? cardsData.list : [];
   const dailyLearningStats = loadDailyLearningStats();
 
   return {

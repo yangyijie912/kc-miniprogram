@@ -114,7 +114,7 @@ function loadCategoriesForSort(): CategorySortCache {
 }
 
 function resolveDefaultCategoryId(rawCard: RawCard): string {
-  const rawCategoryName = rawCard.category?.trim();
+  const rawCategoryName = rawCard.category ? rawCard.category.trim() : undefined;
 
   if (rawCategoryName) {
     const categoryId = defaultCategoryIdByName.get(rawCategoryName);
@@ -132,12 +132,14 @@ function resolveDefaultCategoryId(rawCard: RawCard): string {
 
 function normalizeTags(tags?: string[]): string[] | undefined {
   const tagSet = new Set<string>();
-  (tags ?? []).forEach((tag) => {
-    const normalizedTag = tag.trim();
-    if (normalizedTag) {
-      tagSet.add(normalizedTag);
-    }
-  });
+  if (Array.isArray(tags)) {
+    tags.forEach((tag) => {
+      const normalizedTag = tag.trim();
+      if (normalizedTag) {
+        tagSet.add(normalizedTag);
+      }
+    });
+  }
   if (tagSet.size === 0) {
     return undefined;
   }
@@ -175,12 +177,12 @@ function toCard(rawCard: RawCard): Card {
     content: rawCard.content,
     tags: normalizeTags(rawCard.tags),
     status: rawCard.status,
-    createdAt: rawCard.createdAt ?? createdAt,
-    updatedAt: rawCard.updatedAt ?? createdAt,
+    createdAt: rawCard.createdAt !== undefined ? rawCard.createdAt : createdAt,
+    updatedAt: rawCard.updatedAt !== undefined ? rawCard.updatedAt : createdAt,
     statusUpdatedAt: rawCard.statusUpdatedAt,
     masteredAt: rawCard.masteredAt,
     contentUpdatedAt: rawCard.contentUpdatedAt,
-    sort: rawCard.sort ?? Number.MAX_SAFE_INTEGER,
+    sort: rawCard.sort !== undefined ? rawCard.sort : Number.MAX_SAFE_INTEGER,
   };
 }
 
@@ -302,7 +304,7 @@ function buildCardQuerySignature(params: {
 function getMatchedCards(params: CardQueryParams): Card[] {
   // page / pageSize 只用于分页，不能混进卡片字段过滤，否则每张卡都会因为没有这两个字段而被筛掉。
   const { keyword, page: _page, pageSize: _pageSize, cardSortConfig, ...filters } = params;
-  const normalizedKeyword = keyword?.trim().toLowerCase();
+  const normalizedKeyword = keyword ? keyword.trim().toLowerCase() : undefined;
   const defaultSortConfig: CardSortConfig = {
     sortBy: 'customSort',
     order: 'asc',
@@ -331,8 +333,10 @@ function getMatchedCards(params: CardQueryParams): Card[] {
       const matchKeyword =
         card.question.toLowerCase().includes(normalizedKeyword) ||
         card.answer.toLowerCase().includes(normalizedKeyword) ||
-        card.content?.toLowerCase().includes(normalizedKeyword) ||
-        card.tags?.some((tag) => tag.toLowerCase().includes(normalizedKeyword));
+        (card.content ? card.content.toLowerCase().includes(normalizedKeyword) : false) ||
+        (Array.isArray(card.tags)
+          ? card.tags.some((tag) => tag.toLowerCase().includes(normalizedKeyword))
+          : false);
 
       if (!matchKeyword) {
         return false;
@@ -383,7 +387,7 @@ export function getCards(params?: CardQueryParams): ServiceResult<PageResult<Car
     list: paginatedResult.map(cloneCard),
     total: result.length,
     page,
-    pageSize: pageSize ?? result.length,
+    pageSize: pageSize !== undefined ? pageSize : result.length,
   });
 }
 

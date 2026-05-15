@@ -223,7 +223,7 @@ function mergeCategories(
     const newCategory: Category = {
       ...importedCategory,
       name: importedName,
-      sort: importedCategory.sort ?? mergedCategories.length, // 保留原排序值，或者放到最后
+      sort: importedCategory.sort !== undefined ? importedCategory.sort : mergedCategories.length, // 保留原排序值，或者放到最后
       themeIndex: resolveImportedCategoryThemeIndex(importedCategory, mergedCategories),
     };
     mergedCategories.push(newCategory);
@@ -244,7 +244,7 @@ function transformImportedCategoryId(rawCard: RawCard, mergeResult: MergeCategor
   const mergedCategories = mergeResult.mergedCategories;
   const importedCategoryMap = mergeResult.importedCategoryMap;
   // 从原始数据中获取分类名称和ID
-  const rawCategoryName = rawCard.category?.trim();
+  const rawCategoryName = rawCard.category ? rawCard.category.trim() : undefined;
   const rawCategoryId = rawCard.categoryId;
 
   // 1、如果卡片的 categoryId 在导入分类ID映射中，说明这个分类在合并后被保留或新建了，直接使用映射后的系统分类ID
@@ -278,27 +278,27 @@ function normalizeImportedCard(
     return null; // 跳过数据不完整的卡片
   }
 
-  const createdAt = rawCard?.createdAt || Date.now();
+  const createdAt = rawCard.createdAt !== undefined ? rawCard.createdAt : Date.now();
   const status = config
     ? config.statusStrategy === 'imported'
-      ? rawCard?.status
+      ? rawCard.status
       : undefined
-    : rawCard?.status;
+    : rawCard.status;
 
   return {
     id: rawCard.id || generateUUID(),
     categoryId: transformImportedCategoryId(rawCard, mergeResult),
-    question: rawCard?.question,
-    answer: rawCard?.answer,
-    content: rawCard?.content,
-    tags: rawCard?.tags,
+    question: rawCard.question,
+    answer: rawCard.answer,
+    content: rawCard.content,
+    tags: rawCard.tags,
     status,
     createdAt, // 时间戳
-    updatedAt: rawCard?.updatedAt ?? createdAt,
-    statusUpdatedAt: rawCard?.statusUpdatedAt,
-    masteredAt: rawCard?.masteredAt,
-    contentUpdatedAt: rawCard?.contentUpdatedAt,
-    sort: rawCard?.sort ?? Number.MAX_SAFE_INTEGER,
+    updatedAt: rawCard.updatedAt !== undefined ? rawCard.updatedAt : createdAt,
+    statusUpdatedAt: rawCard.statusUpdatedAt,
+    masteredAt: rawCard.masteredAt,
+    contentUpdatedAt: rawCard.contentUpdatedAt,
+    sort: rawCard.sort !== undefined ? rawCard.sort : Number.MAX_SAFE_INTEGER,
   };
 }
 
@@ -318,7 +318,7 @@ function mergeCards(
 
     const existed = cardsMap.has(normalizedCard.id);
 
-    if (existed && config?.conflictStrategy === 'skip') {
+    if (existed && config && config.conflictStrategy === 'skip') {
       countTotal.skippedCardCount += 1;
       continue;
     }
@@ -371,7 +371,8 @@ export async function importFromJsonFile(
     if (mode === 'merge') {
       // 合并导入保留本地数据，再按冲突策略处理导入内容；学习统计继续以当前设备为准。
       const currentCategories = getCategories().data || [];
-      const currentCards = getCards().data?.list || [];
+      const currentCardsResult = getCards().data;
+      const currentCards = currentCardsResult ? currentCardsResult.list : [];
       const mergeResult = mergeCategories(importData.categories, currentCategories);
       mergedCategories = mergeResult.mergedCategories;
       mergedCards = mergeCards(importData.cards, currentCards, mergeResult, config);

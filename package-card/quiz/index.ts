@@ -181,23 +181,28 @@ Page({
   // 选择状态
   onQuiz(event: WechatMiniprogram.BaseEvent) {
     const status = event.currentTarget.dataset.status;
+    const currentCard = this.data.currentCard;
+    if (!currentCard) {
+      return;
+    }
+
     switch (status) {
       case 'unknown':
-        this.changeStatus(this.data.currentCard?.id, 'unknown');
+        this.changeStatus(currentCard.id, 'unknown');
         this.setData({
           'quizResult.unknown': this.data.quizResult.unknown + 1,
         });
         this.nextQuestion();
         break;
       case 'fuzzy':
-        this.changeStatus(this.data.currentCard?.id, 'fuzzy');
+        this.changeStatus(currentCard.id, 'fuzzy');
         this.setData({
           'quizResult.fuzzy': this.data.quizResult.fuzzy + 1,
         });
         this.nextQuestion();
         break;
       case 'mastered':
-        this.changeStatus(this.data.currentCard?.id, 'mastered');
+        this.changeStatus(currentCard.id, 'mastered');
         this.setData({
           'quizResult.mastered': this.data.quizResult.mastered + 1,
         });
@@ -207,22 +212,22 @@ Page({
   },
 
   onLoad(options) {
-    if (options?.categoryId) {
+    if (options && options.categoryId) {
       this.setData({
         'quizOptions.categoryId': options.categoryId,
       });
     }
-    if (options?.mode) {
+    if (options && options.mode) {
       this.setData({
         'quizOptions.mode': options.mode as quizQuery['mode'],
       });
     }
-    if (options?.type) {
+    if (options && options.type) {
       this.setData({
         'quizOptions.type': options.type as quizQuery['type'],
       });
     }
-    if (options?.limit) {
+    if (options && options.limit) {
       this.setData({
         'quizOptions.limit': Number(options.limit) as quizQuery['limit'],
       });

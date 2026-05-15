@@ -28,7 +28,7 @@ Page({
       this.setData({
         cardData: {
           ...card,
-          statusText: card?.status ? cardStatusTextMap[card.status] : '新',
+          statusText: card.status ? cardStatusTextMap[card.status] : '新',
           tagsText: formatTagsText(card.tags),
         } as Card,
       });
@@ -60,7 +60,7 @@ Page({
 
   // 页面加载
   onLoad(options) {
-    const id = options?.id || null;
+    const id = options && options.id ? options.id : null;
     if (id) {
       this.setData({ cardId: id });
     } else {

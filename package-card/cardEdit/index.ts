@@ -67,14 +67,14 @@ Page({
       'formData.question': card.question,
       'formData.answer': card.answer,
       'formData.content': card.content || '',
-      'formData.tagsText': card.tags?.join('、') || '',
+      'formData.tagsText': Array.isArray(card.tags) ? card.tags.join('、') : '',
     });
   },
 
   // 输入事件处理函数
   onContentInput(e: WechatMiniprogram.CustomEvent) {
     this.setData({
-      'formData.content': e.detail?.value || '',
+      'formData.content': e.detail && typeof e.detail.value === 'string' ? e.detail.value : '',
     });
   },
 
@@ -224,7 +224,7 @@ Page({
 
   onLoad(options) {
     // 新增卡片时，如果传入了 categoryId 参数，优先使用这个参数
-    if (options?.categoryId && !options?.id) {
+    if (options && options.categoryId && !options.id) {
       this.loadCategories(options.categoryId);
       this.setData({
         'formData.categoryId': options.categoryId,
@@ -233,10 +233,10 @@ Page({
       this.loadCategories();
     }
     this.setData({
-      cardId: options?.id || undefined,
+      cardId: options && options.id ? options.id : undefined,
     });
-    if (options?.id) {
-      this.loadCard(options?.id);
+    if (options && options.id) {
+      this.loadCard(options.id);
       return;
     }
   },
