@@ -5,7 +5,8 @@ Page({
     categoryId: '' as string,
     formData: {
       name: '' as string,
-      sort: 0 as number,
+      // 排序输入需要保留原始字符串，避免用户清空或编辑中间态时被立即转回 0。
+      sort: '' as string,
     },
   },
 
@@ -24,7 +25,7 @@ Page({
     this.setData({
       formData: {
         ...this.data.formData,
-        sort: Number(event.detail.value),
+        sort: event.detail.value,
       },
     });
   },
@@ -39,9 +40,10 @@ Page({
       });
       return;
     }
-    // 将排序转换为数字，如果输入为空则默认为 0
-    const sort = formData.sort ? Number(formData.sort) : 0;
-    if (Number.isNaN(sort)) {
+    // 只在提交时解析排序，允许输入框保留空串等编辑态，避免被受控值强制回写成 0。
+    const rawSort = formData.sort.trim();
+    const sort = rawSort === '' ? 0 : Number(rawSort);
+    if (!Number.isFinite(sort)) {
       wx.showToast({
         title: '排序必须是数字',
         icon: 'none',
@@ -81,7 +83,7 @@ Page({
         this.setData({
           formData: {
             name: res.data.name,
-            sort: Number(res.data.sort),
+            sort: String(res.data.sort),
           },
           categoryId,
         });
