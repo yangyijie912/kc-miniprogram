@@ -82,11 +82,6 @@
   flex-shrink: 0;
 }
 
-.page-actions-copy {
-  flex: 1;
-  min-width: 0;
-}
-
 .page-actions-head {
   display: flex;
   align-items: center;

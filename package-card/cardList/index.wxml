@@ -38,15 +38,13 @@
       </picker>
 
       <view class="page-actions">
-        <view class="page-actions-copy">
-          <view class="page-actions-head">
-            <view class="page-actions-title">{{ currentModeTitle }}</view>
-            <view class="sort-state-tag {{ (isSortMode || isEditMode) ? 'active' : '' }}">
-              {{ currentModeTag }}
-            </view>
+        <view class="page-actions-head">
+          <view class="page-actions-title">{{ currentModeTitle }}</view>
+          <view class="sort-state-tag {{ (isSortMode || isEditMode) ? 'active' : '' }}">
+            {{ currentModeTag }}
           </view>
-          <view class="page-actions-desc">{{ currentModeDesc }}</view>
         </view>
+        <view class="page-actions-desc">{{ currentModeDesc }}</view>
 
         <view class="page-actions-body">
           <view

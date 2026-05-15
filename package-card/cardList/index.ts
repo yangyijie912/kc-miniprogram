@@ -263,6 +263,7 @@ Page({
     selectedSortIndex: 0 as number,
     selectedSortLabel: getSortLabel(0),
     sortOptionLabels: CARD_SORT_OPTIONS.map((option) => option.label),
+    enteredFromHomeSearch: false as boolean,
     interactionMode: 'browse' as InteractionMode,
     isEditMode: false as boolean,
     isSortMode: false as boolean,
@@ -311,7 +312,9 @@ Page({
       ...this.data.queryParams,
       keyword: keyword ? keyword : undefined,
     };
-    const isSearchResultMode = Boolean(keyword);
+    // 和 uniapp 对齐：只有“首页带 keyword 进入”的场景才切搜索结果页内模式；
+    // 当前列表页自己输入关键词时，只是普通筛选，不应该把整块筛选区切掉。
+    const isSearchResultMode = this.data.enteredFromHomeSearch && Boolean(keyword);
 
     this.setData({
       queryParams: query,
@@ -462,6 +465,7 @@ Page({
     this.setData({
       queryParams: normalizedQuery,
       inputKeyword: normalizedQuery.keyword || '',
+      enteredFromHomeSearch: Boolean(normalizedQuery.keyword?.trim()),
       isSearchResultMode: Boolean(normalizedQuery.keyword?.trim()),
       showQuizAction:
         Boolean(normalizedQuery.categoryId) && !Boolean(normalizedQuery.keyword?.trim()),
