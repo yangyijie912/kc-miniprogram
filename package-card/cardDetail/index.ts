@@ -4,6 +4,15 @@ import { getCategoryById } from '@/services/categoryService';
 import { UNCATEGORIZED_NAME } from '@/constants/category';
 import { cardStatusTextMap } from '@/constants/cardStatus';
 
+function formatTagsText(tags: Card['tags']) {
+  if (!Array.isArray(tags) || tags.length === 0) {
+    return '';
+  }
+
+  // 详情页标签是完整展示态；为空时必须返回空串，不能把 undefined 拼进 UI。
+  return '/ ' + tags.join('•');
+}
+
 Page({
   data: {
     cardId: '' as string,
@@ -20,9 +29,7 @@ Page({
         cardData: {
           ...card,
           statusText: card?.status ? cardStatusTextMap[card.status] : '新',
-          tagsText:
-            (Array.isArray(card?.tags) && card?.tags?.length > 0 ? '/ ' : '') +
-            card?.tags?.join('•'),
+          tagsText: formatTagsText(card.tags),
         } as Card,
       });
 
