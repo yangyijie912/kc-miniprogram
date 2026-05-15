@@ -10,7 +10,8 @@ page {
   overflow-x: hidden;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  background: #efe5d5;
+  /* 这里保持透明，让具体页面自己决定滚动区域底色，避免全局底色把局部渐变压深。 */
+  background: transparent;
 }
 .page {
   /* min-height: 100vh; */
