@@ -27,7 +27,7 @@
     <view class="section">
       <view class="section-title">今日状态</view>
       <view class="today-panel">
-        <view class="today-main-card">
+        <view class="today-main-card" bindtap="handleTodayQuizTap">
           <view class="today-main-head">
             <view>
               <view class="today-main-label">今日测验进度</view>

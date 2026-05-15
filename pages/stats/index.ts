@@ -169,6 +169,24 @@ Page({
     });
   },
 
+  handleTodayQuizTap() {
+    const { todayQuizRate, todayProgressText } = this.data;
+
+    // 进度卡片只负责已完成结果回看；未完成时统一拦截并提示继续去做题。
+    if (todayQuizRate < 100 || todayProgressText === '今日还没有开始每日测验') {
+      wx.showToast({
+        title: '今日测验还没完成，快去开始吧',
+        icon: 'none',
+      });
+      return;
+    }
+
+    // 结果页沿用测验页完成时的入参协议，避免入口不同导致页面状态分支不一致。
+    wx.navigateTo({
+      url: '/package-card/quizResult/index?type=today',
+    });
+  },
+
   onShow() {
     this.loadStatsPage();
   },

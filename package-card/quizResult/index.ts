@@ -35,11 +35,15 @@ Page({
     });
   },
 
-  // 返回首页
+  // 结果页入口可能来自测验完成，也可能来自统计页回看；优先回上一页，无栈再兜底首页。
   toHome() {
-    // wx.navigateBack({
-    //   delta: 1,
-    // });
+    if (getCurrentPages().length > 1) {
+      wx.navigateBack({
+        delta: 1,
+      });
+      return;
+    }
+
     wx.switchTab({
       url: '/pages/index/index',
     });
