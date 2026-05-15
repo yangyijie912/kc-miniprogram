@@ -1,22 +1,23 @@
 <view class="page">
   <scroll-view class="scrollarea page-scroll" scroll-y bindscrolltolower="onReachBottom" lower-threshold="120">
-    <view wx-if="{{!isSearchResultMode}}" class="toolbar">
-      <input
-        value="{{ inputKeyword }}"
-        bindinput="onSearchInput"
-        class="search-input"
-        placeholder="问题/答案/笔记/标签"
-        placeholder-class="placeholder"
-      />
-      <view class="filter-btn" bindtap="searchCard">筛选</view>
-    </view>
-
-    <view wx-if="{{isSearchResultMode}}" class="result-banner">
+    <view wx:if="{{showResultBanner}}" class="result-banner">
       <view class="result-title">搜索结果</view>
       <view class="result-keyword">关键词：{{ queryParams.keyword }}</view>
     </view>
 
-    <view wx-if="{{!isSearchResultMode}}" class="filter-row">
+    <block wx:else>
+      <view class="toolbar">
+        <input
+          value="{{ inputKeyword }}"
+          bindinput="onSearchInput"
+          class="search-input"
+          placeholder="问题/答案/笔记/标签"
+          placeholder-class="placeholder"
+        />
+        <view class="filter-btn" bindtap="searchCard">筛选</view>
+      </view>
+
+      <view class="filter-row">
       <view class="filter-status">
           <view
             wx:for="{{statusTabs}}"
@@ -64,7 +65,8 @@
           </view>
         </view>
       </view>
-    </view>
+      </view>
+    </block>
 
     <view class="card-list {{ isEditMode ? 'is-editing' : '' }} {{ isSortMode ? 'is-sorting' : '' }}">
       <view

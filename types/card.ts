@@ -112,4 +112,5 @@ export type PageOptions = {
   categoryId?: string;
   keyword?: string;
   status?: string;
+  enteredFromHomeSearch?: string;
 };

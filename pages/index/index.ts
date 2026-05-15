@@ -57,7 +57,10 @@ Page({
       return;
     }
     wx.navigateTo({
-      url: '/package-card/cardList/index?keyword=' + encodeURIComponent(this.data.searchQuery),
+      // 显式标记来源，避免列表页把普通带 keyword 的场景误判成“搜索结果模式”。
+      url:
+        '/package-card/cardList/index?enteredFromHomeSearch=1&keyword=' +
+        encodeURIComponent(this.data.searchQuery),
     });
   },
 

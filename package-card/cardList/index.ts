@@ -248,6 +248,14 @@ function buildBrowseState(pageData: {
   });
 }
 
+function buildSearchUiState(isSearchResultMode: boolean) {
+  return {
+    showSearchToolbar: !isSearchResultMode,
+    showFilterRow: !isSearchResultMode,
+    showResultBanner: isSearchResultMode,
+  };
+}
+
 Page({
   data: {
     inputKeyword: '',
@@ -260,6 +268,9 @@ Page({
     isLoading: false as boolean,
     showQuizAction: false as boolean,
     isSearchResultMode: false as boolean,
+    showSearchToolbar: true as boolean,
+    showFilterRow: true as boolean,
+    showResultBanner: false as boolean,
     statusTabs: buildStatusTabs(),
     showQuizSetup: false as boolean,
     selectedSortIndex: 0 as number,
@@ -321,6 +332,7 @@ Page({
     this.setData({
       queryParams: query,
       isSearchResultMode,
+      ...buildSearchUiState(isSearchResultMode),
       showQuizAction: Boolean(query.categoryId) && !isSearchResultMode,
       ...buildInteractionState({
         interactionMode: this.data.interactionMode,
@@ -459,6 +471,8 @@ Page({
     const { categoryId, status, keyword } = q;
     const normalizedKeyword = keyword ? decodeURIComponent(keyword) : undefined;
     const hasKeyword = Boolean(normalizedKeyword && normalizedKeyword.trim());
+    // 只认首页显式传入的来源标记，避免把列表内筛选或其他入口误判成搜索结果页。
+    const enteredFromHomeSearch = options.enteredFromHomeSearch === '1';
 
     const normalizedQuery: QueryParams = {
       categoryId,
@@ -469,14 +483,15 @@ Page({
     this.setData({
       queryParams: normalizedQuery,
       inputKeyword: normalizedQuery.keyword || '',
-      enteredFromHomeSearch: hasKeyword,
-      isSearchResultMode: hasKeyword,
-      showQuizAction: Boolean(normalizedQuery.categoryId) && !hasKeyword,
+      enteredFromHomeSearch,
+      isSearchResultMode: enteredFromHomeSearch && hasKeyword,
+      ...buildSearchUiState(enteredFromHomeSearch && hasKeyword),
+      showQuizAction: Boolean(normalizedQuery.categoryId) && !(enteredFromHomeSearch && hasKeyword),
       statusTabs: buildStatusTabs(normalizedQuery.status),
       ...buildInteractionState({
         interactionMode: 'browse',
         queryParams: normalizedQuery,
-        isSearchResultMode: hasKeyword,
+        isSearchResultMode: enteredFromHomeSearch && hasKeyword,
         cardViewList: this.data.cardViewList,
         selectedCards: [],
       }),
