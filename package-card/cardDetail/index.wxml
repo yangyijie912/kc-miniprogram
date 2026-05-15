@@ -22,9 +22,7 @@
 
     <view class="panel">
       <view class="panel-title">答案</view>
-      <view class="panel-text">
-        {{ cardData.answer }}
-      </view>
+      <view class="panel-text">{{ cardData.answer }}</view>
     </view>
 
     <view class="panel">
