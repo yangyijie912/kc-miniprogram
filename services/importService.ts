@@ -3,6 +3,7 @@ import { getCards, saveAllCards, saveDailyLearningStats } from '@/services/cardS
 import { fail, success } from '@/services/serviceHelper';
 import { generateUUID } from '@/utils/uuid';
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from '@/constants/category';
+import { DAILY_QUIZ_SESSION_KEY } from '@/constants/storageKeys';
 import type { ImportData, ImportResult, ImportMode, MergeConfig } from '@/types/migration';
 import type { RawCard, Card, Category, DailyLearningStats } from '@/types/card';
 import type { ServiceResult } from '@/types/service';
@@ -11,6 +12,12 @@ import {
   isValidCategoryThemeIndex,
   pickAvailableCategoryThemeIndex,
 } from '@/utils/categoryTheme';
+
+function invalidateDailyQuizState() {
+  // 覆盖导入会整体替换题库；旧的每日测验队列和结果统计都会失真，必须一起失效。
+  wx.removeStorageSync(DAILY_QUIZ_SESSION_KEY);
+  wx.removeStorageSync('quizResult');
+}
 
 /**
  * ==============================================================
@@ -389,6 +396,7 @@ export async function importFromJsonFile(
 
     if (mode === 'overwrite') {
       saveDailyLearningStats(importedDailyLearningStats);
+      invalidateDailyQuizState();
     }
 
     // 5、返回导入结果
