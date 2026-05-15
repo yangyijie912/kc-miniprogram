@@ -75,7 +75,7 @@ Page({
   },
 
   onLoad(options) {
-    const categoryId = options?.id || null;
+    const categoryId = options && options.id ? options.id : null;
     if (categoryId) {
       // 编辑模式，加载分类数据
       const res = getCategoryById(categoryId);
