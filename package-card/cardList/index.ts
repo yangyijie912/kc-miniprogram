@@ -13,6 +13,10 @@ type StatusTab = {
   active: boolean;
 };
 
+type CardListItem = CardView & {
+  answerPreview: string;
+};
+
 // 基本状态标签列表
 const baseStatusTabs: Array<Omit<StatusTab, 'active'>> = [
   { label: '全部', value: '' },
@@ -31,10 +35,32 @@ function buildStatusTabs(status?: CardStatus): StatusTab[] {
 }
 
 // 根据 selectedCards 列表更新 cardViewList 中的 isSelected 字段
-function applySelectionState(cardViewList: CardView[], selectedCards: string[]): CardView[] {
+function applySelectionState(
+  cardViewList: CardListItem[],
+  selectedCards: string[],
+): CardListItem[] {
   return cardViewList.map((item) => ({
     ...item,
     isSelected: selectedCards.includes(item.id),
+  }));
+}
+
+function formatAnswerPreview(answer: string | null | undefined) {
+  if (!answer) {
+    return '';
+  }
+
+  // 列表预览必须固定卡高：把显式换行压成空格，再交给两行省略处理。
+  return answer
+    .replace(/\s*\r?\n\s*/g, ' ')
+    .replace(/[\t ]+/g, ' ')
+    .trim();
+}
+
+function buildCardListItems(cardViewList: CardView[]): CardListItem[] {
+  return cardViewList.map((item) => ({
+    ...item,
+    answerPreview: formatAnswerPreview(item.answer),
   }));
 }
 
@@ -76,7 +102,7 @@ Page({
   data: {
     inputKeyword: '',
     queryParams: {} as QueryParams,
-    cardViewList: [] as CardView[],
+    cardViewList: [] as CardListItem[],
     currentPage: 0 as number,
     pageSize: PAGE_SIZE,
     total: 0 as number,
@@ -182,7 +208,9 @@ Page({
     });
     const categoryList = loadCategories();
     const cardViewList = createCardViewList(list, categoryList);
-    const nextCardViewList = reset ? cardViewList : this.data.cardViewList.concat(cardViewList);
+    const nextCardViewList = reset
+      ? buildCardListItems(cardViewList)
+      : this.data.cardViewList.concat(buildCardListItems(cardViewList));
     const nextSelectedCards = reset ? [] : this.data.selectedCards;
     const transferCategoryState = syncTransferCategoryState(
       categoryList.map((category) => ({

@@ -79,7 +79,7 @@
           </view>
         </view>
         <view class="card-question">{{ item.question }}</view>
-        <view class="card-answer">{{ item.answer }}</view>
+        <view class="card-answer">{{ item.answerPreview }}</view>
         <view wx:if="{{ item.tagText }}" class="card-tag card-tag-bottom">{{ item.tagText }}</view>
         <view wx:else class="card-empty-tag card-tag-bottom">暂无标签</view>
       </view>

@@ -126,3 +126,9 @@
   font-size: 26rpx;
   line-height: 1.8;
 }
+
+.panel-text {
+  /* 详情页属于完整阅读态，答案要保留编辑时输入的显式换行。 */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
