@@ -1,3 +1,4 @@
+import { QUIZ_RESULT_STORAGE_KEY } from '@/constants/storageKeys';
 import { jsonToUrlParam } from '@/package-card/utils/jsonToUrl';
 import type { quizQuery, QuizResultSummary } from '@/types/quiz';
 
@@ -19,7 +20,7 @@ Page({
   },
 
   onShow() {
-    const resultStr = wx.getStorageSync('quizResult');
+    const resultStr = wx.getStorageSync(QUIZ_RESULT_STORAGE_KEY);
     if (resultStr) {
       const parsedResult = JSON.parse(resultStr);
       this.setData({

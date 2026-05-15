@@ -4,6 +4,7 @@ import {
   getDailyQuizSession,
   updateDailyQuizSessionProgress,
 } from '@/services/quizService';
+import { QUIZ_RESULT_STORAGE_KEY } from '@/constants/storageKeys';
 import { jsonToUrlParam } from '@/package-card/utils/jsonToUrl';
 import type { CardStatus, CardView } from '@/types/card';
 import type { quizQuery, QuizResultSummary } from '@/types/quiz';
@@ -69,7 +70,7 @@ Page({
     if (this.data.quizOptions.type === 'today') {
       this.syncDailyProgress(true);
     }
-    wx.setStorageSync('quizResult', JSON.stringify(this.data.quizResult));
+    wx.setStorageSync(QUIZ_RESULT_STORAGE_KEY, JSON.stringify(this.data.quizResult));
     wx.redirectTo({
       url: `/package-card/quizResult/index?${jsonToUrlParam(this.data.quizOptions)}`,
     });
