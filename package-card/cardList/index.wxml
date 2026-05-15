@@ -31,39 +31,68 @@
         class="sort-picker-wrap"
         range="{{sortOptionLabels}}"
         value="{{selectedSortIndex}}"
+        disabled="{{isSortMode}}"
         bindchange="onSortChange"
       >
-        <view class="sort-picker">排序：{{ selectedSortLabel }}</view>
+        <view class="sort-picker {{ isSortMode ? 'is-disabled' : '' }}">{{ selectedSortLabel }}</view>
       </picker>
 
       <view class="page-actions">
         <view class="page-actions-copy">
-          <view class="page-actions-title">批量操作</view>
-          <view class="page-actions-desc">长按卡片进入多选，支持转移分类与删除</view>
+          <view class="page-actions-head">
+            <view class="page-actions-title">{{ currentModeTitle }}</view>
+            <view class="sort-state-tag {{ (isSortMode || isEditMode) ? 'active' : '' }}">
+              {{ currentModeTag }}
+            </view>
+          </view>
+          <view class="page-actions-desc">{{ currentModeDesc }}</view>
         </view>
 
         <view class="page-actions-body">
-          <view wx-if="{{showQuizAction}}" class="action-tool quiz-btn" bindtap="openQuizSetup">
-            <text class="action-tool-icon">▷</text>
+          <view
+            class="action-pill action-pill-sort {{ isSortMode ? 'active' : '' }} {{ isSortModeDisabled ? 'disabled' : '' }}"
+            bindtap="toggleSortMode"
+          >
+            <image class="action-pill-icon" src="/assets/actions/drag-sort.svg" mode="aspectFit" />
+            <view class="action-pill-label">{{ sortModeActionLabel }}</view>
           </view>
-          <view class="action-tool add-btn" bindtap="goToAddCard">
-            <text class="action-tool-icon">+</text>
+          <view wx-if="{{showQuizAction}}" class="action-pill action-pill-quiz" bindtap="openQuizSetup">
+            <image class="action-tool-icon-image" src="/assets/actions/quiz.svg" mode="aspectFit" />
+            <view class="action-pill-label">测验</view>
+          </view>
+          <view class="action-pill action-pill-add" bindtap="goToAddCard">
+            <image class="action-tool-icon-image" src="/assets/actions/add.svg" mode="aspectFit" />
+            <view class="action-pill-label">新增</view>
           </view>
         </view>
       </view>
     </view>
 
-    <view class="card-list {{ isEditMode ? 'is-editing' : '' }}">
+    <view class="card-list {{ isEditMode ? 'is-editing' : '' }} {{ isSortMode ? 'is-sorting' : '' }}">
       <view
         wx:for="{{cardViewList}}"
         wx:for-item="item"
         wx:for-index="index"
         wx:key="id"
-        class="card-item {{ isEditMode ? 'is-editing' : '' }} {{ item.isSelected ? 'is-selected' : '' }}"
+        class="card-item {{ isEditMode ? 'is-editing' : '' }} {{ isSortMode ? 'is-sorting' : '' }} {{ item.isSelected ? 'is-selected' : '' }}"
         bindtap="onCardClick"
         bindlongpress="onEdit"
         data-id="{{ item.id }}"
       >
+        <view wx:if="{{isSortMode}}" class="card-sort-actions">
+          <view
+            class="sort-move-btn {{ item.canMoveUp ? '' : 'disabled' }}"
+            catchtap="moveCardUp"
+            data-id="{{ item.id }}"
+            data-index="{{ index }}"
+          >↑</view>
+          <view
+            class="sort-move-btn {{ item.canMoveDown ? '' : 'disabled' }}"
+            catchtap="moveCardDown"
+            data-id="{{ item.id }}"
+            data-index="{{ index }}"
+          >↓</view>
+        </view>
         <view
           wx:if="{{isEditMode}}"
           class="card-check {{ item.isSelected ? 'selected' : '' }}"
@@ -95,8 +124,18 @@
       <view wx:elif="{{ !hasMore }}" class="list-footer-text">没有更多了</view>
     </view>
 
-    <view wx:if="{{isEditMode}}" class="bottom-placeholder"> </view>
+    <view wx:if="{{isEditMode || isSortMode}}" class="bottom-placeholder"> </view>
   </scroll-view>
+
+  <view wx:if="{{isSortMode}}" class="sort-bar">
+    <view class="sort-summary">
+      <view class="sort-title">排序中</view>
+      <view class="sort-desc">已按自定义顺序排序，点击卡片左侧按钮上下移动即可调整顺序</view>
+    </view>
+    <view class="sort-actions">
+      <view class="sort-btn sort-btn-secondary" bindtap="toggleSortMode">退出排序</view>
+    </view>
+  </view>
 
   <view wx:if="{{isEditMode}}" class="batch-bar">
     <view class="batch-summary">

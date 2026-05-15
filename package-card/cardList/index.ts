@@ -1,7 +1,19 @@
-import type { QueryParams, PageOptions, CardStatus, CardView, CardSortConfig } from '@/types/card';
+import type {
+  QueryParams,
+  PageOptions,
+  CardStatus,
+  CardView,
+  CardSortConfig,
+  InteractionMode,
+  Move,
+} from '@/types/card';
 import type { quizQuery } from '@/types/quiz';
 import { createCardViewList, loadCardPage, loadCategories } from '@/view-model/card-view';
-import { batchDeleteCards, batchUpdateCards } from '@/services/cardService';
+import {
+  batchDeleteCards,
+  batchUpdateCards,
+  updateCardOrderInCategory,
+} from '@/services/cardService';
 import { CARD_SORT_OPTIONS } from '@/constants/sortConfig';
 
 const PAGE_SIZE = 10;
@@ -15,7 +27,16 @@ type StatusTab = {
 
 type CardListItem = CardView & {
   answerPreview: string;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
 };
+
+type Direction = 'up' | 'down';
+
+const CUSTOM_SORT_INDEX = Math.max(
+  0,
+  CARD_SORT_OPTIONS.findIndex((option) => option.value.sortBy === 'customSort'),
+);
 
 // 基本状态标签列表
 const baseStatusTabs: Array<Omit<StatusTab, 'active'>> = [
@@ -38,10 +59,16 @@ function buildStatusTabs(status?: CardStatus): StatusTab[] {
 function applySelectionState(
   cardViewList: CardListItem[],
   selectedCards: string[],
+  interactionMode: InteractionMode,
 ): CardListItem[] {
-  return cardViewList.map((item) => ({
+  const isSelectMode = interactionMode === 'select';
+  const isSortMode = interactionMode === 'sort';
+
+  return cardViewList.map((item, index) => ({
     ...item,
-    isSelected: selectedCards.includes(item.id),
+    isSelected: isSelectMode && selectedCards.includes(item.id),
+    canMoveUp: isSortMode && index > 0,
+    canMoveDown: isSortMode && index < cardViewList.length - 1,
   }));
 }
 
@@ -61,7 +88,114 @@ function buildCardListItems(cardViewList: CardView[]): CardListItem[] {
   return cardViewList.map((item) => ({
     ...item,
     answerPreview: formatAnswerPreview(item.answer),
+    canMoveUp: false,
+    canMoveDown: false,
   }));
+}
+
+function canUseSortMode(queryParams: QueryParams, isSearchResultMode: boolean): boolean {
+  return Boolean(queryParams.categoryId) && !isSearchResultMode;
+}
+
+function getSortModeDisabledReason(queryParams: QueryParams, isSearchResultMode: boolean): string {
+  if (!queryParams.categoryId) {
+    return '仅分类列表支持上下排序';
+  }
+
+  if (isSearchResultMode) {
+    return '搜索结果里暂不支持上下排序';
+  }
+
+  return '';
+}
+
+function normalizeInteractionMode(
+  interactionMode: InteractionMode,
+  sortModeAvailable: boolean,
+): InteractionMode {
+  if (interactionMode === 'sort' && !sortModeAvailable) {
+    return 'browse';
+  }
+
+  return interactionMode;
+}
+
+function getInteractionCopy(interactionMode: InteractionMode) {
+  if (interactionMode === 'sort') {
+    return {
+      currentModeTitle: '排序模式',
+      currentModeTag: '排序中',
+      currentModeDesc: '点击卡片左侧按钮上下移动，完成后可退出排序',
+      sortModeActionLabel: '退出排序',
+    };
+  }
+
+  if (interactionMode === 'select') {
+    return {
+      currentModeTitle: '多选模式',
+      currentModeTag: '多选中',
+      currentModeDesc: '长按继续选择，支持批量转移分类与删除',
+      sortModeActionLabel: '上下排序',
+    };
+  }
+
+  return {
+    currentModeTitle: '浏览模式',
+    currentModeTag: '浏览中',
+    currentModeDesc: '长按卡片进入多选模式，或点击上下排序',
+    sortModeActionLabel: '上下排序',
+  };
+}
+
+function buildInteractionState(params: {
+  interactionMode: InteractionMode;
+  queryParams: QueryParams;
+  isSearchResultMode: boolean;
+  cardViewList: CardListItem[];
+  selectedCards: string[];
+}) {
+  const sortModeAvailable = canUseSortMode(params.queryParams, params.isSearchResultMode);
+  const normalizedInteractionMode = normalizeInteractionMode(
+    params.interactionMode,
+    sortModeAvailable,
+  );
+  const normalizedSelectedCards =
+    normalizedInteractionMode === 'select' ? params.selectedCards : [];
+
+  return {
+    interactionMode: normalizedInteractionMode,
+    isEditMode: normalizedInteractionMode === 'select',
+    isSortMode: normalizedInteractionMode === 'sort',
+    isSortModeDisabled: !sortModeAvailable,
+    sortModeDisabledReason: getSortModeDisabledReason(
+      params.queryParams,
+      params.isSearchResultMode,
+    ),
+    selectedCards: normalizedSelectedCards,
+    cardViewList: applySelectionState(
+      params.cardViewList,
+      normalizedSelectedCards,
+      normalizedInteractionMode,
+    ),
+    ...getInteractionCopy(normalizedInteractionMode),
+  };
+}
+
+function reorderCardListItems(cardViewList: CardListItem[], move: Move): CardListItem[] {
+  const movedIndex = cardViewList.findIndex((item) => item.id === move.movedId);
+  const anchorIndex = cardViewList.findIndex((item) => item.id === move.anchorId);
+
+  if (movedIndex === -1 || anchorIndex === -1) {
+    return cardViewList;
+  }
+
+  const nextList = [...cardViewList];
+  const [movedCard] = nextList.splice(movedIndex, 1);
+  const adjustedAnchorIndex = movedIndex < anchorIndex ? anchorIndex - 1 : anchorIndex;
+  const insertIndex = move.position === 'before' ? adjustedAnchorIndex : adjustedAnchorIndex + 1;
+
+  nextList.splice(insertIndex, 0, movedCard);
+  return nextList;
 }
 
 // 同步转移分类的选择状态，确保在分类列表变化时 selectedTransferCategoryId 始终有效
@@ -98,6 +232,20 @@ function getSortLabel(sortIndex: number): string {
   return CARD_SORT_OPTIONS[sortIndex]?.label ?? CARD_SORT_OPTIONS[0].label;
 }
 
+function buildBrowseState(pageData: {
+  queryParams: QueryParams;
+  isSearchResultMode: boolean;
+  cardViewList: CardListItem[];
+}) {
+  return buildInteractionState({
+    interactionMode: 'browse',
+    queryParams: pageData.queryParams,
+    isSearchResultMode: pageData.isSearchResultMode,
+    cardViewList: pageData.cardViewList,
+    selectedCards: [],
+  });
+}
+
 Page({
   data: {
     inputKeyword: '',
@@ -115,7 +263,15 @@ Page({
     selectedSortIndex: 0 as number,
     selectedSortLabel: getSortLabel(0),
     sortOptionLabels: CARD_SORT_OPTIONS.map((option) => option.label),
+    interactionMode: 'browse' as InteractionMode,
     isEditMode: false as boolean,
+    isSortMode: false as boolean,
+    isSortModeDisabled: true as boolean,
+    sortModeDisabledReason: '仅分类列表支持上下排序',
+    sortModeActionLabel: '上下排序',
+    currentModeTitle: '浏览模式',
+    currentModeTag: '浏览中',
+    currentModeDesc: '长按卡片进入多选模式，或点击上下排序',
     selectedCards: [] as string[],
     categoryDialogVisible: false as boolean,
     categoryOptions: [] as Array<{ id: string; name: string }>,
@@ -155,7 +311,20 @@ Page({
       ...this.data.queryParams,
       keyword: keyword ? keyword : undefined,
     };
-    this.setData({ queryParams: query });
+    const isSearchResultMode = Boolean(keyword);
+
+    this.setData({
+      queryParams: query,
+      isSearchResultMode,
+      showQuizAction: Boolean(query.categoryId) && !isSearchResultMode,
+      ...buildInteractionState({
+        interactionMode: this.data.interactionMode,
+        queryParams: query,
+        isSearchResultMode,
+        cardViewList: this.data.cardViewList,
+        selectedCards: this.data.selectedCards,
+      }),
+    });
     this.loadData(true);
   },
 
@@ -163,19 +332,29 @@ Page({
   toggleStatusFilter(event: WechatMiniprogram.BaseEvent) {
     const rawStatus = event.currentTarget.dataset.value as CardStatus | '' | undefined;
     const status = rawStatus ? rawStatus : undefined;
+    const queryParams = {
+      ...this.data.queryParams,
+      status,
+    };
 
     this.setData({
-      queryParams: {
-        ...this.data.queryParams,
-        status,
-      },
+      queryParams,
       statusTabs: buildStatusTabs(status),
+      ...buildBrowseState({
+        queryParams,
+        isSearchResultMode: this.data.isSearchResultMode,
+        cardViewList: this.data.cardViewList,
+      }),
     });
     this.loadData(true);
   },
 
   // 切换排序配置。这里不让页面自己排数据，而是把排序参数交给服务层统一处理。
   onSortChange(event: WechatMiniprogram.PickerChange) {
+    if (this.data.isSortMode) {
+      return;
+    }
+
     const selectedSortIndex = Number(event.detail.value);
     this.setData({
       selectedSortIndex,
@@ -211,7 +390,8 @@ Page({
     const nextCardViewList = reset
       ? buildCardListItems(cardViewList)
       : this.data.cardViewList.concat(buildCardListItems(cardViewList));
-    const nextSelectedCards = reset ? [] : this.data.selectedCards;
+    const nextInteractionMode =
+      reset && this.data.interactionMode === 'select' ? 'browse' : this.data.interactionMode;
     const transferCategoryState = syncTransferCategoryState(
       categoryList.map((category) => ({
         id: category.id,
@@ -219,9 +399,16 @@ Page({
       })),
       this.data.selectedTransferCategoryId,
     );
+    const interactionState = buildInteractionState({
+      interactionMode: nextInteractionMode,
+      queryParams: this.data.queryParams,
+      isSearchResultMode: this.data.isSearchResultMode,
+      cardViewList: nextCardViewList,
+      selectedCards: this.data.selectedCards,
+    });
 
     this.setData({
-      cardViewList: applySelectionState(nextCardViewList, nextSelectedCards),
+      ...interactionState,
       currentPage: page,
       total,
       pageSize,
@@ -231,8 +418,6 @@ Page({
         id: category.id,
         name: category.name,
       })),
-      isEditMode: reset ? false : this.data.isEditMode,
-      selectedCards: reset ? [] : this.data.selectedCards,
       ...transferCategoryState,
     });
   },
@@ -241,6 +426,7 @@ Page({
   openQuizSetup() {
     this.setData({
       showQuizSetup: true,
+      ...buildBrowseState(this.data),
     });
   },
 
@@ -280,11 +466,28 @@ Page({
       showQuizAction:
         Boolean(normalizedQuery.categoryId) && !Boolean(normalizedQuery.keyword?.trim()),
       statusTabs: buildStatusTabs(normalizedQuery.status),
+      ...buildInteractionState({
+        interactionMode: 'browse',
+        queryParams: normalizedQuery,
+        isSearchResultMode: Boolean(normalizedQuery.keyword?.trim()),
+        cardViewList: this.data.cardViewList,
+        selectedCards: [],
+      }),
     });
   },
 
   onShow() {
     this.loadData(true);
+  },
+
+  onHide() {
+    if (!this.data.isSortMode) {
+      return;
+    }
+
+    this.setData({
+      ...buildBrowseState(this.data),
+    });
   },
 
   onPullDownRefresh() {
@@ -299,17 +502,27 @@ Page({
   // 点击卡片多选或进入详情
   onCardClick(event: WechatMiniprogram.BaseEvent) {
     const id = event.currentTarget.dataset.id;
-    const { isEditMode, selectedCards } = this.data;
+    const { interactionMode, selectedCards } = this.data;
+
+    if (interactionMode === 'sort') {
+      return;
+    }
+
     let arr = [...selectedCards];
-    if (isEditMode) {
+    if (interactionMode === 'select') {
       if (arr.includes(id)) {
         arr = arr.filter((cardId) => cardId !== id);
       } else {
         arr.push(id);
       }
       this.setData({
-        selectedCards: arr,
-        cardViewList: applySelectionState(this.data.cardViewList, arr),
+        ...buildInteractionState({
+          interactionMode: 'select',
+          queryParams: this.data.queryParams,
+          isSearchResultMode: this.data.isSearchResultMode,
+          cardViewList: this.data.cardViewList,
+          selectedCards: arr,
+        }),
       });
       return;
     }
@@ -323,6 +536,9 @@ Page({
     const query = this.data.queryParams.categoryId
       ? `?categoryId=${this.data.queryParams.categoryId}`
       : '';
+    this.setData({
+      ...buildBrowseState(this.data),
+    });
     wx.navigateTo({
       url: `/package-card/cardEdit/index${query}`,
     });
@@ -330,31 +546,125 @@ Page({
 
   // 进入编辑模式（长按卡片）
   onEdit(event: WechatMiniprogram.BaseEvent) {
-    const id = event.currentTarget.dataset.id;
-    const { selectedCards } = this.data;
-    this.setData({
-      isEditMode: true,
-    });
-    if (!selectedCards.includes(id)) {
-      const nextSelectedCards = [...selectedCards, id];
-      this.setData({
-        selectedCards: nextSelectedCards,
-        cardViewList: applySelectionState(this.data.cardViewList, nextSelectedCards),
-      });
+    if (this.data.interactionMode === 'sort') {
       return;
     }
+
+    const id = event.currentTarget.dataset.id;
+    const { selectedCards } = this.data;
+    const nextSelectedCards = selectedCards.includes(id) ? selectedCards : [...selectedCards, id];
+
     this.setData({
-      cardViewList: applySelectionState(this.data.cardViewList, selectedCards),
+      ...buildInteractionState({
+        interactionMode: 'select',
+        queryParams: this.data.queryParams,
+        isSearchResultMode: this.data.isSearchResultMode,
+        cardViewList: this.data.cardViewList,
+        selectedCards: nextSelectedCards,
+      }),
     });
   },
 
   exitEditMode() {
     this.setData({
-      isEditMode: false,
-      selectedCards: [],
-      cardViewList: applySelectionState(this.data.cardViewList, []),
+      categoryDialogVisible: false,
+      ...buildInteractionState({
+        interactionMode: 'browse',
+        queryParams: this.data.queryParams,
+        isSearchResultMode: this.data.isSearchResultMode,
+        cardViewList: this.data.cardViewList,
+        selectedCards: [],
+      }),
     });
-    this.closeCategoryDialog();
+  },
+
+  toggleSortMode() {
+    if (this.data.isSortMode) {
+      this.setData({
+        categoryDialogVisible: false,
+        ...buildBrowseState(this.data),
+      });
+      return;
+    }
+
+    if (this.data.isSortModeDisabled) {
+      wx.showToast({
+        title: this.data.sortModeDisabledReason || '当前列表暂不支持上下排序',
+        icon: 'none',
+      });
+      return;
+    }
+
+    const shouldReload = this.data.selectedSortIndex !== CUSTOM_SORT_INDEX;
+
+    this.setData({
+      selectedSortIndex: CUSTOM_SORT_INDEX,
+      selectedSortLabel: getSortLabel(CUSTOM_SORT_INDEX),
+      categoryDialogVisible: false,
+      ...buildInteractionState({
+        interactionMode: 'sort',
+        queryParams: this.data.queryParams,
+        isSearchResultMode: this.data.isSearchResultMode,
+        cardViewList: this.data.cardViewList,
+        selectedCards: [],
+      }),
+    });
+
+    // 排序模式必须绑定到自定义顺序，否则用户眼前的顺序和最终落盘顺序会脱节。
+    if (shouldReload) {
+      this.loadData(true);
+    }
+  },
+
+  moveCard(event: WechatMiniprogram.BaseEvent, direction: Direction) {
+    if (!this.data.isSortMode || !this.data.queryParams.categoryId) {
+      return;
+    }
+
+    const id = String(event.currentTarget.dataset.id || '');
+    const index = Number(event.currentTarget.dataset.index);
+
+    if (!id || Number.isNaN(index)) {
+      return;
+    }
+
+    const anchorIndex = direction === 'up' ? index - 1 : index + 1;
+    const anchorCard = this.data.cardViewList[anchorIndex];
+
+    if (!anchorCard) {
+      return;
+    }
+
+    const move: Move = {
+      movedId: id,
+      anchorId: anchorCard.id,
+      position: direction === 'up' ? 'before' : 'after',
+    };
+    const result = updateCardOrderInCategory(this.data.queryParams.categoryId, move);
+
+    if (!result.success) {
+      wx.showToast({ title: result.message || '排序失败', icon: 'none' });
+      return;
+    }
+
+    const reorderedList = reorderCardListItems(this.data.cardViewList, move);
+    this.setData({
+      ...buildInteractionState({
+        interactionMode: 'sort',
+        queryParams: this.data.queryParams,
+        isSearchResultMode: this.data.isSearchResultMode,
+        cardViewList: reorderedList,
+        selectedCards: [],
+      }),
+    });
+  },
+
+  moveCardUp(event: WechatMiniprogram.BaseEvent) {
+    this.moveCard(event, 'up');
+  },
+
+  moveCardDown(event: WechatMiniprogram.BaseEvent) {
+    this.moveCard(event, 'down');
   },
 
   // 选择转移的分类

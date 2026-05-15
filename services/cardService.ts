@@ -13,6 +13,7 @@ import type {
   Category,
   RawCard,
   CardSortConfig,
+  Move,
   DailyLearningStats,
   CardStatus,
   CardStatusCode,
@@ -533,6 +534,62 @@ export function batchDeleteCards(ids: string[]): ServiceResult<null> {
 
 export function saveAllCards(cards: Card[]): ServiceResult<null> {
   saveCardsToStorage(cards);
+  return success(null);
+}
+
+const compareCardSort = (a: Card, b: Card) => {
+  if (a.sort !== b.sort) {
+    return a.sort - b.sort;
+  }
+
+  return a.createdAt - b.createdAt;
+};
+
+export function updateCardOrderInCategory(categoryId: string, move: Move): ServiceResult<null> {
+  if (!categoryId) {
+    return fail('分类 ID 不能为空');
+  }
+
+  const currentList = loadCardsFromStorage();
+  // 上下移动必须基于分类全量顺序计算，不能只看当前页面已经渲染出来的片段。
+  const categoryCards = currentList
+    .filter((card) => card.categoryId === categoryId)
+    .sort(compareCardSort);
+  const movedIndex = categoryCards.findIndex((card) => card.id === move.movedId);
+  const anchorIndex = categoryCards.findIndex((card) => card.id === move.anchorId);
+
+  if (movedIndex === -1 || anchorIndex === -1) {
+    return fail('排序目标不存在');
+  }
+
+  if (move.position === 'before' && movedIndex < anchorIndex && movedIndex + 1 === anchorIndex) {
+    return success(null);
+  }
+
+  if (move.position === 'after' && movedIndex > anchorIndex && movedIndex === anchorIndex + 1) {
+    return success(null);
+  }
+
+  const nextCategoryCards = [...categoryCards];
+  const [movedCard] = nextCategoryCards.splice(movedIndex, 1);
+  const adjustedAnchorIndex = movedIndex < anchorIndex ? anchorIndex - 1 : anchorIndex;
+  const insertIndex = move.position === 'before' ? adjustedAnchorIndex : adjustedAnchorIndex + 1;
+
+  nextCategoryCards.splice(insertIndex, 0, movedCard);
+  nextCategoryCards.forEach((card, index) => {
+    card.sort = (index + 1) * SORT_STEP;
+  });
+
+  const nextList = currentList.map((card) => {
+    if (card.categoryId !== categoryId) {
+      return card;
+    }
+
+    const updatedCard = nextCategoryCards.find((item) => item.id === card.id);
+    return updatedCard ? { ...card, sort: updatedCard.sort } : card;
+  });
+
+  saveCardsToStorage(nextList);
   return success(null);
 }
 

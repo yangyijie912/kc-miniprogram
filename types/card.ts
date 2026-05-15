@@ -86,6 +86,14 @@ export interface CardSortConfig {
   order?: SortOrder;
 }
 
+export type Move = {
+  movedId: string;
+  anchorId: string;
+  position: 'before' | 'after';
+};
+
+export type InteractionMode = 'browse' | 'select' | 'sort';
+
 export type DailyLearningStats = {
   date: string;
   practicedCardIds: string[];

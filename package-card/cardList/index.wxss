@@ -66,15 +66,18 @@
 
 .page-actions {
   min-width: 100%;
-  padding: 22rpx 22rpx 20rpx;
+  padding: 22rpx;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16rpx;
+  flex-direction: column;
+  gap: 14rpx;
   border-radius: 28rpx;
-  background: linear-gradient(135deg, rgba(255, 252, 247, 0.96) 0%, rgba(255, 247, 236, 0.88) 100%);
+  background:
+    radial-gradient(circle at 88% 16%, rgba(31, 94, 255, 0.12), transparent 42%),
+    linear-gradient(138deg, rgba(255, 252, 247, 0.98) 0%, rgba(255, 246, 232, 0.94) 100%);
   border: 1rpx solid rgba(61, 43, 24, 0.12);
-  box-shadow: 0 16rpx 40rpx rgba(80, 55, 25, 0.06);
+  box-shadow:
+    0 12rpx 30rpx rgba(80, 55, 25, 0.08),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -84,53 +87,113 @@
   min-width: 0;
 }
 
+.page-actions-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14rpx;
+}
+
 .page-actions-title {
   color: #1e1c18;
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 700;
 }
 
-.page-actions-desc {
-  margin-top: 8rpx;
+.sort-state-tag {
+  height: 46rpx;
+  padding: 0 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  background: rgba(61, 43, 24, 0.08);
   color: #6c645a;
+  font-size: 21rpx;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sort-state-tag.active {
+  background: rgba(31, 94, 255, 0.14);
+  color: #1f5eff;
+}
+
+.page-actions-desc {
+  color: #72695e;
   font-size: 22rpx;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .page-actions-body {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  flex-shrink: 0;
+  gap: 10rpx;
+  flex-wrap: nowrap;
 }
 
-.action-tool {
-  width: 72rpx;
-  height: 72rpx;
-  display: inline-flex;
+.action-pill {
+  height: 76rpx;
+  min-width: 0;
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999rpx;
-  border: 1rpx solid rgba(61, 43, 24, 0.08);
-  box-shadow: 0 12rpx 26rpx rgba(80, 55, 25, 0.08);
+  gap: 8rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(61, 43, 24, 0.1);
+  box-shadow: 0 8rpx 20rpx rgba(80, 55, 25, 0.08);
   box-sizing: border-box;
-  flex-shrink: 0;
+  padding: 0 12rpx;
+  overflow: hidden;
 }
 
-.action-tool-icon {
-  font-size: 34rpx;
-  line-height: 1;
-  font-weight: 600;
+.action-tool-icon-image {
+  width: 38rpx;
+  height: 38rpx;
 }
 
-.add-btn {
+.action-pill-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.action-pill-label {
+  color: #1e1c18;
+  font-size: 24rpx;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.action-pill-add {
   background: linear-gradient(135deg, rgba(18, 122, 114, 0.16) 0%, rgba(18, 122, 114, 0.08) 100%);
-  color: #127a72;
 }
 
-.quiz-btn {
+.action-pill-quiz {
   background: linear-gradient(135deg, rgba(31, 94, 255, 0.16) 0%, rgba(31, 94, 255, 0.08) 100%);
+}
+
+.action-pill-sort {
+  background: linear-gradient(135deg, rgba(61, 43, 24, 0.12) 0%, rgba(61, 43, 24, 0.06) 100%);
+}
+
+.action-pill-sort.active {
+  border-color: rgba(31, 94, 255, 0.24);
+  background: linear-gradient(135deg, rgba(31, 94, 255, 0.2) 0%, rgba(31, 94, 255, 0.1) 100%);
+}
+
+.action-pill-sort.active .action-pill-label {
   color: #1f5eff;
+}
+
+.action-pill-sort.disabled {
+  opacity: 0.56;
+  border-color: rgba(61, 43, 24, 0.08);
+  background: linear-gradient(135deg, rgba(61, 43, 24, 0.08) 0%, rgba(61, 43, 24, 0.04) 100%);
+}
+
+.action-pill-sort.disabled .action-pill-label {
+  color: #8a7f73;
 }
 
 .filter-row {
@@ -159,11 +222,15 @@
   display: flex;
   align-items: center;
   border-radius: 999rpx;
-  background: rgba(255, 252, 247, 0.88);
-  border: 1rpx solid rgba(61, 43, 24, 0.1);
-  color: #4f463d;
+  background: rgba(255, 252, 247, 0.84);
+  border: 1rpx solid rgba(61, 43, 24, 0.12);
+  color: #6c645a;
   font-size: 24rpx;
-  box-shadow: 0 10rpx 24rpx rgba(80, 55, 25, 0.05);
+  box-sizing: border-box;
+}
+
+.sort-picker.is-disabled {
+  opacity: 0.56;
 }
 
 .filter-chip {
@@ -177,6 +244,17 @@
 .filter-chip.active {
   background: rgba(31, 94, 255, 0.1);
   color: #1f5eff;
+}
+
+@media (max-width: 360px) {
+  .page-actions-body {
+    flex-wrap: wrap;
+  }
+
+  .action-pill {
+    flex: unset;
+    width: calc(50% - 5rpx);
+  }
 }
 
 .card-list {
@@ -267,6 +345,12 @@
   padding-left: 84rpx;
 }
 
+.card-item.is-sorting {
+  /* 排序态复用和多选相同的左侧 rail，避免卡片内容区再被额外挤窄。 */
+  padding-left: 84rpx;
+  border-color: rgba(31, 94, 255, 0.16);
+}
+
 .card-item.is-selected {
   border-color: rgba(31, 94, 255, 0.3);
   background:
@@ -309,6 +393,40 @@
 .card-check.selected .card-check-dot {
   opacity: 1;
   background: #1f5eff;
+}
+
+.card-sort-actions {
+  position: absolute;
+  top: 50%;
+  left: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  transform: translateY(-50%);
+}
+
+.sort-move-btn {
+  width: 36rpx;
+  height: 36rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2rpx solid rgba(31, 94, 255, 0.2);
+  background: rgba(238, 244, 255, 0.98);
+  color: #1f5eff;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 1;
+  box-sizing: border-box;
+  box-shadow: 0 8rpx 18rpx rgba(31, 94, 255, 0.12);
+}
+
+.sort-move-btn.disabled {
+  border-color: rgba(61, 43, 24, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  color: #b5ab9e;
+  box-shadow: none;
 }
 
 .card-top {
@@ -420,6 +538,61 @@
   box-shadow: 0 18rpx 42rpx rgba(80, 55, 25, 0.12);
   backdrop-filter: blur(12px);
   box-sizing: border-box;
+}
+
+.sort-bar {
+  position: fixed;
+  left: 28rpx;
+  right: 28rpx;
+  bottom: calc(20rpx + env(safe-area-inset-bottom));
+  z-index: 5;
+  padding: 20rpx 20rpx 18rpx;
+  border-radius: 30rpx;
+  background: rgba(255, 252, 247, 0.96);
+  border: 1rpx solid rgba(61, 43, 24, 0.12);
+  box-shadow: 0 18rpx 42rpx rgba(80, 55, 25, 0.12);
+  backdrop-filter: blur(12px);
+  box-sizing: border-box;
+}
+
+.sort-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.sort-title {
+  color: #1e1c18;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.sort-desc {
+  color: #6c645a;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.sort-actions {
+  margin-top: 16rpx;
+  display: flex;
+}
+
+.sort-btn {
+  flex: 1;
+  height: 76rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.sort-btn-secondary {
+  background: rgba(31, 94, 255, 0.1);
+  color: #1f5eff;
+  border: 1rpx solid rgba(31, 94, 255, 0.12);
 }
 
 .batch-summary {
