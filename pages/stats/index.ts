@@ -202,7 +202,7 @@ Page({
     // 进度卡片只负责已完成结果回看；未完成时统一拦截并提示继续去做题。
     if (todayQuizRate < 100 || todayProgressText === '今日还没有开始每日测验') {
       wx.showToast({
-        title: '今日测验还没完成，快去开始吧',
+        title: '今日测验还没完成，快去完成吧',
         icon: 'none',
       });
       return;
