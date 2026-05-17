@@ -13,7 +13,7 @@
 
     <view class="list-card">
       <view wx:for="{{categoryViewList}}" wx:key="id" class="category-row">
-        <view>
+        <view class="category-info">
           <view class="category-name">{{ item.name }}</view>
           <view class="category-count">{{ item.cardCount }} 张卡片</view>
         </view>

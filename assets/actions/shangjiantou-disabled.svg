@@ -1,4 +1,5 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M12 17V7" stroke="#B9B1A7" stroke-width="1.8" stroke-linecap="round"/>
-  <path d="M7.5 11.5 12 7l4.5 4.5" stroke="#B9B1A7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg class="icon" width="200px" height="200.00px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path fill="#7a7a7a" d="M558.545455 801.303273V332.055273l170.565818 184.785454a34.909091 34.909091 0 1 0 51.293091-47.383272L549.282909 219.066182a34.955636 34.955636 0 0 0-51.293091 0l-231.121454 250.414545a34.862545 34.862545 0 0 0 1.954909 49.338182 34.909091 34.909091 0 0 0 49.338182-2.001454L488.727273 332.055273v469.248a34.909091 34.909091 0 1 0 69.818182 0"  />
 </svg>

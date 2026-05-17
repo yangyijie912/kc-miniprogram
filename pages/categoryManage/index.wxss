@@ -79,6 +79,12 @@
   border-bottom: 1rpx solid rgba(61, 43, 24, 0.08);
 }
 
+.category-info {
+  min-width: 0;
+  flex: 1;
+  padding-right: 16rpx;
+}
+
 .category-row:last-child {
   border-bottom: none;
 }
@@ -87,6 +93,9 @@
   color: #1e1c18;
   font-size: 30rpx;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .category-count {
@@ -96,16 +105,16 @@
 
 .row-actions {
   display: flex;
-  gap: 12rpx;
+  gap: 14rpx;
 }
 
 .row-icon {
-  width: 56rpx;
-  height: 56rpx;
+  width: 64rpx;
+  height: 64rpx;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8rpx;
+  border-radius: 10rpx;
   background: #ffffff;
   border: 1rpx solid rgba(61, 43, 24, 0.04);
   box-sizing: border-box;
@@ -117,12 +126,12 @@
 }
 
 .row-icon-danger {
-  background: rgba(239, 125, 66, 0.12);
+  background: rgba(215, 75, 63, 0.12);
 }
 
 .row-icon-image {
-  width: 28rpx;
-  height: 28rpx;
+  width: 32rpx;
+  height: 32rpx;
   display: block;
 }
 

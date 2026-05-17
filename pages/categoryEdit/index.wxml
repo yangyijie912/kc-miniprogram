@@ -14,7 +14,7 @@
 
       <view class="form-group">
         <view class="form-label">名称</view>
-        <input class="form-input" value="{{formData.name}}" bindinput="onNameInput" placeholder="例如：数学" placeholder-class="input-placeholder" />
+        <input class="form-input" value="{{formData.name}}" maxlength="20" bindinput="onNameInput" placeholder="例如：数学" placeholder-class="input-placeholder" />
       </view>
 
       <view class="form-group">

@@ -40,6 +40,13 @@ Page({
       });
       return;
     }
+    if (formData.name.trim().length > 20) {
+      wx.showToast({
+        title: '名称最多20个字',
+        icon: 'none',
+      });
+      return;
+    }
     // 只在提交时解析排序，允许输入框保留空串等编辑态，避免被受控值强制回写成 0。
     const rawSort = formData.sort.trim();
     const sort = rawSort === '' ? 0 : Number(rawSort);
