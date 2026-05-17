@@ -1,306 +1,70 @@
 [
   {
-    "id": "1",
-    "category": "Vue",
-    "question": "Vue是什么？",
-    "answer": "待补充",
-    "content": "Vue是一个渐进式框架，基于标准 HTML、CSS 和 JavaScript 构建，并提供了一套声明式的、组件化的编程模型。Vue 有两个核心功能：\n(1)声明式渲染：Vue 基于标准 HTML 拓展了一套模板语法\n(2)响应式：Vue 会自动跟踪 JavaScript 状态并在其发生变化时响应式地更新 DOM",
-    "tags": [
-      "响应式原理"
-    ]
+    "id": "f5311991-2da6-4dd7-9092-d68acc85406e",
+    "categoryId": "b39977ed-4843-40a8-b71a-9e3b038135d9",
+    "question": "如何使用知识卡片归屉？",
+    "answer": "把知识点或问题点写出来，然后精炼结论便于记忆，再把背景、步骤和注意事项或者其他知识在笔记里补充完整。",
+    "content": "# 知识卡片示例\n\n这是一张可直接参考的示例卡，演示如何把一条知识整理成可以复习、可以检索、也可以继续扩写的结构。\n\n## 推荐写法\n\n1. **问题**：写成你真正会遇到的场景，或者容易遗漏的知识点，不要只写一个空泛主题。\n2. **答案**：先放最短可执行结论，方便快速回忆。\n3. **笔记**：再补充背景、步骤、例子和坑点，让卡片真正可用。\n4. **标签**：推荐填写，可以进一步归纳和定位，也便于后续查询。\n\n## 填写建议\n\n- 问题尽量具体，最好能让你一眼知道自己忘了什么。\n- 答案尽量短，适合背诵和快速检索。\n- 内容可以写成 Markdown，支持标题、列表和引用。\n- 如果这张卡是示例，建议同时保留一个“正确答案”和一个“完整说明”。\n\n> 这条示例的目标就是展示用法，让新卡片参考怎么填。\n\n---\n\n## 可直接复用的模板\n\n- **问题**：我在什么场景下会遇到这个问题？\n- **答案**：一句话说清核心结论。\n- **笔记**：\n  - 怎么做\n  - 为什么这么做\n  - 容易踩的坑\n  - 什么时候不要这么做\n\n把这几层补齐后，卡片就不只是“答案”，而是一个能反复使用的知识单元。当然，工具只是辅助，也可以完全按照自己的习惯填写。",
+    "tags": ["QA", "指引"],
+    "createdAt": 1774972800000,
+    "updatedAt": 1774972800000,
+    "sort": 1000
+  },
+
+  {
+    "id": "0f6c7a5b-7b5e-4e4a-9df7-1f8a2c3d9e6b",
+    "categoryId": "b39977ed-4843-40a8-b71a-9e3b038135d9",
+    "question": "卡片标签怎么写，后续才更容易检索？",
+    "answer": "用主题词和场景词组合，数量少而准，不要把标签写成整句。",
+    "content": "## 标签的目标\n\n为了以后能更快找到这张卡，而刷题时大脑也更容易和其他同标签卡关联上。\n\n## 推荐原则\n\n- **优先主题词**：比如 `排序`、`导入`、`校验`。\n- **补一个场景词**：比如 `小程序`、`编辑页`、`构建`。\n- **数量尽量少**：2 到 4 个通常就够。\n- **不要写整句**：整句标签不好筛选，也不利于复用。\n\n## 示例\n\n- `示例`：表示这张卡是演示数据。\n- `写卡技巧`：表示这张卡讲的是知识组织方法。\n- `小程序`：表示问题和微信小程序实现有关。\n\n## 结论\n\n标签的标准就是归纳和检索。",
+    "tags": ["QA", "检索", "写卡技巧"],
+    "createdAt": 1774972800000,
+    "updatedAt": 1774972800000,
+    "sort": 2000
+  },
+
+  {
+    "id": "5d4f6f1b-1b38-4f2b-8d44-2b2a1d04a901",
+    "categoryId": "b39977ed-4843-40a8-b71a-9e3b038135d9",
+    "question": "测验的机制是什么？",
+    "answer": "每日测验先从整库按状态抽题，比例大致是未知 6、模糊 3、已掌握 1；自由测验则按所选的分类、模式和题量随机抽题。",
+    "content": "这套测验分两种：**每日测验** 和 **自由测验**，规则不一样。\n\n## 每日测验\n\n- 固定从整库抽题。\n- 抽题比例大致是 **未知 6、模糊 3、已掌握 1**。\n- 某一类题不够时，会从剩下的题里补足。\n- 抽出来的题最后还会再打乱一次。\n- 默认题量是 10 题，数量不足抽全部。\n- 题目、日期、题量和题面都没变时，才会继续用原来的进度，否则题目队列会重建。\n\n## 自由测验\n\n- 按你选的分类、模式和题量抽题。\n- 选了哪个分类，就先看哪个分类。\n- 选了复习模式，就只抽未掌握、模糊和未标状态的题。\n- 选了 只抽不会，就只抽未掌握的题。\n- 其余情况就是按筛选结果随机打乱后抽取定好的数量，数量不足就抽全部。\n\n## 进度\n\n- 会记住每日测验的进度，退出后还能回来继续做。自由测验不会记录进度。\n- 每日测验的结果可以重新进入每日测验页查看，也可以从统计页点进去查看。自由测验答完后只会出现一次。",
+    "tags": ["QA", "测验"],
+    "createdAt": 1774972800000,
+    "updatedAt": 1774972800000,
+    "sort": 3000
   },
   {
-    "id": "2",
-    "category": "Vue",
-    "question": "Vue和React的区别？",
-    "answer": "待补充",
-    "content": "相同点：\n(1)都是组件化思想\n(2)都有Virtual DOM（虚拟dom）这个概念\n(3)数据驱动视图，开发时只需要关注数据的变化\n(4)都提倡单向数据流\n不同点：\n(1)核心思想不同。React推崇函数式编程（纯组件），数据不可变以及单向数据流。Vue是以数据可变的、细粒度的响应性系统为基础，属性可直接修改，它对侦测数据的变化更敏感、更精确。\n(2)对于视图描述这块，它们的方案不一样。React用的是jsx，可以直接用 js 来写逻辑。Vue基于标准 HTML 拓展了一套模板语法vue template。\n(3) diff算法不同。react主要使用diff队列保存需要更新哪些DOM，得到patch树，再统一操作批量更新DOM。Vue 使用双向指针，边对比，边更新DOM。\n(4)响应式原理不同。React是在state和props的值改变后通过diff算法算出更改的部分，再渲染页面，Vue2是通过Object.defineProperty()来劫持各个属性的setter，getter，在数据变动时发布消息给订阅者，触发相应的监听回调。Vue3用的是Proxy。\n拓展：\n(1)vue template 是受限制的，只能访问 data，prop、method，可以静态的分析和优化，而 react 的 jsx 因为直接是 js 的语法，动态逻辑比较多，没法静态的做分析和优化。\n(2)react的jsx本来就是和 js 同一个上下文，结合 typescript 就很自然。但是vue template和 js 上下文割裂开来，引入 typescript 做类型推导的时候就比较困难，需要单独把所有 prop、method、data 的类型声明一遍才行。",
-    "tags": [
-      "响应式原理"
-    ]
+    "id": "2f7d0be2-0b10-4d39-9f0f-4c0e9123bb55",
+    "categoryId": "b39977ed-4843-40a8-b71a-9e3b038135d9",
+    "question": "数据存储的机制是什么？",
+    "answer": "数据主要存在本地，读写前都会先转 JSON 并检查；丢了就自己负责，页面会尽量回到默认数据继续用。",
+    "content": "这个工具的数据都放在本地。\n\n## 重点\n\n- 卡片数据初始一份默认的示例数据，后续读取都是用本地的，本地数据损坏会回到默认。\n- 本地数据不是云端备份，如果手动清掉、覆盖掉，内容可能就没了，所以重要内容要自己备份，要常常备份。\n- 本地存储内存有限，也没有云端图库，不支持图片上传，但可以自己填写图片链接，导出时只导出链接，所以非要用图片请使用在线图片，本地图片路径则需要自己维护。比如在线图片示例：\n\n![动态示例图片](https://picsum.photos/1000/1000)",
+    "tags": ["QA", "存储", "本地数据"],
+    "createdAt": 1774972800000,
+    "updatedAt": 1774972800000,
+    "sort": 4000
   },
   {
-    "id": "3",
-    "category": "Vue",
-    "question": "都运用了虚拟DOM，React和Vue有什么区别？",
-    "answer": "待补充",
-    "content": "React：重新渲染 + diff\nVue：依赖追踪 + 精确更新\n两者都有 虚拟 DOM 和 diff，但触发更新的方式完全不同。\nReact 的思路是：\nstate 改变 -> 组件函数重新执行 -> 生成新的 virtual DOM -> diff -> 更新真实 DOM\n所以 React 的特点是：组件级重新执行。它不知道哪个变量影响哪个节点，所以选择重新算一遍再diff。\n再看 Vue 的更新模型：\nVue 有一个核心东西叫：响应式系统。它会做一件事：依赖收集。\n流程是：数据变化 -> 找到依赖 -> 更新对应组件\nReact 的 diff：组件重新 render -> VDOM diff\nVue 的 diff：只在依赖触发时 diff ，所以 Vue 的更新范围通常更小。",
-    "tags": [
-      "响应式原理"
-    ]
+    "id": "6a7a4465-8f03-4608-bab7-8ba503e08e2e",
+    "categoryId": "ec2f4df7-8d3f-4e12-ad69-68cbadd0cca2",
+    "question": "如何找出数字数组里最大的值？",
+    "answer": "常见有三种：遍历比较、Math.max 和 reduce。最稳的是遍历比较，因为思路最直观，也最容易处理空数组。",
+    "content": "## 解法\n\n这题常见有三种写法：\n\n1. **遍历比较**：一个个比较，保留当前最大值。\n2. **Math.max**：把数组展开后直接求最大值。\n3. **reduce**：用归并的方式一路选出最大值。\n\n其中最推荐的是**遍历比较**，因为最稳、最好理解，也最方便处理空数组。\n\n## 方案一：遍历比较，最推荐\n\n```js\nfunction getMax(nums) {\n  if (nums.length === 0) {\n    return undefined;\n  }\n\n  let max = nums[0];\n\n  for (let i = 1; i < nums.length; i += 1) {\n    if (nums[i] > max) {\n      max = nums[i];\n    }\n  }\n\n  return max;\n}\n\nconsole.log(getMax([8, 3, 12, 5]));\n// 12\n```\n\n### 思路\n\n- 先拿第一个数当作最大值。\n- 再从第二个数开始，一个一个比较。\n- 只要发现更大的，就更新最大值。\n- 最后留下来的，就是最大的值。\n\n\n## 方案二：Math.max，最短\n\n```js\nfunction getMaxByMath(nums) {\n  if (nums.length === 0) {\n    return undefined;\n  }\n\n  return Math.max(...nums);\n}\n\nconsole.log(getMaxByMath([8, 3, 12, 5]));\n// 12\n```\n\n### 思路\n\n- 用扩展运算符把数组拆开。\n- 交给 `Math.max` 一次算出最大值。\n\n\n## 方案三：reduce，适合熟悉数组方法的人\n\n```js\nfunction getMaxByReduce(nums) {\n  if (nums.length === 0) {\n    return undefined;\n  }\n\n  return nums.reduce(function (max, current) {\n    return current > max ? current : max;\n  });\n}\n\nconsole.log(getMaxByReduce([8, 3, 12, 5]));\n// 12\n```\n\n### 思路\n\n- 每次都拿“当前最大值”和“当前数字”比。\n- 更大的留下来，继续往后比。",
+    "tags": ["示例", "JavaScript", "数组"],
+    "createdAt": 1774972800000,
+    "updatedAt": 1774972800000,
+    "sort": 5000
   },
   {
-    "id": "4",
-    "category": "Vue",
-    "question": "Vue2和Vue3的响应式数据原理分别是什么？",
-    "answer": "待补充",
-    "content": "Vue2用的是Object.defineProperty，通过set和get重新定义和修改属性，属性变化会通知相关依赖进行更新操作。\n缺点：\n(1)检测不到对象属性的添加和删除\n(2)数组API方法无法监听到\n(3)需要对每个属性进行遍历监听，如果嵌套对象，需要深层监听，造成性能问题。\nVue3用的Proxy，Proxy 是 ES6 中提供的功能，其作用为：实现基本操作的拦截和自定义（如属性查找、赋值、枚举、函数调用等）。可以监听整个对象。",
-    "tags": [
-      "还有一个很经典的区别是列表diff。"
-    ]
-  },
-  {
-    "id": "5",
-    "category": "Vue",
-    "question": "为什么vue2中对象添加新属性不会刷新页面？",
-    "answer": "待补充",
-    "content": "vue2是用过Object.defineProperty实现数据响应式，最开始的对象属性被设置成响应式数据，后面新加的属性无法触发事件属性的拦截变成响应式数据。\n解决方式：Vue.set()、Object.assign()、$forcecUpdated()",
-    "tags": [
-      "还有一个很经典的区别是列表diff。"
-    ]
-  },
-  {
-    "id": "6",
-    "category": "Vue",
-    "question": "Vue3 的 reactive / ref 区别",
-    "answer": "待补充",
-    "content": "都可以用来声明响应式状态，reactive 用于创建对象的响应式数据，而 ref 用于创建基本类型的响应式数据。因为 Proxy 只能代理对象，无法直接代理基本类型，所以 Vue3 使用 ref 通过 value 属性包装基本类型实现响应式。为什么模板又不用 .value，因为Vue 在 template 里会自动帮你解包，这就是ref auto unwrapping（ref自动解包）。\nreactive() API 有一些局限性：\n(1)、声明的值类型有限，它只能用于对象类型 (对象、数组和如 Map、Set 这样的集合类型)，不能持有如 string、number 或 boolean 这样的原始类型。\n(2)、不能替换整个对象。state = reactive({ count: 1 })会导致丢失响应性连接，应该写成state.count = 1;\n(3)、对解构操作不友好。对属性进行解构操作也会丢失响应性连接。\nconst user = reactive({\nage: 18",
-    "tags": [
-      "还有一个很经典的区别是列表diff。"
-    ]
-  },
-  {
-    "id": "7",
-    "category": "Vue",
-    "question": "Vue 的双向绑定是怎么实现的？",
-    "answer": "待补充",
-    "content": "Vue 的双向绑定是通过 v-model 实现的，本质上是数据绑定和事件监听的结合。数据变化会更新视图，而用户输入时通过事件修改数据，从而实现数据和视图的同步。\n注意：Vue 的数据流是单向的，v-model 本质是 value 绑定和 input 事件的语法糖（或者说本质是 props 和 emit 的语法糖），通过事件修改数据，从而形成类似双向绑定的效果。Vue2 默认使用 value 和 input 事件，Vue3 改为 modelValue 和 update:modelValue，从而支持多个 v-model。",
-    "tags": [
-      "这里 响应式会丢失。"
-    ]
-  },
-  {
-    "id": "8",
-    "category": "Vue",
-    "question": "created / mounted 区别",
-    "answer": "待补充",
-    "content": "created：数据已经初始化完成，可以访问 data、methods、computed 等，但DOM还没渲染，常见用途是初始化数据、发请求。\nmounted：组件已经完成渲染，DOM 已经挂载到页面。常见用途：操作 DOM、获取元素尺寸、初始化第三方库。\n如果数据不依赖DOM，Vue2请求接口可以在created也可以在mounted，但是服务端渲染不支持mounted，这时候要放在created。放在mounted请求有可能导致页面闪动（页面dom结构已经生成），但如果在页面加载前完成则不会，出现此情况建议：放在created生命周期当中。Vue3推荐onMounted，不要放在setup。",
-    "tags": [
-      "的生命周期"
-    ]
-  },
-  {
-    "id": "9",
-    "category": "Vue",
-    "question": "updated / beforeUpdate 的区别",
-    "answer": "待补充",
-    "content": "beforeUpdate：数据更新了，但 DOM 还没更新。\nupdated：DOM 已经更新完成。一般不建议在 updated 里再修改数据，可能造成无限更新循环。",
-    "tags": [
-      "的生命周期"
-    ]
-  },
-  {
-    "id": "10",
-    "category": "Vue",
-    "question": "setup是什么？",
-    "answer": "待补充",
-    "content": "setup 是 Vue3 Composition API 的入口函数，在组件创建时执行。开发者可以在里面声明响应式状态、计算属性、监听以及生命周期，并将需要暴露给模板的数据 return 出去。\nsetup 执行时机：setup → beforeCreate → created\n也就是说：setup 比 Vue2 生命周期还早。\n所以在 setup 里 没有 this，因为组件实例还没创建。这也是 Vue3 不再推荐 this.xxx 的原因。",
-    "tags": [
-      "的生命周期"
-    ]
-  },
-  {
-    "id": "11",
-    "category": "Vue",
-    "question": "说说keep-alive？",
-    "answer": "待补充",
-    "content": "keep-alive 用于缓存组件实例，避免组件被销毁。当组件被缓存时不会触发 destroy 生命周期，而是触发 activated 和 deactivated（Vue3对应onActivated、onDeactivated）。常用于路由页面缓存，比如列表页返回时保留状态和滚动位置。",
-    "tags": [
-      "的生命周期"
-    ]
-  },
-  {
-    "id": "12",
-    "category": "Vue",
-    "question": "keep-alive 缓存的组件，第一次进入页面会触发 mounted 还是 activated？",
-    "answer": "待补充",
-    "content": "答：mounted\nkeep-alive 会缓存组件实例，当组件切换时不会销毁，而是进入 activated 和 deactivated 状态。默认会缓存访问过的组件，但可以通过 include、exclude、max 控制缓存策略。\nerrorCaptured？（onErrorCaptured）\nVue 提供 errorCaptured 生命周期用于捕获子组件运行时错误，常用于错误监控或降级处理。如果返回 false，可以阻止错误继续向父组件传播。\n触发时机：当子组件发生错误时，父组件的 errorCaptured 会被触发。",
-    "tags": [
-      "的生命周期"
-    ]
-  },
-  {
-    "id": "13",
-    "category": "Vue",
-    "question": "return false 的作用：",
-    "answer": "待补充",
-    "content": "如果返回false，错误就不会继续向上冒泡。",
-    "tags": [
-      "的生命周期"
-    ]
-  },
-  {
-    "id": "14",
-    "category": "Vue",
-    "question": "父组件生命周期和子组件生命周期的执行顺序是什么？",
-    "answer": "待补充",
-    "content": "父子组件生命周期执行顺序是：created 阶段父组件先执行，子组件后执行；mounted 阶段子组件先执行，父组件最后执行。",
-    "tags": [
-      "如果不返回，错误会继续往父组件传播。"
-    ]
-  },
-  {
-    "id": "15",
-    "category": "Vue",
-    "question": "Vue组件之间的通信方式都有哪些？",
-    "answer": "待补充",
-    "content": "(1)父向子通信：props\n(2)子向父通信：$emit\n触发自定义事件，this.$emit('事件名', 参数)。父组件接收到后，由父组件\n修改，子组件本身是不能修改父组件的数据的。\n(3)兄弟组件之间的通信：EventBus\n创建一个中央事件总线EventBus，兄弟组件通过$emit触发自定义事件，$emit第二个参数为传递的数值，另一个兄弟组件通过$on监听自定义事件。\n(4)祖孙与后代组件之间的通信：provide 与 inject\n在祖先组件定义provide属性，返回传递的值。在后代组件通过inject接收组件传递过来的值。\n(5)非关系组件间之间的通信：Vuex / Pinia",
-    "tags": [
-      "组件通信"
-    ]
-  },
-  {
-    "id": "16",
-    "category": "Vue",
-    "question": "EventBus 为什么很少推荐了？",
-    "answer": "待补充",
-    "content": "第一，数据流不清晰。你只看到某个组件在 $on，但到底是谁 $emit 的，要到处找。项目一大就很痛苦。\n第二，难维护。事件名全靠字符串，改名、重构都不安全。\n第三，容易内存泄漏。如果组件销毁时忘记 `$off``，监听还在，就会有问题。\n第四，调试困难。不像 Vuex / Pinia 那样有明确的状态流和 devtools 支持，EventBus 经常是“消息飞来飞去”。",
-    "tags": [
-      "组件通信"
-    ]
-  },
-  {
-    "id": "17",
-    "category": "Vue",
-    "question": "Vue3的composable是什么？",
-    "answer": "待补充",
-    "content": "composable 是 Vue3 Composition API 中用于抽离和复用逻辑的函数，通常以 useXxx 命名。它可以把状态、方法、计算属性、监听等逻辑封装起来，在多个组件中复用，作用类似 React 自定义 Hook，但更贴近 Vue 的响应式体系。",
-    "tags": [
-      "组件通信"
-    ]
-  },
-  {
-    "id": "18",
-    "category": "Vue",
-    "question": "说说Vuex和Pinia？",
-    "answer": "待补充",
-    "content": "Vuex 或 Pinia 用于集中管理全局共享状态，避免组件层层传递 props 或复杂的事件通信，使状态变化更加可追踪和可维护。\nVuex 的状态管理是这种模式：state、mutations、actions特点是：必须通过 mutation 修改 state，这是为了让状态变化可追踪。\nPinia 的设计更简单：state、actions，没有mutations，可以直接改 state。\nPinia 是 Vue 官方推荐的新状态管理库，相比 Vuex 语法更简洁，没有 mutation 概念，TypeScript 支持更好，并且更适合 Vue3 Composition API。\nVuex 通过 mutation 管理状态变化，而 Pinia 允许直接修改 state，因为 Vue3 的响应式系统和 DevTools 已经能够追踪状态变化，从而减少模板代码并提升开发体验。",
-    "tags": [
-      "组件通信"
-    ]
-  },
-  {
-    "id": "19",
-    "category": "Vue",
-    "question": "v-if和v-show的区别？",
-    "answer": "待补充",
-    "content": "(1)v-show隐藏则是为该元素添加css--display:none，dom元素依旧还在。v-if显示隐藏是将dom元素整个添加或删除。\n(2) v-show 由false变为true的时候不会触发组件的生命周期。\nv-if由false变为true的时候，触发组件的beforeCreate、created、beforeMount、mounted钩子，由true变为false的时候触发组件的beforeDestory、destoryed方法\n(3) v-if 是惰性的。意思是：如果初始条件是 false，DOM 不会渲染。而 v-show：DOM 一定会先渲染出来。\nv-if 与 v-show 都能控制dom元素在页面的显示\n如果需要非常频繁地切换，则使用 v-show 较好。\n如果在运行时条件很少改变，则使用 v-if 较好。",
-    "tags": [
-      "Vue"
-    ]
-  },
-  {
-    "id": "20",
-    "category": "Vue",
-    "question": "Vue中的$nextTick有什么作用？",
-    "answer": "待补充",
-    "tags": [
-      "Vue"
-    ]
-  },
-  {
-    "id": "21",
-    "category": "Vue",
-    "question": "computer和watch的区别？",
-    "answer": "待补充",
-    "tags": [
-      "})"
-    ]
-  },
-  {
-    "id": "22",
-    "category": "Vue",
-    "question": "为什么v-if和v-for不建议放在一起使用？",
-    "answer": "待补充",
-    "tags": [
-      "支持异步"
-    ]
-  },
-  {
-    "id": "23",
-    "category": "Vue",
-    "question": "slot是什么？",
-    "answer": "待补充",
-    "content": "插槽。用来拓展组件，去更好地复用组件和对其做定制化处理。\nslot 用于父组件向子组件传递模板内容，分为默认插槽、具名插槽和作用域插槽，作用域插槽允许子组件向父组件暴露数据。\n可以使用<slot>标签，也可以使用v-slot（v-slot属性只能在<template>上使用）",
-    "tags": [
-      "优先级不明显，且有性能方面的浪费。"
-    ]
-  },
-  {
-    "id": "24",
-    "category": "Vue",
-    "question": "vue中有哪些修饰符？",
-    "answer": "待补充",
-    "tags": [
-      "优先级不明显，且有性能方面的浪费。"
-    ]
-  },
-  {
-    "id": "25",
-    "category": "Vue",
-    "question": "自定义指令怎么用，有什么应用场景？",
-    "answer": "待补充",
-    "tags": [
-      "Vue"
-    ]
-  },
-  {
-    "id": "26",
-    "category": "Vue",
-    "question": "Vue2组件中的data为什么是一个函数？",
-    "answer": "待补充",
-    "content": "为了防止多个组件实例对象之间共用一个data，产生数据污染。采用函数的形式，initData时会将其作为工厂函数都会返回全新data对象（函数返回的对象内存地址并不相同）",
-    "tags": [
-      "vs Vue3"
-    ]
-  },
-  {
-    "id": "27",
-    "category": "Vue",
-    "question": "谈谈mixin？",
-    "answer": "待补充",
-    "content": "mixin来分发 Vue 组件中的可复用功能。（解决逻辑复用问题）\n缺点：\n(1)、命名冲突；\n(2)、数据来源不清晰\n拓展：vue 的组件是 option 对象的方式，那么逻辑复用方式很自然可以想到通过对象属性的 mixin，vue2 的组件内逻辑复用方案就是 mixin，但是 mixin 很难区分混入的属性、方法的来源，比较乱，代码维护性差，但也没有更好的方案。后面Vue3.0以后把option api换成composition api才解决了这个问题。\nreact 刚开始也是支持 mixin 的，但后来废弃了。然后采用了HOC（高阶组件），再后面有了Fiber架构后，就是用hooks来解决这个问题。",
-    "tags": [
-      "vs Vue3"
-    ]
-  },
-  {
-    "id": "28",
-    "category": "Vue",
-    "question": "Vue3有哪些新特点？",
-    "answer": "待补充",
-    "content": "(1)体积更小（移除一些不常用的 API，打包时只打包用到的模块）\n(2)速度更快\n(a) diff算法优化（增加了静态标记，生变化的地方添加一个flag标记，下次发生变化的时候直接找该地方进行比较）\n(b)静态提升（不参与更新的元素，会做静态提升，只会被创建一次，在渲染时直接复用）",
-    "tags": [
-      "vs Vue3"
-    ]
-  },
-  {
-    "id": "29",
-    "category": "Vue",
-    "question": "Options API和Composition API有什么不同？",
-    "answer": "待补充",
-    "content": "Options API以“组件实例”的概念为中心，通过定义methods，computed，watch，data等属性与方法，共同处理页面逻辑。\nComposition API是直接在函数作用域内定义响应式状态变量，并将从多个函数中得到的状态组合起来处理复杂问题。(Composition API 的风格是基于函数的组合，但组合式 API 并不是函数式编程。组合式 API 是以 Vue 中数据可变的、细粒度的响应性系统为基础的，而函数式编程通常强调数据不可变。)\n组合式API比起选项式API有以下优点：\n(1)更好的逻辑复用；它可以解决mixin命名冲突和数据来源不清晰的问题（在选项式 API 中主要的逻辑复用机制是 mixins）。\n(2)更好的类型推导；Composition API主要利用基本的变量和函数，它们本身就是类型友好的。\n(3)更灵活的代码组织；Composition API相同的逻辑功能基本都是放在一起的，利于阅读和维护。\n(4)不像选项式 API 需要依赖 this 上下文对象访问属性，被编译的模板可以直接访问 <script setup> 中定义的变量。 Composition API中见不到this的使用，减少了this指向不明的情况。\n两种 API 风格都能够覆盖大部分的应用场景。它们只是同一个底层系统所提供的两套不同的接口。实际上，选项式 API 是在组合式 API 的基础上实现的。（官方认为不必只固守一种风格，这两种API风格在学习中可以选择自己喜欢的。未来也不会废弃选项式API）",
-    "tags": [
-      "(c) 响应式系统Proxy"
-    ]
-  },
-  {
-    "id": "30",
-    "category": "Vue",
-    "question": "如何处理Vue项目中的错误？",
-    "answer": "待补充",
-    "content": "(1)设置全局错误处理函数Vue.config.errorHandler。三个参数分别是错误对象、错误组件、错误信息\n(2)利用生命周期钩子errorCaptured。三个参数分别是错误对象、错误组件、错误信息",
-    "tags": [
-      "(c) 响应式系统Proxy"
-    ]
-  },
-  {
-    "id": "31",
-    "category": "Vue",
-    "question": "vue可以做哪些性能优化？",
-    "answer": "待补充",
-    "tags": [
-      "(c) 响应式系统Proxy"
-    ]
+    "id": "2b2e2e5c-7f9c-4d8e-9eb7-0a9ce60f4d11",
+    "categoryId": "ec2f4df7-8d3f-4e12-ad69-68cbadd0cca2",
+    "question": "如何将数组里的重复数字去掉？",
+    "answer": "可以用 Set 去重，或者用循环加记录表保留第一次出现的值。",
+    "content": "## 解法\n\n这题常见有两种写法：\n\n1. **Set 去重**：代码最短，适合直接生成新数组。\n2. **循环 + 记录表**：思路最清楚，方便理解去重过程。\n\n## 方案一：Set 去重，最简洁\n\n```js\nfunction uniqueNumbers(nums) {\n  return [...new Set(nums)];\n}\n\nconsole.log(uniqueNumbers([1, 2, 2, 3, 1, 4]));\n// [1, 2, 3, 4]\n```\n\n### 思路\n\n- `Set` 会自动去掉重复值。\n- 再把 `Set` 转回数组就行了。\n\n### 适用场景\n\n- 只关心结果，不关心过程。\n\n## 方案二：循环 + 记录表\n\n```js\nfunction uniqueNumbersByLoop(nums) {\n  const seen = {};\n  const result = [];\n\n  for (let i = 0; i < nums.length; i += 1) {\n    const num = nums[i];\n\n    if (!seen[num]) {\n      seen[num] = true;\n      result.push(num);\n    }\n  }\n\n  return result;\n}\n\nconsole.log(uniqueNumbersByLoop([1, 2, 2, 3, 1, 4]));\n// [1, 2, 3, 4]\n```\n\n### 思路\n\n- 准备一个记录表，记住见过哪些数字。\n- 见过的就跳过。\n- 没见过的就放进结果里。\n\n## 总结\n\n这题最先想到的是 **Set 去重**；如果要面试里讲原理，再补上 **循环 + 记录表**。",
+    "tags": ["示例", "JavaScript", "数组"],
+    "createdAt": 1774972800000,
+    "updatedAt": 1774972800000,
+    "sort": 6000
   }
 ]

@@ -19,10 +19,10 @@
             <view class="category-count">{{ item.cardCount }} 张卡片</view>
           </view>
           <view class="row-actions">
-            <view wx:if="{{item.canMoveUp}}" class="row-icon" bindtap="moveUp" data-id="{{item.id}}">
+            <view wx:if="{{item.id !== uncategorizedId && item.canMoveUp}}" class="row-icon" bindtap="moveUp" data-id="{{item.id}}">
               <image class="row-icon-image" src="/assets/actions/shangjiantou.svg" mode="aspectFit" />
             </view>
-            <view wx:else class="row-icon disabled">
+            <view wx:elif="{{item.id !== uncategorizedId}}" class="row-icon disabled">
               <image
                 class="row-icon-image"
                 src="/assets/actions/shangjiantou-disabled.svg"
@@ -30,10 +30,10 @@
               />
             </view>
 
-            <view wx:if="{{item.canMoveDown}}" class="row-icon" bindtap="moveDown" data-id="{{item.id}}">
+            <view wx:if="{{item.id !== uncategorizedId && item.canMoveDown}}" class="row-icon" bindtap="moveDown" data-id="{{item.id}}">
               <image class="row-icon-image" src="/assets/actions/xiajiantou.svg" mode="aspectFit" />
             </view>
-            <view wx:else class="row-icon disabled">
+            <view wx:elif="{{item.id !== uncategorizedId}}" class="row-icon disabled">
               <image
                 class="row-icon-image"
                 src="/assets/actions/xiajiantou-disabled.svg"

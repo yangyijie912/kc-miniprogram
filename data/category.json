@@ -1,42 +1,14 @@
 [
   {
-    "id": "1",
-    "name": "React",
-    "sort": 1
+    "id": "b39977ed-4843-40a8-b71a-9e3b038135d9",
+    "name": "说明",
+    "sort": 0,
+    "themeIndex": 0
   },
   {
-    "id": "2",
-    "name": "Vue",
-    "sort": 2
-  },
-  {
-    "id": "3",
-    "name": "JavaScript",
-    "sort": 3
-  },
-  {
-    "id": "4",
-    "name": "TypeScript",
-    "sort": 4
-  },
-  {
-    "id": "5",
-    "name": "CSS",
-    "sort": 5
-  },
-  {
-    "id": "6",
-    "name": "浏览器",
-    "sort": 6
-  },
-  {
-    "id": "7",
-    "name": "Next.js",
-    "sort": 7
-  },
-  {
-    "id": "8",
-    "name": "工程化",
-    "sort": 8
+    "id": "ec2f4df7-8d3f-4e12-ad69-68cbadd0cca2",
+    "name": "示例",
+    "sort": 1,
+    "themeIndex": 1
   }
 ]

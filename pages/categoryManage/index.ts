@@ -1,9 +1,11 @@
 import { loadAllViewData, type CategoryViewPageData } from '@/view-model/card-view';
 import { deleteCategory, moveCategoryDown, moveCategoryUp } from '@/services/categoryService';
+import { UNCATEGORIZED_ID } from '@/constants/category';
 
 Page({
   data: {
     categoryViewList: [] as CategoryViewPageData['categoryViewList'],
+    uncategorizedId: UNCATEGORIZED_ID,
   },
 
   // 跳转到添加分类页面

@@ -35,10 +35,10 @@ function normalizeLimit(limit?: number, fallback = 10): number {
 
 // 查询参数签名是根据测验选项生成的一个字符串，用于快速判断测验选项是否发生变化，如果发生变化则需要重新生成测验进度数据
 function buildDailyQuizSignature(quizOptions: Partial<quizQuery>): string {
+  const type = quizOptions.type || 'today';
   return [
-    `type:${quizOptions.type || 'today'}`,
-    `categoryId:${quizOptions.categoryId || ''}`,
-    `mode:${quizOptions.mode || ''}`,
+    // 每日测验固定抽整库题目，不再让分类或模式参与续答判断。
+    `type:${type}`,
     `limit:${normalizeLimit(dailyQuizLimit)}`,
   ].join('|');
 }
@@ -122,12 +122,10 @@ function buildQueue(quizOptions: Partial<quizQuery>, ignoreMode = false): CardVi
 
   // 如果是每日测验，抽取题目时按照unknown（包含状态为undefined） : fuzzy : mastered = 6 : 3 : 1的比例进行抽取
   if (quizOptions.type === 'today') {
-    const unknownCards = filterQuizCards(cardList, quizOptions, true, {
-      unknown: true,
-      undefinedStatus: true,
-    });
-    const fuzzyCards = filterQuizCards(cardList, quizOptions, true, { fuzzy: true });
-    const masteredCards = filterQuizCards(cardList, quizOptions, true, { mastered: true });
+    // 每日测验不沿用自由测验的分类/模式筛选，直接按状态从整库抽题。
+    const unknownCards = cardList.filter((card) => card.status === 'unknown' || !card.status);
+    const fuzzyCards = cardList.filter((card) => card.status === 'fuzzy');
+    const masteredCards = cardList.filter((card) => card.status === 'mastered');
 
     // 计算每个状态的题目数量，按照6:3:1的比例分配，如果总数不足则按比例缩放
     const limit = normalizeLimit(dailyQuizLimit);
@@ -149,9 +147,7 @@ function buildQueue(quizOptions: Partial<quizQuery>, ignoreMode = false): CardVi
 
     // 如果抽取的题目总数不足每日测验的限制数量，则从剩余的卡片中随机抽取补足，且题目不能重复
     if (combined.length < limit) {
-      const remainingCards = filterQuizCards(cardList, quizOptions, true).filter(
-        (card) => !combined.some((c) => c.id === card.id),
-      );
+      const remainingCards = cardList.filter((card) => !combined.some((c) => c.id === card.id));
       const additional = shuffle(remainingCards).slice(0, limit - combined.length);
       return toCardViews(shuffle([...combined, ...additional]), getCategoryList());
     }
