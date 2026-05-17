@@ -30,6 +30,20 @@ function cloneCategory(category: Category): Category {
   return { ...category };
 }
 
+// 按 id 去重，避免默认数据和兜底补齐逻辑把同一个系统分类放进列表两次
+function dedupeCategories(list: Category[]): Category[] {
+  const seenIds = new Set<string>();
+
+  return list.filter((category) => {
+    if (seenIds.has(category.id)) {
+      return false;
+    }
+
+    seenIds.add(category.id);
+    return true;
+  });
+}
+
 // 统一在服务层补齐 themeIndex，这样页面读取分类时只消费稳定结果。
 function normalizeCategory(category: Category, index: number): Category {
   const normalizedCategory: Category = {
@@ -61,9 +75,16 @@ function createThemeIndex(currentCategories: Category[], preferredThemeIndex?: n
 
 // 对分类列表进行排序，首先按照 sort 字段升序排序，如果 sort 相同则按照 name 字段的字母顺序排序
 function normalizeCategories(list: Category[]): Category[] {
-  return list
+  return dedupeCategories(list)
     .map((category, index) => normalizeCategory(cloneCategory(category), index))
     .sort((left, right) => left.sort - right.sort || left.name.localeCompare(right.name));
+}
+
+// 确保列表里有且只有一个未分类；如果默认数据本身没有这条，再统一补一次
+function ensureUncategorizedCategory(list: Category[]): Category[] {
+  return list.some((category) => category.id === uncategorizedId)
+    ? list
+    : [...list, uncategorizedCategory];
 }
 
 // 从本地存储加载分类列表，如果没有则使用默认分类，并保存到本地存储
@@ -71,25 +92,22 @@ function loadCategoriesFromStorage(): Category[] {
   const { hasStoredValue, parsed, value } = readStorageJson<unknown>(CATEGORY_STORAGE_KEY, null);
 
   if (!hasStoredValue) {
-    // 本地没有数据，使用默认分类并添加未分类
-    categoryList = normalizeCategories([...defaultCategories, uncategorizedCategory]);
+    // 本地没有数据时，优先使用静态默认分类；如果默认数据缺失未分类，再统一补齐一次
+    categoryList = normalizeCategories(ensureUncategorizedCategory(defaultCategories));
     saveCategoriesToStorage(categoryList);
     return categoryList;
   }
 
   if (!parsed || !Array.isArray(value)) {
     // storage 被污染时直接回退到可用默认值，避免分类服务在初始化阶段崩掉。
-    categoryList = normalizeCategories([...defaultCategories, uncategorizedCategory]);
+    categoryList = normalizeCategories(ensureUncategorizedCategory(defaultCategories));
     saveCategoriesToStorage(categoryList);
     return categoryList;
   }
 
   const savedList = value as Category[];
   // 如果有数据，判断是否包含未分类，如果没有则添加一个
-  if (savedList.findIndex((category) => category.id === uncategorizedId) === -1) {
-    savedList.push(uncategorizedCategory);
-  }
-  categoryList = normalizeCategories(savedList);
+  categoryList = normalizeCategories(ensureUncategorizedCategory(savedList));
   saveCategoriesToStorage(categoryList);
   return categoryList;
 }
