@@ -1,10 +1,124 @@
-.bullet {
+.markdown-body {
   margin-top: 14rpx;
-  color: #6c645a;
+  color: #5e564d;
   font-size: 26rpx;
-  line-height: 1.8;
+  line-height: 1.86;
+  word-break: break-word;
 }
 
-.markdown-body {
+.md-heading {
+  margin: 0;
+  padding: 0;
+  color: #1e1c18;
+  font-weight: 700;
   word-break: break-word;
+}
+
+.md-h1 {
+  margin-top: 34rpx;
+  margin-bottom: 18rpx;
+  font-size: 42rpx;
+  line-height: 1.72;
+}
+
+.md-h2 {
+  margin-top: 30rpx;
+  margin-bottom: 16rpx;
+  font-size: 36rpx;
+  line-height: 1.72;
+}
+
+.md-h3 {
+  margin-top: 26rpx;
+  margin-bottom: 14rpx;
+  font-size: 32rpx;
+  line-height: 1.7;
+}
+
+.md-h4,
+.md-h5,
+.md-h6 {
+  margin-top: 22rpx;
+  margin-bottom: 12rpx;
+  font-size: 29rpx;
+  line-height: 1.68;
+}
+
+.md-paragraph {
+  padding: 10rpx 0;
+  color: #5e564d;
+  font-size: 26rpx;
+  line-height: 1.92;
+  word-break: break-word;
+}
+
+.md-list {
+  padding: 8rpx 0 10rpx;
+}
+
+.md-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10rpx;
+  padding: 5rpx 0;
+  color: #5e564d;
+  font-size: 26rpx;
+  line-height: 1.86;
+}
+
+.md-list-marker {
+  width: 34rpx;
+  flex-shrink: 0;
+  color: #85796d;
+  font-size: 25rpx;
+  line-height: 1.86;
+  text-align: right;
+}
+
+.md-list-content {
+  flex: 1;
+  min-width: 0;
+  color: #5e564d;
+  line-height: 1.86;
+  word-break: break-word;
+}
+
+.md-quote {
+  margin: 18rpx 0;
+  padding: 22rpx 24rpx;
+  border-left: 8rpx solid #127a72;
+  border-radius: 0 18rpx 18rpx 0;
+  background: #edf7f4;
+  color: #536a66;
+  font-size: 26rpx;
+  line-height: 1.9;
+  word-break: break-word;
+}
+
+.md-divider {
+  height: 2rpx;
+  margin: 28rpx 0;
+  background: rgba(61, 43, 24, 0.2);
+  line-height: 0;
+  font-size: 0;
+}
+
+.md-code-scroll {
+  margin: 18rpx 0;
+  padding: 24rpx 26rpx;
+  border-radius: 20rpx;
+  background: #2a2420;
+  box-sizing: border-box;
+}
+
+.md-code {
+  color: #f7efe6;
+  font-size: 24rpx;
+  line-height: 1.8;
+  white-space: pre;
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+}
+
+.md-table {
+  margin: 18rpx 0;
 }

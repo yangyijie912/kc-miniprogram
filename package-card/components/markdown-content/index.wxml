@@ -1,3 +1,40 @@
-<view class="bullet markdown-body">
-  <rich-text nodes="{{renderMarkdownToRichText}}"></rich-text>
+<view class="markdown-body">
+  <block wx:for="{{markdownBlocks}}" wx:key="index">
+    <view wx:if="{{item.type === 'heading'}}" class="md-heading md-h{{item.level}}">
+      <rich-text nodes="{{item.html}}"></rich-text>
+    </view>
+
+    <view wx:elif="{{item.type === 'paragraph'}}" class="md-paragraph">
+      <rich-text nodes="{{item.html}}"></rich-text>
+    </view>
+
+    <view wx:elif="{{item.type === 'list'}}" class="md-list">
+      <view
+        wx:for="{{item.items}}"
+        wx:for-item="listItem"
+        wx:for-index="listIndex"
+        wx:key="index"
+        class="md-list-item"
+      >
+        <text class="md-list-marker">{{item.ordered ? listIndex + 1 + '.' : '•'}}</text>
+        <view class="md-list-content">
+          <rich-text nodes="{{listItem.html}}"></rich-text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:elif="{{item.type === 'quote'}}" class="md-quote">
+      <rich-text nodes="{{item.html}}"></rich-text>
+    </view>
+
+    <view wx:elif="{{item.type === 'divider'}}" class="md-divider"></view>
+
+    <scroll-view wx:elif="{{item.type === 'code'}}" scroll-x class="md-code-scroll">
+      <text class="md-code">{{item.text}}</text>
+    </scroll-view>
+
+    <view wx:elif="{{item.type === 'table'}}" class="md-table">
+      <rich-text nodes="{{item.html}}"></rich-text>
+    </view>
+  </block>
 </view>
