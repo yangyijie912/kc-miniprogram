@@ -1,5 +1,5 @@
 import { loadAllViewData, type CategoryViewPageData } from '@/view-model/card-view';
-import { deleteCategory } from '@/services/categoryService';
+import { deleteCategory, moveCategoryDown, moveCategoryUp } from '@/services/categoryService';
 
 Page({
   data: {
@@ -45,6 +45,34 @@ Page({
       title: res.success ? '分类删除成功' : res.message || '分类删除失败',
       icon: res.success ? 'success' : 'none',
     });
+  },
+
+  // 向上移动分类
+  moveUp(event: WechatMiniprogram.BaseEvent) {
+    const id = event.currentTarget.dataset.id;
+    const res = moveCategoryUp(id);
+    if (res.success) {
+      this.loadAllData();
+    } else {
+      wx.showToast({
+        title: res.message || '移动失败',
+        icon: 'none',
+      });
+    }
+  },
+
+  // 向下移动分类
+  moveDown(event: WechatMiniprogram.BaseEvent) {
+    const id = event.currentTarget.dataset.id;
+    const res = moveCategoryDown(id);
+    if (res.success) {
+      this.loadAllData();
+    } else {
+      wx.showToast({
+        title: res.message || '移动失败',
+        icon: 'none',
+      });
+    }
   },
 
   // 加载数据并更新页面显示

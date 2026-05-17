@@ -63,6 +63,8 @@ export interface CategoryView extends Category {
   cardCount: number;
   canEdit: boolean;
   canDelete: boolean;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
   visible: boolean;
   theme: {
     background: string;

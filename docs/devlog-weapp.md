@@ -237,3 +237,12 @@
 - 收紧测验页推进条件：当前题目失效或状态更新失败时，不再继续累加结果并切到下一题；同时自由测验完成后才写 quizResult 缓存，每日测验结果完全以 session 为准，保持两类测验的状态来源一致。
 
 2、markdown 渲染时只保留明确的链接识别，关闭容易误判的模糊链接规则，同步 uni-app 侧的 markdown-it 配置。
+
+3、同步 uniapp 侧的分类管理改动，补上分类上下移动能力。
+
+关键改动：
+
+- `services/categoryService.ts`：新增 `moveCategoryUp` / `moveCategoryDown`，通过交换 `sort` 值实现分类排序调整，未分类和系统分类不允许移动。
+- `view-model/card-view.ts` 和 `types/card.ts`：分类视图补齐 `canMoveUp` / `canMoveDown`，页面只在可移动时显示可点击状态，避免误操作。
+- `pages/categoryManage/index.ts` / `index.wxml` / `index.wxss`：分类管理页增加上下移动按钮，移动成功后重新加载数据，静默成功，样式与现有卡片管理页保持一致。
+- `assets/actions`：补齐编辑、删除、上移、下移图标资源，避免页面继续使用纯文本按钮。

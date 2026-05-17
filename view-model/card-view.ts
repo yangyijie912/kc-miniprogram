@@ -38,15 +38,23 @@ function createCardCountMap(cards: Card[]): Record<string, number> {
 function createCategoryViewList(categoryList: Category[], cardList: Card[]): CategoryView[] {
   const cardCountMap = createCardCountMap(cardList);
   return categoryList
-    .map((category) => {
+    .map((category, index) => {
       const cardCount = cardCountMap[category.id] !== undefined ? cardCountMap[category.id] : 0;
       const isUncategorized = category.id === UNCATEGORIZED_ID;
+      const prev = categoryList[index - 1];
+      const next = categoryList[index + 1];
+      const canEdit = !isUncategorized && !category.isSystem;
+      const canDelete = !isUncategorized && !category.isSystem;
+      const canMoveUp = Boolean(canEdit && prev && prev.id !== UNCATEGORIZED_ID);
+      const canMoveDown = Boolean(canEdit && next && next.id !== UNCATEGORIZED_ID);
 
       return {
         ...category,
         cardCount,
-        canEdit: !isUncategorized,
-        canDelete: !isUncategorized,
+        canEdit,
+        canDelete,
+        canMoveUp,
+        canMoveDown,
         visible: !(isUncategorized && cardCount === 0),
         theme: getCategoryTheme(category),
       };

@@ -190,3 +190,59 @@ export function saveAllCategories(categories: Category[]): ServiceResult<null> {
   saveCategoriesToStorage(categories);
   return success(null);
 }
+
+// 向上移动分类：和上一个可移动分类交换顺序
+export function moveCategoryUp(id: string): ServiceResult<null> {
+  if (id === uncategorizedId) {
+    return fail('该分类不可移动');
+  }
+
+  const currentList = loadCategoriesFromStorage();
+  const index = currentList.findIndex((category) => category.id === id);
+  if (index === -1) {
+    return fail('分类未找到');
+  }
+
+  const targetIndex = index - 1;
+  if (targetIndex < 0) {
+    return fail('已经在顶部');
+  }
+  if (currentList[targetIndex].id === uncategorizedId) {
+    return fail('目标位置不可用');
+  }
+
+  const currentSort = currentList[index].sort;
+  currentList[index].sort = currentList[targetIndex].sort;
+  currentList[targetIndex].sort = currentSort;
+
+  saveCategoriesToStorage(currentList);
+  return success(null);
+}
+
+// 向下移动分类：和下一个可移动分类交换顺序
+export function moveCategoryDown(id: string): ServiceResult<null> {
+  if (id === uncategorizedId) {
+    return fail('该分类不可移动');
+  }
+
+  const currentList = loadCategoriesFromStorage();
+  const index = currentList.findIndex((category) => category.id === id);
+  if (index === -1) {
+    return fail('分类未找到');
+  }
+
+  const targetIndex = index + 1;
+  if (targetIndex >= currentList.length) {
+    return fail('已经在底部');
+  }
+  if (currentList[targetIndex].id === uncategorizedId) {
+    return fail('目标位置不可用');
+  }
+
+  const currentSort = currentList[index].sort;
+  currentList[index].sort = currentList[targetIndex].sort;
+  currentList[targetIndex].sort = currentSort;
+
+  saveCategoriesToStorage(currentList);
+  return success(null);
+}
