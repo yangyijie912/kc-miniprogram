@@ -47,10 +47,10 @@ Page({
       });
       return;
     }
-    // 只在提交时解析排序，允许输入框保留空串等编辑态，避免被受控值强制回写成 0。
+    // 只在提交时解析排序，允许输入框保留空串等编辑态，空值交给服务层追加到末尾。
     const rawSort = formData.sort.trim();
-    const sort = rawSort === '' ? 0 : Number(rawSort);
-    if (!Number.isFinite(sort)) {
+    const sort = rawSort === '' ? undefined : Number(rawSort);
+    if (sort !== undefined && !Number.isFinite(sort)) {
       wx.showToast({
         title: '排序必须是数字',
         icon: 'none',
@@ -61,9 +61,15 @@ Page({
     let res;
 
     if (categoryId) {
-      res = updateCategory({ id: categoryId, name: formData.name.trim(), sort });
+      res = updateCategory(
+        sort === undefined
+          ? { id: categoryId, name: formData.name.trim() }
+          : { id: categoryId, name: formData.name.trim(), sort },
+      );
     } else {
-      res = addCategory({ name: formData.name.trim(), sort });
+      res = addCategory(
+        sort === undefined ? { name: formData.name.trim() } : { name: formData.name.trim(), sort },
+      );
     }
 
     if (!res.success) {

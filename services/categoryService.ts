@@ -30,6 +30,42 @@ function cloneCategory(category: Category): Category {
   return { ...category };
 }
 
+type CategoryInput = Omit<Category, 'id' | 'sort'> & {
+  sort?: number;
+};
+
+function normalizeCategoryName(name: string) {
+  return name.trim();
+}
+
+function isMovableCategory(category: Category) {
+  return category.id !== uncategorizedId && !category.isSystem;
+}
+
+function getNextCategorySort(list: Category[]) {
+  const maxSort = list.reduce((currentMax, category) => {
+    if (!isMovableCategory(category)) {
+      return currentMax;
+    }
+
+    return category.sort > currentMax ? category.sort : currentMax;
+  }, -1);
+
+  return maxSort + 1;
+}
+
+function isDuplicateCategoryName(list: Category[], name: string, excludeId?: string) {
+  const normalizedName = normalizeCategoryName(name);
+
+  return list.some((category) => {
+    if (category.id === excludeId) {
+      return false;
+    }
+
+    return normalizeCategoryName(category.name) === normalizedName;
+  });
+}
+
 // 按 id 去重，避免默认数据和兜底补齐逻辑把同一个系统分类放进列表两次
 function dedupeCategories(list: Category[]): Category[] {
   const seenIds = new Set<string>();
@@ -147,11 +183,26 @@ export function getCategoryById(id: string): ServiceResult<Category | undefined>
 }
 
 // 添加新分类
-export function addCategory(category: Omit<Category, 'id'>): ServiceResult<Category> {
+export function addCategory(category: CategoryInput): ServiceResult<Category> {
   const currentList = loadCategoriesFromStorage();
+  const normalizedName = normalizeCategoryName(category.name);
+
+  if (normalizedName === '') {
+    return fail('名称不能为空');
+  }
+
+  if (isDuplicateCategoryName(currentList, normalizedName)) {
+    return fail('分类名称已存在');
+  }
+
   const newCategory: Category = {
     id: generateUUID(),
     ...category,
+    name: normalizedName,
+    sort:
+      typeof category.sort === 'number' && Number.isFinite(category.sort)
+        ? category.sort
+        : getNextCategorySort(currentList),
     themeIndex: createThemeIndex(currentList, category.themeIndex),
   };
 
@@ -171,7 +222,22 @@ export function updateCategory(updates: Partial<Category>): ServiceResult<Catego
   const updatedCategory: Category = {
     ...currentList[index],
     ...updates,
+    name:
+      updates.name !== undefined ? normalizeCategoryName(updates.name) : currentList[index].name,
   };
+
+  if (updatedCategory.name === '') {
+    return fail('名称不能为空');
+  }
+
+  if (isDuplicateCategoryName(currentList, updatedCategory.name, updatedCategory.id)) {
+    return fail('分类名称已存在');
+  }
+
+  updatedCategory.sort =
+    typeof updates.sort === 'number' && Number.isFinite(updates.sort)
+      ? updates.sort
+      : getNextCategorySort(currentList);
 
   currentList[index] = updatedCategory;
   saveCategoriesToStorage(currentList);
