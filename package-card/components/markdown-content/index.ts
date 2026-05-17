@@ -64,6 +64,15 @@ function createMarkdownIt() {
     typographer: true, // 启用一些语言替换 + 引号美化
   });
 
+  // 只保留明确的链接识别，关闭容易误判的模糊链接规则
+  if (md.linkify && typeof md.linkify.set === 'function') {
+    md.linkify.set({
+      fuzzyLink: false,
+      fuzzyEmail: false,
+      fuzzyIP: false,
+    });
+  }
+
   md.renderer.rules.heading_open = (
     tokens: MarkdownToken[],
     idx: number,
