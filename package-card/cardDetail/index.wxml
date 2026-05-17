@@ -9,11 +9,11 @@
       </view>
       <view class="detail-title">{{ cardData.question }}</view>
       <view class="detail-summary">
-        <view class="detail-top">
+        <view class="detail-meta">
           <view class="detail-status status-{{cardData.status}}">
             {{ cardData.statusText }}
           </view>
-          <view class="detail-tag">
+          <view wx:if="{{cardData.tagsText}}" class="detail-tag">
             {{ cardData.tagsText }}
           </view>
         </view>

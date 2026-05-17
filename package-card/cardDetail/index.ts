@@ -10,7 +10,7 @@ function formatTagsText(tags: Card['tags']) {
   }
 
   // 详情页标签是完整展示态；为空时必须返回空串，不能把 undefined 拼进 UI。
-  return '/ ' + tags.join('•');
+  return tags.join(' • ');
 }
 
 Page({
