@@ -1,5 +1,5 @@
-import { QUIZ_RESULT_STORAGE_KEY } from '@/constants/storageKeys';
 import { jsonToUrlParam } from '@/package-card/utils/jsonToUrl';
+import { getStoredDailyQuizSession, readStoredQuizResult } from '@/utils/storage';
 import type { quizQuery, QuizResultSummary } from '@/types/quiz';
 
 Page({
@@ -20,13 +20,43 @@ Page({
   },
 
   onShow() {
-    const resultStr = wx.getStorageSync(QUIZ_RESULT_STORAGE_KEY);
-    if (resultStr) {
-      const parsedResult = JSON.parse(resultStr);
+    if (this.data.quizOptions.type === 'today') {
+      // 今日测验结果以每日 session 为准，避免和自由测验结果缓存串源。
+      const session = getStoredDailyQuizSession();
+      if (session) {
+        this.setData({
+          quizResult: session.result,
+        });
+        return;
+      }
+
       this.setData({
-        quizResult: parsedResult,
+        quizResult: {
+          total: 0,
+          unknown: 0,
+          fuzzy: 0,
+          mastered: 0,
+        },
       });
+      return;
     }
+
+    const storedResult = readStoredQuizResult();
+    if (storedResult) {
+      this.setData({
+        quizResult: storedResult,
+      });
+      return;
+    }
+
+    this.setData({
+      quizResult: {
+        total: 0,
+        unknown: 0,
+        fuzzy: 0,
+        mastered: 0,
+      },
+    });
   },
 
   // 重新开始测验，跳转回测验页面并传递相同的测验选项

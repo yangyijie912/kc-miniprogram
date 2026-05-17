@@ -7,6 +7,7 @@ import {
   isValidCategoryThemeIndex,
   pickAvailableCategoryThemeIndex,
 } from '@/utils/categoryTheme';
+import { readStorageJson } from '@/utils/storage';
 import type { ServiceResult } from '@/types/service';
 import { generateUUID } from '@/utils/uuid';
 import { success, fail } from '@/services/serviceHelper';
@@ -67,16 +68,23 @@ function normalizeCategories(list: Category[]): Category[] {
 
 // 从本地存储加载分类列表，如果没有则使用默认分类，并保存到本地存储
 function loadCategoriesFromStorage(): Category[] {
-  const saved = wx.getStorageSync(CATEGORY_STORAGE_KEY);
+  const { hasStoredValue, parsed, value } = readStorageJson<unknown>(CATEGORY_STORAGE_KEY, null);
 
-  if (!saved) {
+  if (!hasStoredValue) {
     // 本地没有数据，使用默认分类并添加未分类
     categoryList = normalizeCategories([...defaultCategories, uncategorizedCategory]);
     saveCategoriesToStorage(categoryList);
     return categoryList;
   }
 
-  const savedList = JSON.parse(saved) as Category[];
+  if (!parsed || !Array.isArray(value)) {
+    // storage 被污染时直接回退到可用默认值，避免分类服务在初始化阶段崩掉。
+    categoryList = normalizeCategories([...defaultCategories, uncategorizedCategory]);
+    saveCategoriesToStorage(categoryList);
+    return categoryList;
+  }
+
+  const savedList = value as Category[];
   // 如果有数据，判断是否包含未分类，如果没有则添加一个
   if (savedList.findIndex((category) => category.id === uncategorizedId) === -1) {
     savedList.push(uncategorizedCategory);

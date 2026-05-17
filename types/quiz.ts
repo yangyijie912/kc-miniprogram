@@ -20,6 +20,7 @@ export type QuizResultSummary = {
 export type DailyQuizSession = {
   dateKey: string;
   limit: number;
+  querySignature?: string; // 可选的查询参数签名，用于判断测验选项是否发生变化
   queue: CardView[];
   currentIndex: number;
   result: QuizResultSummary;

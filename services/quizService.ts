@@ -1,10 +1,11 @@
-import { CARD_STORAGE_KEY, DAILY_QUIZ_SESSION_KEY } from '@/constants/storageKeys';
+import { DAILY_QUIZ_SESSION_KEY } from '@/constants/storageKeys';
 import type { ServiceResult } from '@/types/service';
 import { success, fail } from '@/services/serviceHelper';
 import { shuffle } from '@/utils/arrayUtils';
 import type { Card, CardView } from '@/types/card';
 import type { DailyQuizSession, quizQuery, QuizResultSummary } from '@/types/quiz';
 import { getCategories } from '@/services/categoryService';
+import { getCards } from '@/services/cardService';
 import { toCardViews } from '@/utils/cardView';
 import { readDailyQuizSession } from '@/utils/storage';
 import { getDateKey } from '@/utils/date';
@@ -12,9 +13,10 @@ import { getDateKey } from '@/utils/date';
 // 每日测验的题目数量限制，默认值为10
 export const dailyQuizLimit = 10;
 
-// 从本地存储加载卡片列表
+// 测验题库也要复用卡片服务的安全读取和迁移逻辑，不能自己直接解析原始 storage。
 function loadCardList(): Card[] {
-  return JSON.parse(wx.getStorageSync(CARD_STORAGE_KEY) || '[]') as Card[];
+  const cardRes = getCards();
+  return cardRes.success && cardRes.data ? cardRes.data.list : [];
 }
 
 // 获取分类列表
@@ -29,6 +31,44 @@ function normalizeLimit(limit?: number, fallback = 10): number {
     return Math.floor(limit);
   }
   return fallback;
+}
+
+// 查询参数签名是根据测验选项生成的一个字符串，用于快速判断测验选项是否发生变化，如果发生变化则需要重新生成测验进度数据
+function buildDailyQuizSignature(quizOptions: Partial<quizQuery>): string {
+  return [
+    `type:${quizOptions.type || 'today'}`,
+    `categoryId:${quizOptions.categoryId || ''}`,
+    `mode:${quizOptions.mode || ''}`,
+    `limit:${normalizeLimit(dailyQuizLimit)}`,
+  ].join('|');
+}
+
+// 每日测验只把会影响核心题面的字段（分类、问题、答案、内容）算进续答有效性
+// 标签允许漂移，避免轻微整理标签就打断当天进度。
+function isQueueCardStillValid(queuedCard: CardView, currentCard: Card) {
+  return (
+    queuedCard.categoryId === currentCard.categoryId &&
+    queuedCard.question === currentCard.question &&
+    queuedCard.answer === currentCard.answer &&
+    (queuedCard.content || '') === (currentCard.content || '')
+  );
+}
+
+// 判断测验队列是否仍然有效，条件是队列不为空，当前索引在有效范围内，并且每个题目在当前卡片列表中仍然有效
+function isSessionQueueValid(session: DailyQuizSession, currentCardList: Card[]) {
+  if (!session.queue.length) {
+    return false;
+  }
+
+  if (session.currentIndex < 0 || session.currentIndex >= session.queue.length) {
+    return session.finished && session.currentIndex === session.queue.length - 1;
+  }
+
+  const currentCardById = new Map(currentCardList.map((card) => [card.id, card]));
+  return session.queue.every((queuedCard) => {
+    const currentCard = currentCardById.get(queuedCard.id);
+    return currentCard ? isQueueCardStillValid(queuedCard, currentCard) : false;
+  });
 }
 
 // 根据测验选项过滤卡片列表
@@ -78,14 +118,16 @@ function filterQuizCards(
 
 // 构建测验题目队列，先根据测验选项过滤卡片列表，然后随机打乱并限制数量，最后转换为卡片视图
 function buildQueue(quizOptions: Partial<quizQuery>, ignoreMode = false): CardView[] {
+  const cardList = loadCardList();
+
   // 如果是每日测验，抽取题目时按照unknown（包含状态为undefined） : fuzzy : mastered = 6 : 3 : 1的比例进行抽取
   if (quizOptions.type === 'today') {
-    const unknownCards = filterQuizCards(loadCardList(), quizOptions, true, {
+    const unknownCards = filterQuizCards(cardList, quizOptions, true, {
       unknown: true,
       undefinedStatus: true,
     });
-    const fuzzyCards = filterQuizCards(loadCardList(), quizOptions, true, { fuzzy: true });
-    const masteredCards = filterQuizCards(loadCardList(), quizOptions, true, { mastered: true });
+    const fuzzyCards = filterQuizCards(cardList, quizOptions, true, { fuzzy: true });
+    const masteredCards = filterQuizCards(cardList, quizOptions, true, { mastered: true });
 
     // 计算每个状态的题目数量，按照6:3:1的比例分配，如果总数不足则按比例缩放
     const limit = normalizeLimit(dailyQuizLimit);
@@ -107,7 +149,7 @@ function buildQueue(quizOptions: Partial<quizQuery>, ignoreMode = false): CardVi
 
     // 如果抽取的题目总数不足每日测验的限制数量，则从剩余的卡片中随机抽取补足，且题目不能重复
     if (combined.length < limit) {
-      const remainingCards = filterQuizCards(loadCardList(), quizOptions, true).filter(
+      const remainingCards = filterQuizCards(cardList, quizOptions, true).filter(
         (card) => !combined.some((c) => c.id === card.id),
       );
       const additional = shuffle(remainingCards).slice(0, limit - combined.length);
@@ -115,7 +157,7 @@ function buildQueue(quizOptions: Partial<quizQuery>, ignoreMode = false): CardVi
     }
     return toCardViews(shuffle(combined), getCategoryList());
   } else {
-    const filteredList = filterQuizCards(loadCardList(), quizOptions, ignoreMode);
+    const filteredList = filterQuizCards(cardList, quizOptions, ignoreMode);
     const limit = normalizeLimit(quizOptions.limit);
     return toCardViews(shuffle(filteredList).slice(0, limit), getCategoryList());
   }
@@ -136,16 +178,20 @@ function saveDailyQuizSession(session: DailyQuizSession) {
   wx.setStorageSync(DAILY_QUIZ_SESSION_KEY, JSON.stringify(session));
 }
 
-// 判断是否可以重用现有的每日测验进度数据，条件是日期键和题目数量都匹配
+// 判断是否可以重用现有的每日测验进度数据
+// 条件是日期键、题目数量和查询参数签名都匹配，并且题目队列中的每个题目在当前卡片列表中仍然有效（没有被修改或删除）
 function shouldReuseDailySession(
   session: DailyQuizSession,
   quizOptions: Partial<quizQuery>,
+  currentCardList: Card[],
   dateKey: string,
 ): boolean {
   return (
     session.dateKey === dateKey &&
+    session.querySignature === buildDailyQuizSignature(quizOptions) &&
     session.limit ===
-      normalizeLimit(quizOptions.type === 'today' ? dailyQuizLimit : quizOptions.limit)
+      normalizeLimit(quizOptions.type === 'today' ? dailyQuizLimit : quizOptions.limit) &&
+    isSessionQueueValid(session, currentCardList)
   );
 }
 
@@ -155,8 +201,15 @@ export function getDailyQuizSession(
 ): ServiceResult<DailyQuizSession> {
   const todayKey = getDateKey(new Date());
   const storedSession = readDailyQuizSession();
+  const currentCardList = loadCardList();
+  const hasResetStoredSession =
+    !!storedSession &&
+    !shouldReuseDailySession(storedSession, quizOptions, currentCardList, todayKey);
   // 如果现有数据符合条件则重用，否则创建新的测验进度数据并保存到本地存储
-  if (storedSession && shouldReuseDailySession(storedSession, quizOptions, todayKey)) {
+  if (
+    storedSession &&
+    shouldReuseDailySession(storedSession, quizOptions, currentCardList, todayKey)
+  ) {
     return success(storedSession);
   }
   const queue = buildQueue(quizOptions, true);
@@ -166,6 +219,7 @@ export function getDailyQuizSession(
   const session: DailyQuizSession = {
     dateKey: todayKey,
     limit: normalizeLimit(dailyQuizLimit),
+    querySignature: buildDailyQuizSignature(quizOptions),
     queue,
     currentIndex: 0,
     result: createEmptyQuizResult(queue.length),
@@ -173,7 +227,7 @@ export function getDailyQuizSession(
     lastAnsweredAt: Date.now(),
   };
   saveDailyQuizSession(session);
-  return success(session);
+  return success(session, hasResetStoredSession ? '当日题集已按最新卡片内容重新生成' : undefined);
 }
 
 // 更新每日测验进度数据

@@ -211,6 +211,13 @@
   line-height: 1.7;
 }
 
+.quiz-setup-note-tip {
+  margin-top: 10rpx;
+  color: #cc8419;
+  font-size: 22rpx;
+  line-height: 1.6;
+}
+
 .quiz-setup-actions {
   margin-top: 24rpx;
   display: flex;

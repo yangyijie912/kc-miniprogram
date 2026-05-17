@@ -69,8 +69,10 @@ Page({
     // 如果是每日测验，确保最后一次进度同步，标记为已完成
     if (this.data.quizOptions.type === 'today') {
       this.syncDailyProgress(true);
+    } else {
+      // 自由测验结果没有 session 兜底，仍然单独持久化供结果页读取。
+      wx.setStorageSync(QUIZ_RESULT_STORAGE_KEY, JSON.stringify(this.data.quizResult));
     }
-    wx.setStorageSync(QUIZ_RESULT_STORAGE_KEY, JSON.stringify(this.data.quizResult));
     wx.redirectTo({
       url: `/package-card/quizResult/index?${jsonToUrlParam(this.data.quizOptions)}`,
     });
@@ -105,6 +107,7 @@ Page({
         });
         this.setData({
           cardQueue: [],
+          currentCard: null,
         });
         return;
       }
@@ -115,6 +118,12 @@ Page({
         currentCard: this.getCurrentCard(res.data.currentIndex, res.data.queue),
         quizResult: res.data.result,
       });
+      if (res.message) {
+        wx.showToast({
+          title: res.message,
+          icon: 'none',
+        });
+      }
 
       // 如果测验已经完成，直接跳转到结果页
       if (res.data.finished) {
@@ -143,6 +152,7 @@ Page({
     // 加载失败，清空队列并提示错误
     this.setData({
       cardQueue: [],
+      currentCard: null,
     });
     this.resetQuizResult(0);
     wx.showToast({
@@ -153,7 +163,14 @@ Page({
 
   // 状态更新接口
   changeStatus(cardId: string | undefined, status: CardStatus) {
-    if (!cardId) return;
+    if (!cardId) {
+      wx.showToast({
+        title: '当前题目已失效，请重新开始测验',
+        icon: 'none',
+      });
+      return false;
+    }
+
     // 测验场景统一走服务层的专用接口，保证状态时间字段和学习统计口径一起更新。
     const res = updateDailyLearningStats(cardId, status);
     if (!res.success) {
@@ -161,7 +178,10 @@ Page({
         title: res.message || '状态更新失败',
         icon: 'none',
       });
+      return false;
     }
+
+    return true;
   },
 
   // 进入下一题
@@ -188,21 +208,27 @@ Page({
 
     switch (status) {
       case 'unknown':
-        this.changeStatus(currentCard.id, 'unknown');
+        if (!this.changeStatus(currentCard.id, 'unknown')) {
+          return;
+        }
         this.setData({
           'quizResult.unknown': this.data.quizResult.unknown + 1,
         });
         this.nextQuestion();
         break;
       case 'fuzzy':
-        this.changeStatus(currentCard.id, 'fuzzy');
+        if (!this.changeStatus(currentCard.id, 'fuzzy')) {
+          return;
+        }
         this.setData({
           'quizResult.fuzzy': this.data.quizResult.fuzzy + 1,
         });
         this.nextQuestion();
         break;
       case 'mastered':
-        this.changeStatus(currentCard.id, 'mastered');
+        if (!this.changeStatus(currentCard.id, 'mastered')) {
+          return;
+        }
         this.setData({
           'quizResult.mastered': this.data.quizResult.mastered + 1,
         });
