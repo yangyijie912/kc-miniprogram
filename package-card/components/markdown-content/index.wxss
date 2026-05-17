@@ -119,6 +119,41 @@
   font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
 }
 
-.md-table {
+.md-table-scroll {
+  width: 100%;
   margin: 18rpx 0;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.md-table-grid {
+  display: inline-block;
+  min-width: 100%;
+  padding: 2rpx;
+  box-sizing: border-box;
+}
+
+.md-table-row {
+  display: flex;
+  min-width: max-content;
+}
+
+.md-table-cell {
+  width: 168rpx;
+  min-height: 76rpx;
+  flex: 0 0 168rpx;
+  padding: 14rpx 16rpx;
+  border-right: 1rpx solid rgba(61, 43, 24, 0.12);
+  border-bottom: 1rpx solid rgba(61, 43, 24, 0.12);
+  color: #5e564d;
+  font-size: 24rpx;
+  line-height: 1.65;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+
+.md-table-head {
+  background: rgba(18, 122, 114, 0.08);
+  color: #1e1c18;
+  font-weight: 700;
 }

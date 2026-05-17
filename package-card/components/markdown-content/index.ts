@@ -7,13 +7,6 @@ const STRONG_STYLE = 'color: #1e1c18; font-weight: 700;';
 const EM_STYLE = 'color: #725f4e;';
 const IMAGE_STYLE =
   'display: block; width: 100%; max-width: 100%; padding: 18rpx 0; border-radius: 20rpx;';
-const TABLE_WRAPPER_STYLE =
-  'display: block; padding: 18rpx 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 18rpx; background: rgba(255, 255, 255, 0.72);';
-const TABLE_STYLE = 'width: 100%; min-width: 100%; border-collapse: collapse; table-layout: auto;';
-const TABLE_CELL_STYLE =
-  'min-width: 160rpx; padding: 18rpx 20rpx; border: 1rpx solid rgba(61, 43, 24, 0.12); color: #5e564d; line-height: 1.75; vertical-align: top; word-break: break-word; text-align: left;';
-const TABLE_HEAD_STYLE =
-  'background: rgba(18, 122, 114, 0.08); color: #1e1c18; font-weight: 700; text-align: left;';
 
 type MarkdownToken = {
   type: string;
@@ -36,7 +29,16 @@ type MarkdownBlock =
   | { type: 'quote'; html: string }
   | { type: 'divider' }
   | { type: 'code'; text: string }
-  | { type: 'table'; html: string };
+  | { type: 'table'; rows: MarkdownTableRow[] };
+
+type MarkdownTableRow = {
+  cells: MarkdownTableCell[];
+};
+
+type MarkdownTableCell = {
+  html: string;
+  head: boolean;
+};
 
 function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (character) => {
@@ -123,30 +125,6 @@ function createMarkdownIt() {
     return self.renderToken(tokens, idx, options);
   };
 
-  md.renderer.rules.table_open = () =>
-    `<div style="${TABLE_WRAPPER_STYLE}"><table style="${TABLE_STYLE}">`;
-  md.renderer.rules.table_close = () => '</table></div>';
-  md.renderer.rules.th_open = (
-    tokens: MarkdownToken[],
-    idx: number,
-    options: unknown,
-    _env: unknown,
-    self: { renderToken(tokens: MarkdownToken[], idx: number, options: unknown): string },
-  ) => {
-    tokens[idx].attrSet('style', `${TABLE_CELL_STYLE} ${TABLE_HEAD_STYLE}`);
-    return self.renderToken(tokens, idx, options);
-  };
-  md.renderer.rules.td_open = (
-    tokens: MarkdownToken[],
-    idx: number,
-    options: unknown,
-    _env: unknown,
-    self: { renderToken(tokens: MarkdownToken[], idx: number, options: unknown): string },
-  ) => {
-    tokens[idx].attrSet('style', TABLE_CELL_STYLE);
-    return self.renderToken(tokens, idx, options);
-  };
-
   return md;
 }
 
@@ -158,10 +136,6 @@ function renderInline(tokens?: MarkdownToken[]) {
   }
 
   return (md.renderer as MarkdownRenderer).renderInline(tokens, md.options, {});
-}
-
-function renderTokenRange(tokens: MarkdownToken[], start: number, end: number) {
-  return (md.renderer as MarkdownRenderer).render(tokens.slice(start, end + 1), md.options, {});
 }
 
 function collectList(tokens: MarkdownToken[], start: number) {
@@ -212,6 +186,57 @@ function collectList(tokens: MarkdownToken[], start: number) {
   }
 
   return { items, end: start };
+}
+
+function collectTable(tokens: MarkdownToken[], start: number) {
+  const rows: MarkdownTableRow[] = [];
+  let currentRow: MarkdownTableRow | null = null;
+  let currentCellHead: boolean | null = null;
+
+  for (let i = start + 1; i < tokens.length; i += 1) {
+    const token = tokens[i];
+
+    if (token.type === 'table_close') {
+      return { rows, end: i };
+    }
+
+    if (token.type === 'tr_open') {
+      currentRow = { cells: [] };
+      continue;
+    }
+
+    if (token.type === 'tr_close') {
+      if (currentRow) {
+        rows.push(currentRow);
+      }
+      currentRow = null;
+      continue;
+    }
+
+    if (token.type === 'th_open') {
+      currentCellHead = true;
+      continue;
+    }
+
+    if (token.type === 'td_open') {
+      currentCellHead = false;
+      continue;
+    }
+
+    if (token.type === 'th_close' || token.type === 'td_close') {
+      currentCellHead = null;
+      continue;
+    }
+
+    if (token.type === 'inline' && currentRow && currentCellHead !== null) {
+      currentRow.cells.push({
+        html: renderInline(token.children),
+        head: currentCellHead,
+      });
+    }
+  }
+
+  return { rows, end: start };
 }
 
 function collectQuote(tokens: MarkdownToken[], start: number) {
@@ -276,11 +301,9 @@ function parseMarkdown(content: string) {
     }
 
     if (token.type === 'table_open') {
-      const end = tokens.findIndex((item, index) => index > i && item.type === 'table_close');
-      if (end > i) {
-        blocks.push({ type: 'table', html: renderTokenRange(tokens, i, end) });
-        i = end;
-      }
+      const { rows, end } = collectTable(tokens, i);
+      blocks.push({ type: 'table', rows });
+      i = end;
     }
   }
 

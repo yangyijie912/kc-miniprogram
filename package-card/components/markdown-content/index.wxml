@@ -33,8 +33,20 @@
       <text class="md-code">{{item.text}}</text>
     </scroll-view>
 
-    <view wx:elif="{{item.type === 'table'}}" class="md-table">
-      <rich-text nodes="{{item.html}}"></rich-text>
-    </view>
+    <scroll-view wx:elif="{{item.type === 'table'}}" scroll-x class="md-table-scroll">
+      <view class="md-table-grid">
+        <view wx:for="{{item.rows}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="index" class="md-table-row">
+          <view
+            wx:for="{{row.cells}}"
+            wx:for-item="cell"
+            wx:for-index="cellIndex"
+            wx:key="index"
+            class="md-table-cell {{cell.head ? 'md-table-head' : ''}}"
+          >
+            <rich-text nodes="{{cell.html}}"></rich-text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
   </block>
 </view>
