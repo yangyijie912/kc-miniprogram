@@ -245,9 +245,30 @@
 - `pages/categoryManage/index.ts` / `index.wxml` / `index.wxss`：分类管理页增加上下移动按钮，移动成功后重新加载数据，静默成功，样式与现有卡片管理页保持一致。
 - `assets/actions`：补齐编辑、删除、上移、下移图标资源，避免页面继续使用纯文本按钮。
 
-3、其他改动：
+3、其他问题修复和业务调整：
 
 - markdown 渲染时只保留明确的链接识别，关闭容易误判的模糊链接规则，同步 uni-app 侧的 markdown-it 配置。
 - 更新卡片的初始默认数据，附带说明和示例。
 - 修复每日测验数量错误的问题，确保每日测验不参与分类过滤，抽全题库。
 - 分类名限制调整为 20 字，不能重名，排序不填则放到最后。
+
+4、重构小程序端 Markdown 展示组件，修复 rich-text 在真机上的块级样式失效问题。
+
+背景说明：
+
+- 小程序 `rich-text` 不是完整浏览器渲染器，对 HTML 标签、外部 wxss 穿透、`overflow-x`、`hr`、`blockquote`、列表缩进和表格布局的支持都不稳定。
+- 之前直接把 markdown-it 生成的整段 HTML 交给 `rich-text`，在 H5 / App 侧表现正常，但在小程序真机里会出现标题行高和上下间距过紧、分割线不显示、列表前导间隔过宽、引用块样式失效且内容拥挤等问题。
+- 后续尝试把样式写成 inline style 只能缓解部分问题，无法稳定控制列表、引用、分割线和表格这类块级结构。
+
+关键改动：
+
+- `package-card/components/markdown-content/index.ts`：保留 markdown-it 作为 Markdown 解析器，但不再把整篇 Markdown 直接渲染成一个 HTML 字符串；改为读取 token 并拆成 `heading`、`paragraph`、`list`、`quote`、`divider`、`code`、`table` 等块级数据。
+- `package-card/components/markdown-content/index.wxml`：改为按块级数据渲染原生小程序节点。标题、段落、列表、引用、分割线、代码块和表格都由 `view` / `text` / `scroll-view` 控制外层结构，`rich-text` 只保留在块内部处理加粗、斜体、行内代码、链接、图片等行内内容。
+- `package-card/components/markdown-content/index.wxss`：新增小程序专用 Markdown 样式，统一标题上下间距和行高，手动绘制分割线，列表使用自定义 marker 缩小前导间隔，引用块使用原生背景、左边线和内边距。
+- 表格不再依赖 `rich-text` 内部的 `<table>` 横向溢出能力，改成解析为行列数据后用 `scroll-view scroll-x` 包裹原生单元格，固定单元格宽度，内容较多时横向滚动，避免在手机窄屏里全部挤在一起。
+
+5、已知问题：小程序真机中 Markdown 笔记 textarea 在长内容编辑时可能出现内部滚动条，与页面滚动存在一定手感冲突。当前保留原生 auto-height，以保证输入、光标、键盘聚焦和工具栏插入行为稳定。
+
+- 当前不继续改动，不影响核心功能，继续改的收益小，只提升视觉和手感，疑似小程序原生组件边界问题，当前不打算为它重构编辑器。
+- 继续改风险会明显变大：光标跳动、输入区空白、键盘聚焦异常、页面滚动错位、工具栏插入位置错乱、不同机型表现不一致。编辑器是核心入口，一旦光标、键盘、插入位置出问题，体验会比滚动条难受十倍。
+- 后续如需优化，可评估拆分为预览/编辑模式：编辑时 textarea 固定高度，查看时 Markdown 预览完整展开，或改为固定高度编辑区：textarea 固定高度，内部滚动变成明确设计，页面不再跟着内容无限变长。
