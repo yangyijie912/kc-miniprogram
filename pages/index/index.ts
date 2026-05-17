@@ -40,6 +40,13 @@ Page({
     });
   },
 
+  // 分类管理是 tab 页，这里必须使用 switchTab，避免走错跳转方式。
+  goToCategoryManage() {
+    wx.switchTab({
+      url: '/pages/categoryManage/index',
+    });
+  },
+
   // 处理搜索输入事件，更新 searchQuery 数据字段
   onSearchInput(event: WechatMiniprogram.Input) {
     this.setData({

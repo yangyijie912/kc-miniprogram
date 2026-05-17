@@ -12,42 +12,48 @@
     </view>
 
     <view class="list-card">
-      <view wx:for="{{categoryViewList}}" wx:key="id" class="category-row">
-        <view class="category-info">
-          <view class="category-name">{{ item.name }}</view>
-          <view class="category-count">{{ item.cardCount }} 张卡片</view>
+      <view wx:if="{{categoryViewList.length > 0}}">
+        <view wx:for="{{categoryViewList}}" wx:key="id" class="category-row">
+          <view class="category-info">
+            <view class="category-name">{{ item.name }}</view>
+            <view class="category-count">{{ item.cardCount }} 张卡片</view>
+          </view>
+          <view class="row-actions">
+            <view wx:if="{{item.canMoveUp}}" class="row-icon" bindtap="moveUp" data-id="{{item.id}}">
+              <image class="row-icon-image" src="/assets/actions/shangjiantou.svg" mode="aspectFit" />
+            </view>
+            <view wx:else class="row-icon disabled">
+              <image
+                class="row-icon-image"
+                src="/assets/actions/shangjiantou-disabled.svg"
+                mode="aspectFit"
+              />
+            </view>
+
+            <view wx:if="{{item.canMoveDown}}" class="row-icon" bindtap="moveDown" data-id="{{item.id}}">
+              <image class="row-icon-image" src="/assets/actions/xiajiantou.svg" mode="aspectFit" />
+            </view>
+            <view wx:else class="row-icon disabled">
+              <image
+                class="row-icon-image"
+                src="/assets/actions/xiajiantou-disabled.svg"
+                mode="aspectFit"
+              />
+            </view>
+
+            <view wx:if="{{item.canEdit}}" class="row-icon" bindtap="goToEdit" data-id="{{item.id}}">
+              <image class="row-icon-image" src="/assets/actions/bianji.svg" mode="aspectFit" />
+            </view>
+
+            <view wx:if="{{item.canDelete}}" class="row-icon row-icon-danger" bindtap="removeCategory" data-id="{{item.id}}">
+              <image class="row-icon-image" src="/assets/actions/shanchu.svg" mode="aspectFit" />
+            </view>
+          </view>
         </view>
-        <view class="row-actions">
-          <view wx:if="{{item.canMoveUp}}" class="row-icon" bindtap="moveUp" data-id="{{item.id}}">
-            <image class="row-icon-image" src="/assets/actions/shangjiantou.svg" mode="aspectFit" />
-          </view>
-          <view wx:else class="row-icon disabled">
-            <image
-              class="row-icon-image"
-              src="/assets/actions/shangjiantou-disabled.svg"
-              mode="aspectFit"
-            />
-          </view>
+      </view>
 
-          <view wx:if="{{item.canMoveDown}}" class="row-icon" bindtap="moveDown" data-id="{{item.id}}">
-            <image class="row-icon-image" src="/assets/actions/xiajiantou.svg" mode="aspectFit" />
-          </view>
-          <view wx:else class="row-icon disabled">
-            <image
-              class="row-icon-image"
-              src="/assets/actions/xiajiantou-disabled.svg"
-              mode="aspectFit"
-            />
-          </view>
-
-          <view wx:if="{{item.canEdit}}" class="row-icon" bindtap="goToEdit" data-id="{{item.id}}">
-            <image class="row-icon-image" src="/assets/actions/bianji.svg" mode="aspectFit" />
-          </view>
-
-          <view wx:if="{{item.canDelete}}" class="row-icon row-icon-danger" bindtap="removeCategory" data-id="{{item.id}}">
-            <image class="row-icon-image" src="/assets/actions/shanchu.svg" mode="aspectFit" />
-          </view>
-        </view>
+      <view wx:else class="empty-card">
+        <view class="empty-text">当前还没有可管理的分类，请点击右上角新增分类，先建立一个分类结构再回来管理。</view>
       </view>
     </view>
   </view>

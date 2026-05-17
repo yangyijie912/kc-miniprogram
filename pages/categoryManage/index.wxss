@@ -70,6 +70,23 @@
   padding: 12rpx 20rpx;
 }
 
+.empty-card {
+  margin: 12rpx 0 6rpx;
+  padding: 30rpx 24rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1rpx dashed rgba(31, 94, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.empty-text {
+  color: #6c645a;
+  font-size: 24rpx;
+  line-height: 1.7;
+}
+
 .category-row {
   padding: 24rpx 8rpx;
   display: flex;
